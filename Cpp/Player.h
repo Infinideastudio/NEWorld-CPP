@@ -1,0 +1,37 @@
+#pragma once
+#include "Def.h"
+#include "Hitbox.h"
+
+extern bool FLY;      //·ÉÐÐ;
+extern bool CROSS;    //´©Ç½ ¡û_¡û (Superman!);
+
+namespace player{
+
+	void InitHitbox();
+	void InitPosition();
+	bool putblock(int x, int y, int z, block blockname);
+	void MoveHitbox(double x, double y, double z);
+	void MoveHitboxToPosition();
+	void Move();
+	void save(string worldn);
+	void load(string worldn);
+
+	extern Hitbox::AABB playerbox;
+	//extern int livesoverall;
+	//extern int lives;
+	//extern int livestarget;
+
+	extern double xa, ya, za;
+	extern bool OnGround;
+	extern bool Running;
+	extern bool NearWall;
+	extern bool inWater;
+
+	extern float speed;
+	extern int AirJumps;
+	extern int cxt, cyt, czt, cxtl, cytl, cztl;
+	extern double lookupdown, heading, xpos, ypos, zpos, xposold, yposold, zposold, jump;
+	extern float xlookspeed, ylookspeed;
+	extern int intxpos, intypos, intzpos, intxposold, intyposold, intzposold;
+	extern double renderxpos, renderypos, renderzpos;
+}
