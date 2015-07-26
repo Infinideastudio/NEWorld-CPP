@@ -78,7 +78,7 @@ namespace textures{
 		return (int((getTextureIndex(iblock, side) - 1) / (BLOCKTEXTURE_SIZE / (double)BLOCKTEXTURE_UNITSIZE)))*(BLOCKTEXTURE_UNITSIZE / (double)BLOCKTEXTURE_SIZE);
 	}
 
-	TEXTURE_RGB LoadRGBTexture(string Filename){
+	TEXTURE_RGB LoadRGBImage(string Filename){
 		unsigned char col[3];
 		unsigned int ind = 0;
 		TEXTURE_RGB bitmap; //返回位图
@@ -107,7 +107,7 @@ namespace textures{
 		return bitmap;
 	}
 
-	TEXTURE_RGBA LoadRGBATexture(string Filename, string MkFilename){
+	TEXTURE_RGBA LoadRGBAImage(string Filename, string MkFilename){
 		unsigned char col[3];
 		unsigned int ind = 0;
 		TEXTURE_RGBA bitmap; //返回位图
@@ -148,30 +148,36 @@ namespace textures{
 		return bitmap;
 	}
 
-	TEXTURE_RGBA LoadFontTexture(string Filename){
+	GLuint LoadFontTexture(string Filename){
 		TEXTURE_RGBA Texture;
 		TEXTURE_RGB image;
 		ubyte *ip, *tp;
-		image = LoadRGBTexture(Filename);
+		GLuint ret;
+		image = LoadRGBImage(Filename);
 		Texture.sizeX = image.sizeX;
 		Texture.sizeY = image.sizeY;
 		Texture.buffer = shared_ptr<ubyte>(new unsigned char[image.sizeX * image.sizeY * 4]);
 		if (Texture.buffer == nullptr){
 			printf("[console][Warning] Cannot alloc memory when loading &s\n", Filename.c_str());
-			return TEXTURE_RGBA();
+			return -1;
 		}
 		ip = image.buffer.get();
 		tp = Texture.buffer.get();
-		for (unsigned i = 0; i != image.sizeX*image.sizeY ; i++){
+		for (unsigned int i = 0; i != image.sizeX*image.sizeY ; i++){
 			*tp = 255; tp++;
 			*tp = 255; tp++;
 			*tp = 255; tp++;
 			*tp = 255 - *ip; tp++; ip += 3;
 		}
-		return Texture;
+		glGenTextures(1, &ret);
+		glBindTexture(GL_TEXTURE_2D, ret);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Texture.sizeX, Texture.sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, Texture.buffer.get());
+		return ret;
 	}
 
-	void SaveRGBTexture(string filename, TEXTURE_RGB image){
+	void SaveRGBImage(string filename, TEXTURE_RGB image){
 		BITMAPFILEHEADER bitmapfileheader;
 		BITMAPINFOHEADER bitmapinfoheader;
 		bitmapfileheader.bfType = BITMAP_ID;
@@ -205,6 +211,17 @@ namespace textures{
 			ofs.write((char*)&r, sizeof(ubyte));
 		}
 		ofs.close();
+	}
+
+	GLuint LoadRGBATexture(string Filename, string MkFilename){
+		GLuint ret;
+		TEXTURE_RGBA image = LoadRGBAImage(Filename, MkFilename);
+		glGenTextures(1, &ret);
+		glBindTexture(GL_TEXTURE_2D, ret);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.sizeX, image.sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.buffer.get());
+		return ret;
 	}
 
 }

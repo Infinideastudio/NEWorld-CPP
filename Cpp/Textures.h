@@ -47,11 +47,13 @@ namespace textures{
 
 	double getTexcoordY(block iblock, ubyte side);
 
-	TEXTURE_RGB LoadRGBTexture(string Filename);
+	TEXTURE_RGB LoadRGBImage(string Filename);
 
-	TEXTURE_RGBA LoadRGBATexture(string Filename, string MkFilename);
+	TEXTURE_RGBA LoadRGBAImage(string Filename, string MkFilename);
 
-	TEXTURE_RGBA LoadFontTexture(string Filename);
+	GLuint LoadFontTexture(string Filename);
 
-	void SaveRGBTexture(string filename, TEXTURE_RGB image);
+	GLuint LoadRGBATexture(string Filename, string MkFilename);
+
+	void SaveRGBImage(string filename, TEXTURE_RGB image);
 }

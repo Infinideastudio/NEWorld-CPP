@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="源文件\World">
-      <UniqueIdentifier>{5970dcdf-c172-4ba2-acda-b29b439fe887}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\MO">
-      <UniqueIdentifier>{4eb0c277-4674-4d64-830b-0f46277b0c2b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="World">
       <UniqueIdentifier>{ec766a03-2021-4ac2-a796-8d6f6104cb09}</UniqueIdentifier>
     </Filter>
@@ -27,6 +21,9 @@
     </Filter>
     <Filter Include="Moveable Object">
       <UniqueIdentifier>{fcc310bf-65af-471a-969d-edf76d6238f1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Moveable Object\Animals">
+      <UniqueIdentifier>{42b60842-aa52-494c-a3b6-f00e3897c9d1}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -90,6 +87,9 @@
     <ClInclude Include="..\Cpp\client.h">
       <Filter>Network</Filter>
     </ClInclude>
+    <ClInclude Include="..\Cpp\Cat.h">
+      <Filter>Moveable Object\Animals</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Cpp\Def.cpp">
@@ -128,9 +128,6 @@
     <ClCompile Include="..\Cpp\Skin.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="..\Cpp\Mo.cpp">
-      <Filter>Moveable Object</Filter>
-    </ClCompile>
     <ClCompile Include="..\Cpp\Chunk.cpp">
       <Filter>World</Filter>
     </ClCompile>
@@ -148,6 +145,9 @@
     </ClCompile>
     <ClCompile Include="..\Cpp\server.cpp">
       <Filter>Network</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Cpp\Cat.cpp">
+      <Filter>Moveable Object\Animals</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

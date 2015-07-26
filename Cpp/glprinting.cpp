@@ -16,13 +16,7 @@ namespace glprt{
 void BuildFont(int w, int h){
 	glprt::ww = w;
 	glprt::wh = h;
-	textures::TEXTURE_RGBA Tex = textures::LoadFontTexture("textures\\Fonts\\ascii.bmp");
-
-	glGenTextures(1, &glprt::Font);
-	glBindTexture(GL_TEXTURE_2D, glprt::Font);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Tex.sizeX, Tex.sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, Tex.buffer.get());
+	glprt::Font = textures::LoadFontTexture("textures\\Fonts\\ascii.bmp");
 
 	float cx, cy;
 
@@ -153,12 +147,7 @@ void renderChar(int x, int y, string glstring){
 				/*color 7 :*/printf("Loading unicode font texture #%d\n", uc / 256);
 				std::stringstream ss;
 				ss << "Textures\\Fonts\\unicode\\unicode_glyph_" << uc / 256 << ".bmp";
-				Tex = textures::LoadFontTexture(ss.str());
-				glGenTextures(1, &ftex);
-				glBindTexture(GL_TEXTURE_2D, ftex);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Tex.sizeX, Tex.sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, Tex.buffer.get());
+				ftex = textures::LoadFontTexture(ss.str());
 				glprt::unicodeTex[uc / 256] = ftex;
 				glprt::unicodeTexAval[uc / 256] = true;
 			}

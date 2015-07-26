@@ -2,11 +2,12 @@
 #include "Def.h"
 #include "ChunkIndexArray.h"
 #include "Chunk.h"
+#include "Mo.h"
 
 namespace world{
 	extern string worldname;
-	extern int worldsize;
-	extern int worldheight;
+	const int worldsize = 134217728;
+	const int worldheight = 128;
 	extern brightness skylight;         //Sky light level;
 	extern brightness BRIGHTNESSMAX;     //Maximum brightness;
 	extern brightness BRIGHTNESSMIN;    //Mimimum brightness;
@@ -28,6 +29,8 @@ namespace world{
 	extern int chunkLoadList[65536][4]; //1 to
 	extern int chunkUnloadList[65536][4]; //1 to
 	extern int chunkRenders, chunkLoads, chunkUnloads;
+
+	extern vector<shared_ptr<Mo>> MOs;
 
 	void Init();
 

@@ -8,8 +8,6 @@ extern int viewdistance;
 namespace world{
 
 	string worldname = "DefaultWorld";
-	int worldsize = 134217728;
-	int worldheight = 128;
 	brightness skylight = 15;         //Sky light level;
 	brightness BRIGHTNESSMAX = 15;    //Maximum brightness;
 	brightness BRIGHTNESSMIN = 2;     //Mimimum brightness;
@@ -29,6 +27,8 @@ namespace world{
 	int chunkLoadList[65536][4]; //1 to
 	int chunkUnloadList[65536][4]; //1 to
 	int chunkRenders, chunkLoads, chunkUnloads;
+
+	vector<shared_ptr<Mo>> MOs;
 
 	void Init(){
 

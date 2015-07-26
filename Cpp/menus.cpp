@@ -146,8 +146,8 @@ void options(){
 		viewdistBar->text = strWithVar("渲染距离：", viewdistance);
 		ciArrayBtn->text = strWithVar("使用区块索引数组, ", boolstr(UseCIArray));
 		if (ciArrayBtn->clicked) UseCIArray = !UseCIArray;
-		if (rdstbtn->clicked);// renderoptions();
-		if (gistbtn->clicked);// GUIoptions();
+		//if (rdstbtn->clicked) renderoptions();
+		//if (gistbtn->clicked) GUIoptions();
 		if (backbtn->clicked) f = true;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glMatrixMode(GL_PROJECTION);

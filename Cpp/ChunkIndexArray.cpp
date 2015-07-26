@@ -1,61 +1,99 @@
-#pragma once
-#include "Def.h"
-
-enum MoType{
-	NORMAL,
-	ANIMAL,
-	SKELETON,
-	SPIDER
-};
-
-class Mo{
-private:
-	string name;
-	int type;
-
-	//生命
-	int health;
-	int healthMax;
-	int healingAbility;
-
-	//移动
-	bool moveable = true;
-	bool canFly;
-	bool canSwim;
-	int moveSpeed = 10;
-	
-	//战斗
-	int fightType; //0 和平 1 中立 2 主动 3 BOSS
-	int attack;
-	int defense;
-	int field;
-	bool ignoreWallView;
-
-	//状态
-	bool inFight = false;
-
-	//皮肤
-	Skin skin;
-
-	//掉落
-	bool dropEquipment;
-	int dropEquipmentChance;
-	vector<std::pair<int, ItemPair>> dropThings;  //掉落概率-掉落物
-
-	//装备
-	int equipment[4];
-
-public:
-	virtual inline string getName() const { return name; }
-	virtual inline int getType() const { return type; }
-	virtual inline int getHealth() const { return health; }
-	virtual inline int getMaxHealth() const { return healthMax; }
-
-	virtual void init();
-	virtual void update();
-	virtual void renderer(){
-		skin.renderer();
+#include "ChunkIndexArray.h"
+namespace world{
+	void chunkIndexArray::setsize(int s){
+		size = s;
+		size2 = size*size;
+		size3 = size*size*size;
 	}
-	virtual void drop();
 
-};
+	bool chunkIndexArray::create(){
+		int x, y, z;
+		Array = (int*)malloc(size3*sizeof(int));
+		if (Array == nullptr) return true;
+		for (x = 0; x != size; x++){
+			for (y = 0; y != size; y++){
+				for (z = 0; z != size; z++){
+					Array[x*size2 + y*size + z] = -1;
+				}
+			}
+		}
+		return false;
+	}
+
+	void chunkIndexArray::destroy(){
+		free(Array);
+		Array = 0;
+	}
+
+	void chunkIndexArray::move(int xd, int yd, int zd){
+		if (Array == nullptr) return;
+		chunkIndexArray arrTemp;
+		int x, y, z;
+		arrTemp.setsize(size);
+		arrTemp.create();
+		for (x = 0; x != size; x++){
+			for (y = 0; y != size; y++){
+				for (z = 0; z != size; z++){
+					if (elementExists(x + xd, y + yd, z + zd))
+						arrTemp.Array[x*size2 + y*size + z] = Array[(x + xd)*size2 + (y + yd)*size + (z + zd)];
+					else
+						arrTemp.Array[x*size2 + y*size + z] = -1;
+				}
+			}
+		}
+		destroy();
+		Array = arrTemp.Array;
+	}
+
+	void chunkIndexArray::moveTo(int x, int y, int z){
+		if (Array == nullptr) return;
+		move(x - originX, y - originY, z - originZ);
+	}
+
+	void chunkIndexArray::AddChunk(int ci){
+		if (Array == nullptr) return;
+		int x, y, z;
+		for (x = 0; x != size; x++){
+			for (y = 0; y != size; y++){
+				for (z = 0; z != size; z++){
+					if (Array[x*size2 + y*size + z] >= ci) Array[x*size2 + y*size + z]++;
+				}
+			}
+		}
+	}
+
+	void chunkIndexArray::DeleteChunk(int ci){
+		if (Array == nullptr) return;
+		int x, y, z;
+		for (x = 0; x != size; x++){
+			for (y = 0; y != size; y++){
+				for (z = 0; z != size; z++){
+					if (Array[x*size2 + y*size + z] == ci) Array[x*size2 + y*size + z] = -1;
+					if (Array[x*size2 + y*size + z] > ci) Array[x*size2 + y*size + z]--;
+				}
+			}
+		}
+	}
+
+	bool chunkIndexArray::elementExists(int x, int y, int z){
+		if (x < 0) return false;
+		if (x >= size) return false;
+		if (y < 0) return false;
+		if (y >= size) return false;
+		if (z < 0) return false;
+		if (z >= size) return false;
+		return true;
+	}
+
+	bool chunkIndexArray::chunkIndexExists(int x, int y, int z){
+		if (Array == nullptr) return false;
+		if (!elementExists(x - originX, y - originY, z - originZ)) return false;
+		if (Array[(x - originX)*size2 + (y - originY)*size + (z - originZ)] < 0) return false;
+		return true;
+	}
+
+	int chunkIndexArray::getChunkIndex(int x, int y, int z){
+		if (Array == nullptr) return -1;
+		return Array[(x - originX)*size2 + (y - originY)*size + (z - originZ)];
+	}
+}

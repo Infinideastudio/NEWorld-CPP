@@ -463,13 +463,7 @@ void splashscreen(){
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	textures::TEXTURE_RGBA TexTemp;
-	TexTemp = textures::LoadRGBATexture("textures\\gui\\SplashScreen.bmp", "");
-	glGenTextures(1, &splTex);
-	glBindTexture(GL_TEXTURE_2D, splTex);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TexTemp.sizeX, TexTemp.sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, TexTemp.buffer.get());
+	splTex = textures::LoadRGBATexture("textures\\gui\\SplashScreen.bmp", "");
 
 	int i;
 	glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -618,75 +612,39 @@ void setupWaterFog(){
 void LoadTextures(){
 	//‘ÿ»ÎŒ∆¿Ì
 	textures::Init();
-	int gloop;
-	int mode = filter;
 
-	textures::TEXTURE_RGBA TextureImage[20];
-	TextureImage[textures::ROCK] = textures::LoadRGBATexture("textures\\blocks\\stone.bmp", "");
-	TextureImage[textures::GRASS_TOP] = textures::LoadRGBATexture("textures\\blocks\\grass_top.bmp", "");
-	TextureImage[textures::GRASS_SIDE] = textures::LoadRGBATexture("textures\\blocks\\grass_side.bmp", "");
-	TextureImage[textures::DIRT] = textures::LoadRGBATexture("textures\\blocks\\dirt.bmp", "");
-	TextureImage[textures::STONE] = textures::LoadRGBATexture("textures\\blocks\\cobblestone.bmp", "");
-	TextureImage[textures::PLANK] = textures::LoadRGBATexture("textures\\blocks\\plank.bmp", "");
-	TextureImage[textures::WOOD_TOP] = textures::LoadRGBATexture("textures\\blocks\\wood_top.bmp", "");
-	TextureImage[textures::WOOD_SIDE] = textures::LoadRGBATexture("textures\\blocks\\wood_side.bmp", "");
-	TextureImage[textures::BEDROCK] = textures::LoadRGBATexture("textures\\blocks\\bedrock.bmp", "");
-	TextureImage[textures::LEAF] = textures::LoadRGBATexture("textures\\blocks\\leaf.bmp", "textures\\blocks\\leafmask.bmp");
-	TextureImage[textures::GLASS] = textures::LoadRGBATexture("textures\\blocks\\glass.bmp", "textures\\blocks\\glassmask.bmp");
-	TextureImage[textures::WATER] = textures::LoadRGBATexture("textures\\blocks\\water.bmp", "textures\\blocks\\watermask.bmp");
-	TextureImage[textures::LAVA] = textures::LoadRGBATexture("textures\\blocks\\lava.bmp", "textures\\blocks\\lavamask.bmp");
-	TextureImage[textures::GLOWSTONE] = textures::LoadRGBATexture("textures\\blocks\\glowstone.bmp", "");
-	TextureImage[textures::SAND] = textures::LoadRGBATexture("textures\\blocks\\sand.bmp", "");
-	TextureImage[textures::CEMENT] = textures::LoadRGBATexture("textures\\blocks\\cement.bmp", "");
-	TextureImage[textures::ICE] = textures::LoadRGBATexture("textures\\blocks\\ice.bmp", "textures\\blocks\\icemask.bmp");
-	TextureImage[textures::COAL] = textures::LoadRGBATexture("textures\\blocks\\coal.bmp", "");
-	TextureImage[textures::IRON] = textures::LoadRGBATexture("textures\\blocks\\iron.bmp", "");
+	BlockTexture[textures::ROCK] = textures::LoadRGBATexture("textures\\blocks\\stone.bmp", "");
+	BlockTexture[textures::GRASS_TOP] = textures::LoadRGBATexture("textures\\blocks\\grass_top.bmp", "");
+	BlockTexture[textures::GRASS_SIDE] = textures::LoadRGBATexture("textures\\blocks\\grass_side.bmp", "");
+	BlockTexture[textures::DIRT] = textures::LoadRGBATexture("textures\\blocks\\dirt.bmp", "");
+	BlockTexture[textures::STONE] = textures::LoadRGBATexture("textures\\blocks\\cobblestone.bmp", "");
+	BlockTexture[textures::PLANK] = textures::LoadRGBATexture("textures\\blocks\\plank.bmp", "");
+	BlockTexture[textures::WOOD_TOP] = textures::LoadRGBATexture("textures\\blocks\\wood_top.bmp", "");
+	BlockTexture[textures::WOOD_SIDE] = textures::LoadRGBATexture("textures\\blocks\\wood_side.bmp", "");
+	BlockTexture[textures::BEDROCK] = textures::LoadRGBATexture("textures\\blocks\\bedrock.bmp", "");
+	BlockTexture[textures::LEAF] = textures::LoadRGBATexture("textures\\blocks\\leaf.bmp", "textures\\blocks\\leafmask.bmp");
+	BlockTexture[textures::GLASS] = textures::LoadRGBATexture("textures\\blocks\\glass.bmp", "textures\\blocks\\glassmask.bmp");
+	BlockTexture[textures::WATER] = textures::LoadRGBATexture("textures\\blocks\\water.bmp", "textures\\blocks\\watermask.bmp");
+	BlockTexture[textures::LAVA] = textures::LoadRGBATexture("textures\\blocks\\lava.bmp", "textures\\blocks\\lavamask.bmp");
+	BlockTexture[textures::GLOWSTONE] = textures::LoadRGBATexture("textures\\blocks\\glowstone.bmp", "");
+	BlockTexture[textures::SAND] = textures::LoadRGBATexture("textures\\blocks\\sand.bmp", "");
+	BlockTexture[textures::CEMENT] = textures::LoadRGBATexture("textures\\blocks\\cement.bmp", "");
+	BlockTexture[textures::ICE] = textures::LoadRGBATexture("textures\\blocks\\ice.bmp", "textures\\blocks\\icemask.bmp");
+	BlockTexture[textures::COAL] = textures::LoadRGBATexture("textures\\blocks\\coal.bmp", "");
+	BlockTexture[textures::IRON] = textures::LoadRGBATexture("textures\\blocks\\iron.bmp", "");
 
-	for (gloop = 1; gloop != 20; gloop++){
-		glGenTextures(1, &BlockTexture[gloop]);
-		glBindTexture(GL_TEXTURE_2D, BlockTexture[gloop]);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mode);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mode);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TextureImage[gloop].sizeX, TextureImage[gloop].sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, TextureImage[gloop].buffer.get());
+	guiImage[1] = textures::LoadRGBATexture("textures\\gui\\MainMenu.bmp", "");
+	guiImage[2] = textures::LoadRGBATexture("textures\\gui\\select.bmp", "");
+	guiImage[3] = textures::LoadRGBATexture("textures\\gui\\unselect.bmp", "");
+	guiImage[4] = textures::LoadRGBATexture("textures\\gui\\title.bmp", "textures\\gui\\titlemask.bmp");
+	guiImage[5] = textures::LoadRGBATexture("textures\\gui\\lives.bmp", "");
+
+	for (int gloop = 1; gloop != 11; gloop++){
+		string path = "textures\\blocks\\destroy_" + itos(gloop) + ".bmp";
+		DestroyImage[gloop] = textures::LoadRGBATexture(path, path);
 	}
 
-	textures::TEXTURE_RGBA  TextureImage2[6];
-	TextureImage2[1] = textures::LoadRGBATexture("textures\\gui\\MainMenu.bmp", "");
-	TextureImage2[2] = textures::LoadRGBATexture("textures\\gui\\select.bmp", "");
-	TextureImage2[3] = textures::LoadRGBATexture("textures\\gui\\unselect.bmp", "");
-	TextureImage2[4] = textures::LoadRGBATexture("textures\\gui\\title.bmp", "textures\\gui\\titlemask.bmp");
-	TextureImage2[5] = textures::LoadRGBATexture("textures\\gui\\lives.bmp", "");
-	for (gloop = 1; gloop != 6; gloop++){
-		glGenTextures(1, &guiImage[gloop]);
-		glBindTexture(GL_TEXTURE_2D, guiImage[gloop]);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TextureImage2[gloop].sizeX, TextureImage2[gloop].sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, TextureImage2[gloop].buffer.get());
-	}
-
-	textures::TEXTURE_RGBA  TextureImage3[11];
-	std::stringstream ss;
-	for (gloop = 1; gloop != 11; gloop++){
-		ss << "textures\\blocks\\destroy_" << gloop << ".bmp";
-		TextureImage3[gloop] = textures::LoadRGBATexture(ss.str(), ss.str());
-		ss.clear();
-		ss.str("");
-		glGenTextures(1, &DestroyImage[gloop]);
-		glBindTexture(GL_TEXTURE_2D, DestroyImage[gloop]);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mode);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mode);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, TextureImage3[gloop].sizeX, TextureImage3[gloop].sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, TextureImage3[gloop].buffer.get());
-	}
-
-
-	textures::TEXTURE_RGBA BlockTexturesBuffer;
-	BlockTexturesBuffer = textures::LoadRGBATexture("textures\\blocks\\Terrain.bmp", "textures\\blocks\\Terrainmask.bmp");
-	glGenTextures(1, &BlockTextures);
-	glBindTexture(GL_TEXTURE_2D, BlockTextures);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mode);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, mode);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, BlockTexturesBuffer.sizeX, BlockTexturesBuffer.sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, BlockTexturesBuffer.buffer.get());
-
+	BlockTextures = textures::LoadRGBATexture("textures\\blocks\\Terrain.bmp", "textures\\blocks\\Terrainmask.bmp");
 }
 
 void saveGame(){
@@ -2126,7 +2084,7 @@ void saveScreenshot(int x, int y, int w, int h, string filename){
 	scrBuffer.sizeY = h;
 	scrBuffer.buffer = shared_ptr<ubyte>((ubyte*)malloc(w*h * 3));
 	glReadPixels(x, y, w, h, GL_RGB, GL_UNSIGNED_BYTE, scrBuffer.buffer.get());
-	textures::SaveRGBTexture(filename, scrBuffer);
+	textures::SaveRGBImage(filename, scrBuffer);
 }
 
 void createThumbnail(){

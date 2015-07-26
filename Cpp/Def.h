@@ -73,6 +73,11 @@ inline int RoundInt(double d){
 	if (!n) return int(d + 0.5);
 	else return -(int(-d + 0.5));
 }
+inline string itos(int i){
+	char a[12];
+	_itoa_s(i, a, 12, 10);
+	return string(a);
+}
 struct ItemPair{
 	int ID;
 	int amount;

@@ -1,5 +1,6 @@
 #pragma once
 #include "Def.h"
+#include "Skin.h"
 
 enum MoType{
 	NORMAL,
@@ -22,7 +23,8 @@ private:
 	bool moveable = true;
 	bool canFly;
 	bool canSwim;
-	int moveSpeed = 10;
+	double moveSpeed = 1;
+	double XPos, YPos, ZPos;
 	
 	//战斗
 	int fightType; //0 和平 1 中立 2 主动 3 BOSS
@@ -46,6 +48,7 @@ private:
 	int equipment[4];
 
 public:
+	virtual ~Mo();
 	virtual inline string getName() const { return name; }
 	virtual inline int getType() const { return type; }
 	virtual inline int getHealth() const { return health; }
@@ -53,8 +56,6 @@ public:
 
 	virtual void init();
 	virtual void update();
-	virtual void renderer(){
-		skin.renderer();
-	}
+	virtual void renderer(){ skin.renderer(); }
 
 };

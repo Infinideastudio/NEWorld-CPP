@@ -12,6 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Cpp\Blocks.h" />
+    <ClInclude Include="..\Cpp\Cat.h" />
     <ClInclude Include="..\Cpp\Chunk.h" />
     <ClInclude Include="..\Cpp\ChunkIndexArray.h" />
     <ClInclude Include="..\Cpp\client.h" />
@@ -33,6 +34,7 @@
     <ClInclude Include="..\Cpp\WorldGen.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Cpp\Cat.cpp" />
     <ClCompile Include="..\Cpp\Chunk.cpp" />
     <ClCompile Include="..\Cpp\ChunkIndexArray.cpp" />
     <ClCompile Include="..\Cpp\client.cpp" />
@@ -42,7 +44,6 @@
     <ClCompile Include="..\Cpp\GUI.cpp" />
     <ClCompile Include="..\Cpp\Hitbox.cpp" />
     <ClCompile Include="..\Cpp\menus.cpp" />
-    <ClCompile Include="..\Cpp\Mo.cpp" />
     <ClCompile Include="..\Cpp\NEWorld.cpp" />
     <ClCompile Include="..\Cpp\Particles.cpp" />
     <ClCompile Include="..\Cpp\Player.cpp" />
