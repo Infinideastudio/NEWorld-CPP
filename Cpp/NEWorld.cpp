@@ -79,7 +79,7 @@ NEWorld-CPP第一版作者（翻译作者）：Null (abc612008)
 #include "particles.h"
 #include "frustum.h"
 #include "menus.h"
-
+#include "Cat.h"
 //socket,server,client
 //#define MAKE_WORD(a,b) cast(ushort,((a)and &hff)or(cast(ushort,((b)and &hff))shl 8))
 
@@ -366,7 +366,22 @@ main_menu:
 }
 
 void CharInputFun(GLFWwindow * win, unsigned int c){
-	inputstr += (char)c;
+	if (c >= 128){
+		wchar_t* pwszUnicode=new wchar_t[2];
+		pwszUnicode[0] = c;
+		pwszUnicode[1] = '\0';
+		int iSize;
+		char* pszMultiByte;
+		iSize = WideCharToMultiByte(CP_ACP, 0, pwszUnicode, -1, NULL, 0, NULL, NULL);
+		pszMultiByte = (char*)malloc((iSize + 1));
+		WideCharToMultiByte(CP_ACP, 0, pwszUnicode, -1, pszMultiByte, iSize, NULL, NULL);
+		inputstr += pszMultiByte;
+		free(pszMultiByte);
+		delete[] pwszUnicode;
+	}
+	else{
+		inputstr += (char)c;
+	}
 }
 
 void updateThreadFunc(){
@@ -810,7 +825,7 @@ void updategame(){
 			world::AddChunk(cx, cy, cz);
 			world::getChunkPtr(cx, cy, cz)->Load();
 		}
-
+		if (rnd() < 0.1) world::MOs.push_back(shared_ptr<Mo>(new Cat(player::xa + rand() % 40 - 20, player::ya, player::za + rand() % 40 - 20)));
 	}
 
 	//加载动画
@@ -1505,6 +1520,9 @@ void drawGUI(){
 		show(ss.str()); ss.str("");
 
 		ss << "ChunkIndexCache Index = " << world::ciCacheIndex;
+		show(ss.str()); ss.str("");
+
+		ss << "MO count: " << world::MOs.size();
 		show(ss.str()); ss.str("");
 
 		//ss << "Particle count: " & particles::ptcsrendered & "/" & particles::ptcs.size()

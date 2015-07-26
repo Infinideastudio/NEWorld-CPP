@@ -2,6 +2,7 @@
 #include "Textures.h"
 
 void Skin::renderer(){
+	if (texture == -1) return;
 
 }
 

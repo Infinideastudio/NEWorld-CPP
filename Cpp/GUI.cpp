@@ -297,7 +297,11 @@ namespace gui{
 				text += inputstr;
 			}
 			if (parent->backspacep && !parent->backspacepl && text.length() >= 1){
-				text = text.substr(0, text.length() - 1);
+				int n = text[text.length() - 1];
+				if (n > 0 && n <= 127)
+					text = text.substr(0, text.length() - 1);
+				else
+					text = text.substr(0, text.length() - 2);
 			}
 		}
         

@@ -53,7 +53,6 @@ void mainmenu(){
 		label1->resize(0, windowwidth, windowheight - 32, windowheight - 16);
 		label2->resize(0, windowwidth, windowheight - 16, windowheight);
 		glfwGetCursorPos(win, &mx, &my);
-		//mw=glfwGetMouseWheel();
 		mb = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ? 1 : 0;
 		MainForm.mousedata((int)mx, (int)my, mw, mb);
 		MainForm.update();
@@ -133,7 +132,6 @@ void options(){
 		backbtn->resize(leftp, midp - 10, downp - 24, downp);
 		//savebtn->resize(midp + 10, rightp, downp - 24, downp);
 		glfwGetCursorPos(win, &mx, &my);
-		//SIGN mw=glfwGetMouseWheel();
 		mb = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ? 1 : 0;
 		//更新GUI;
 		MainForm.mousedata((int)mx, (int)my, mw, mb);
@@ -320,7 +318,6 @@ void worldmenu(){
 		vscroll->barheight = (downp - 72 - 48) / (64 * worldcount + 64)*(downp - 36 - 40);
 		if (vscroll->barheight > downp - 36 - 40) vscroll->barheight = downp - 36 - 40;
 		glfwGetCursorPos(win, &mx, &my);
-		//mw=glfwGetMouseWheel();
 		mb = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ? 1 : 0;
 		MainForm.mousedata((int)mx, (int)my, mw, mb);
 		MainForm.update();
@@ -544,9 +541,9 @@ void createworldmenu(){
 	MainForm.Init();
 	inputstr = "";
 	gui::label* title = MainForm.createlabel("==============<  新 建 世 界  >==============");
-	gui::textbox*  worldnametb = MainForm.createtextbox("输入世界名称");
-	gui::button*  okbtn = MainForm.createbutton("确定");
-	gui::button*  backbtn = MainForm.createbutton("<< 返回世界菜单");
+	gui::textbox* worldnametb = MainForm.createtextbox("输入世界名称");
+	gui::button* okbtn = MainForm.createbutton("确定");
+	gui::button* backbtn = MainForm.createbutton("<< 返回世界菜单");
 	okbtn->enabled = false;
 	do{
 		leftp = windowwidth / 2 - 250;
@@ -558,7 +555,6 @@ void createworldmenu(){
 		okbtn->resize(midp - 250, midp + 250, 84, 120);
 		backbtn->resize(leftp, rightp, downp - 24, downp);
 		glfwGetCursorPos(win, &mx, &my);
-		//SIGN mw=glfwGetMouseWheel();
 		mb = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ? 1 : 0;
 		//更新GUI;
 		MainForm.mousedata((int)mx, (int)my, mw, mb);
@@ -568,14 +564,8 @@ void createworldmenu(){
 			worldnametbChanged = true;
 		}
 		if (worldnametb->text == "" || !worldnametbChanged) okbtn->enabled = false; else okbtn->enabled = true;
-		if (okbtn->clicked == true){
-			//mkdir(exepath & "\\Worlds");
-			//mkdir(exepath & "\\Worlds\\" & worldnametb->text);
-			//mkdir(exepath & "\\Worlds\\" & worldnametb->text & "\\chunks");
-			f = true;
-		}
+		if (okbtn->clicked || backbtn->clicked) f = true;
 		inputstr = "";
-		if (backbtn->clicked) f = true;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -597,6 +587,7 @@ void createworldmenu(){
 		glDisable(GL_TEXTURE_2D);
 		MainForm.render();
 		glfwSwapBuffers(win);
+		glfwPollEvents();
 		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(win)) exit(0);
 	} while (!f);
 	MainForm.cleanup();

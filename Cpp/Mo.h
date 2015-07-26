@@ -48,14 +48,14 @@ private:
 	int equipment[4];
 
 public:
-	virtual ~Mo();
+	virtual ~Mo(){};
 	virtual inline string getName() const { return name; }
 	virtual inline int getType() const { return type; }
 	virtual inline int getHealth() const { return health; }
 	virtual inline int getMaxHealth() const { return healthMax; }
 
-	virtual void init();
-	virtual void update();
+	virtual void init(){};
+	virtual void update(){};
 	virtual void renderer(){ skin.renderer(); }
 
 };

@@ -85,7 +85,7 @@ namespace textures{
 		bitmap.buffer = nullptr; bitmap.sizeX = bitmap.sizeY = 0;
 		std::ifstream bmpfile(Filename, std::ios::binary | std::ios::in); //位图文件（二进制）
 		if (!bmpfile.is_open()){
-			printf("[console][Warning] Cannot load &s\n", Filename.c_str());
+			printf("[console][Warning] Cannot load %s\n", Filename.c_str());
 			return TEXTURE_RGB();
 		}
 		BITMAPINFOHEADER bih; //各种关于位图的参数
@@ -115,7 +115,7 @@ namespace textures{
 		std::ifstream bmpfile(Filename, std::ios::binary | std::ios::in); //位图文件（二进制）
 		std::ifstream maskfile(MkFilename, std::ios::binary | std::ios::in); //遮罩位图文件（二进制）
 		if (!bmpfile.is_open()){
-			printf("[console][Warning] Cannot load &s\n", Filename.c_str());
+			printf("[console][Warning] Cannot load %s\n", Filename.c_str());
 			return TEXTURE_RGBA();
 		}
 		BITMAPFILEHEADER bfh; //各种关于文件的参数
@@ -158,7 +158,7 @@ namespace textures{
 		Texture.sizeY = image.sizeY;
 		Texture.buffer = shared_ptr<ubyte>(new unsigned char[image.sizeX * image.sizeY * 4]);
 		if (Texture.buffer == nullptr){
-			printf("[console][Warning] Cannot alloc memory when loading &s\n", Filename.c_str());
+			printf("[console][Warning] Cannot alloc memory when loading %s\n", Filename.c_str());
 			return -1;
 		}
 		ip = image.buffer.get();
