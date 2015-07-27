@@ -3,7 +3,6 @@
 
 void Skin::renderer(){
 	if (texture == -1) return;
-
 }
 
 void Skin::loadSkin(string path, string pathMask, int type){

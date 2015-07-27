@@ -17,6 +17,8 @@ using std::mutex;
 using std::shared_ptr;
 #include "..\Project\GLs\glew.h"
 #include "..\Project\GLs\glfw3.h"
+#include "Setting.h"
+#include "Control.h"
 #include "blocks.h"
 //Types/constants define;
 typedef signed char sbyte;
@@ -32,7 +34,7 @@ typedef unsigned long uint32;
 typedef unsigned long long uint64;
 typedef unsigned char blockinfo;
 typedef unsigned char brightness;
-
+typedef GLuint TextureID;
 //const double PI = 3.1415926535898;
 
 extern uint BlockTexture[20];

@@ -15,11 +15,9 @@ namespace player{
 	void Move();
 	void save(string worldn);
 	void load(string worldn);
+	void additem(block itemname);
 
 	extern Hitbox::AABB playerbox;
-	//extern int livesoverall;
-	//extern int lives;
-	//extern int livestarget;
 
 	extern double xa, ya, za;
 	extern bool OnGround;
@@ -34,4 +32,13 @@ namespace player{
 	extern float xlookspeed, ylookspeed;
 	extern int intxpos, intypos, intzpos, intxposold, intyposold, intzposold;
 	extern double renderxpos, renderypos, renderzpos;
+
+	extern float height;
+	extern float heightExt;
+
+	extern block BlockInHand;
+	extern ubyte itemInHand;
+	extern block inventorybox[4][10];
+	extern block inventorypcs[4][10];
+
 }

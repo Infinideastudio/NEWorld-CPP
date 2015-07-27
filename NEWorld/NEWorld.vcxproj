@@ -16,6 +16,7 @@
     <ClInclude Include="..\Cpp\Chunk.h" />
     <ClInclude Include="..\Cpp\ChunkIndexArray.h" />
     <ClInclude Include="..\Cpp\client.h" />
+    <ClInclude Include="..\Cpp\Control.h" />
     <ClInclude Include="..\Cpp\Def.h" />
     <ClInclude Include="..\Cpp\DeveloperOptions.h" />
     <ClInclude Include="..\Cpp\frustum.h" />
@@ -28,6 +29,7 @@
     <ClInclude Include="..\Cpp\Player.h" />
     <ClInclude Include="..\Cpp\Renderer.h" />
     <ClInclude Include="..\Cpp\server.h" />
+    <ClInclude Include="..\Cpp\Setting.h" />
     <ClInclude Include="..\Cpp\Skin.h" />
     <ClInclude Include="..\Cpp\Textures.h" />
     <ClInclude Include="..\Cpp\World.h" />
@@ -38,6 +40,7 @@
     <ClCompile Include="..\Cpp\Chunk.cpp" />
     <ClCompile Include="..\Cpp\ChunkIndexArray.cpp" />
     <ClCompile Include="..\Cpp\client.cpp" />
+    <ClCompile Include="..\Cpp\Control.cpp" />
     <ClCompile Include="..\Cpp\Def.cpp" />
     <ClCompile Include="..\Cpp\frustum.cpp" />
     <ClCompile Include="..\Cpp\glprinting.cpp" />
@@ -49,6 +52,7 @@
     <ClCompile Include="..\Cpp\Player.cpp" />
     <ClCompile Include="..\Cpp\Renderer.cpp" />
     <ClCompile Include="..\Cpp\server.cpp" />
+    <ClCompile Include="..\Cpp\setting.cpp" />
     <ClCompile Include="..\Cpp\Skin.cpp" />
     <ClCompile Include="..\Cpp\Textures.cpp" />
     <ClCompile Include="..\Cpp\World.cpp" />

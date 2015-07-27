@@ -90,6 +90,12 @@
     <ClInclude Include="..\Cpp\Cat.h">
       <Filter>Moveable Object\Animals</Filter>
     </ClInclude>
+    <ClInclude Include="..\Cpp\Setting.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Cpp\Control.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Cpp\Def.cpp">
@@ -148,6 +154,12 @@
     </ClCompile>
     <ClCompile Include="..\Cpp\Cat.cpp">
       <Filter>Moveable Object\Animals</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Cpp\setting.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Cpp\Control.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

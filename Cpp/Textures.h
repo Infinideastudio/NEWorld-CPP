@@ -51,9 +51,9 @@ namespace textures{
 
 	TEXTURE_RGBA LoadRGBAImage(string Filename, string MkFilename);
 
-	GLuint LoadFontTexture(string Filename);
+	TextureID LoadFontTexture(string Filename);
 
-	GLuint LoadRGBATexture(string Filename, string MkFilename);
+	TextureID LoadRGBATexture(string Filename, string MkFilename);
 
 	void SaveRGBImage(string filename, TEXTURE_RGB image);
 }

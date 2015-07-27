@@ -3,19 +3,7 @@
 #include "Textures.h"
 #include "glprinting.h"
 
-extern int windowwidth;
-extern int windowheight;
-extern double mx;
-extern double my;
-extern int mw;
-extern int mb;
 extern bool gamebegin;
-extern bool ESCP;
-extern float FOVyNormal;
-extern float mousemove;
-extern int viewdistance;
-extern bool UseCIArray;
-extern string inputstr;
 
 template<typename T>
 string strWithVar(string str, T var){
@@ -39,15 +27,13 @@ void mainmenu(){
 	auto startbtn = MainForm.createbutton("开始游戏");
 	auto optionsbtn = MainForm.createbutton(">> 选项...");
 	auto quitbtn = MainForm.createbutton("退出");
-	auto faststartbtn = MainForm.createbutton("快速开始游戏");
 	auto label1 = MainForm.createlabel("开发者:qiaozhanrong[小桥],abc612008[Null],Jelawat地鼠,renfei147...");
 	auto label2 = MainForm.createlabel("向Minecraft制作团队表达敬意！");
 	do{
 		leftp = windowwidth / 2 - 200;
 		midp = windowwidth / 2;
 		rightp = windowwidth / 2 + 200;
-		faststartbtn->resize(leftp, rightp, upp, upp + 32);
-		startbtn->resize(leftp, rightp, upp + 72 + 6, upp + 72 + 6 + (72 - 38));
+		startbtn->resize(leftp, rightp, upp, upp + 32);
 		optionsbtn->resize(leftp, midp - 3, upp + 38, upp + 72);
 		quitbtn->resize(midp + 3, rightp, upp + 38, upp + 72);
 		label1->resize(0, windowwidth, windowheight - 32, windowheight - 16);
@@ -60,7 +46,6 @@ void mainmenu(){
 		if (gamebegin) f = true;
 		if (optionsbtn->clicked) options();
 		if (quitbtn->clicked) exit(0);
-		if (faststartbtn->clicked) gamebegin = true;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
@@ -89,8 +74,7 @@ void mainmenu(){
 		MainForm.render();
 		glfwSwapBuffers(win);
 		glfwPollEvents();
-		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS&&ESCP == false || glfwWindowShouldClose(win)) exit(0);
-		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_RELEASE) ESCP = false;
+		if (glfwWindowShouldClose(win)) exit(0);
 	} while (!f);
 	MainForm.cleanup();
 }
@@ -144,8 +128,8 @@ void options(){
 		viewdistBar->text = strWithVar("渲染距离：", viewdistance);
 		ciArrayBtn->text = strWithVar("使用区块索引数组, ", boolstr(UseCIArray));
 		if (ciArrayBtn->clicked) UseCIArray = !UseCIArray;
-		//if (rdstbtn->clicked) renderoptions();
-		//if (gistbtn->clicked) GUIoptions();
+		if (rdstbtn->clicked) Renderoptions();
+		if (gistbtn->clicked) GUIoptions();
 		if (backbtn->clicked) f = true;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glMatrixMode(GL_PROJECTION);
@@ -169,74 +153,78 @@ void options(){
 		MainForm.render();
 		glfwSwapBuffers(win);
 		glfwPollEvents();
-		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(win)) exit(0);
+		if (glfwWindowShouldClose(win)) exit(0);
 	} while (!f);
 	MainForm.cleanup();
 }
-/* 偷懒
+
 void Renderoptions(){
     //渲染设置菜单;
-     MainForm gui.Form;
-     leftp int = windowwidth/2-250;
-     rightp int = windowwidth/2+250;
-     midp int = windowwidth/2;
-     upp int = 60;
-     downp int = windowheight-20;
-     lspc int = 36;
-     bool f;
-    MainForm.Init();
-     title gui.label    ptr = MainForm.CreateLabel("==============<  渲 染 选 项  >==============");
-     backbtn gui.button ptr = MainForm.CreateButton("<< 返回选项菜单");
-    do;
-        leftp=windowwidth/2-250;
-        rightp=windowwidth/2+250;
-        midp=windowwidth/2;
-        downp=windowheight-20;
-        title->resize(midp-225,midp+225,20,36);
-        backbtn->resize(leftp,rightp,downp-24,downp);
-        glfwGetMousePos(@mx,@my);
-        mw=glfwGetMouseWheel();
-        //更新GUI;
-        MainForm.mousedata(mx,my,mw,mb);
-        MainForm.update();
-        if( backbtn->clicked=true then f=true;
-        glClear(GL_COLOR_BUFFER_BIT||GL_DEPTH_BUFFER_BIT);
-        glLoadIdentity();
-        glortho(0,windowwidth,windowheight,0,-1.0,1.0);
-        glDepthFunc(GL_ALWAYS);
-        glDisable(GL_CULL_FACE);
-        glEnable(GL_TEXTURE_2D);
-        glcolor4f(1.0,1.0,1.0,1.0);
-        glbindtexture(GL_TEXTURE_2D,guiImage(1));
-        glbegin(GL_QUADS);
-            gltexcoord2f(0.0,1.0),glvertex2i(0,0);
-            gltexcoord2f(1.0,1.0),glvertex2i(windowwidth,0);
-            gltexcoord2f(1.0,0.45),glvertex2i(windowwidth,windowheight);
-            gltexcoord2f(0.0,0.45),glvertex2i(0,windowheight);
-        glend();
-        //渲染控件;
-        glDisable(GL_TEXTURE_2D);
-        MainForm.render();
-        glfwSwapBuffers();
-        if( glfwGetKey(GLFW_KEY_ESC)=GLFW_PRESS||glfwGetWindowParam(GLFW_OPENED)=0 then end;
-    loop until f=true;
+	gui::Form MainForm;
+	int leftp = windowwidth / 2 - 250;
+	int rightp = windowwidth / 2 + 250;
+	int midp = windowwidth / 2;
+	int upp = 60;
+	int downp = windowheight - 20;
+	int lspc = 36;
+	bool f = false;
+	MainForm.Init();
+	gui::label*  title = MainForm.createlabel("==============<  渲 染 选 项  >==============");
+	gui::button*  backbtn = MainForm.createbutton("<< 返回选项菜单");
+	do{
+		leftp = windowwidth / 2 - 250;
+		rightp = windowwidth / 2 + 250;
+		midp = windowwidth / 2;
+		downp = windowheight - 20;
+		title->resize(midp - 225, midp + 225, 20, 36);
+		backbtn->resize(leftp, rightp, downp - 24, downp);
+		glfwGetCursorPos(win, &mx, &my);
+		//更新GUI;
+		mb = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ? 1 : 0;
+		MainForm.mousedata((int)mx, (int)my, mw, mb);
+		MainForm.update();
+		if (backbtn->clicked) f = true;
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, windowwidth, windowheight, 0, -1.0, 1.0);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glDepthFunc(GL_ALWAYS);
+		glDisable(GL_CULL_FACE);
+		glEnable(GL_TEXTURE_2D);
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glBindTexture(GL_TEXTURE_2D, guiImage[1]);
+		glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f), glVertex2i(0, 0);
+		glTexCoord2f(1.0f, 1.0f), glVertex2i(windowwidth, 0);
+		glTexCoord2f(1.0f, 0.45f), glVertex2i(windowwidth, windowheight);
+		glTexCoord2f(0.0f, 0.45f), glVertex2i(0, windowheight);
+		glEnd();
+		//渲染控件;
+		glDisable(GL_TEXTURE_2D);
+		MainForm.render();
+		glfwSwapBuffers(win);
+		glfwPollEvents();
+		if (glfwWindowShouldClose(win)) exit(0);
+	} while (!f);
     MainForm.cleanup();
 }
 void GUIoptions(){
     //GUI设置菜单;
-     MainForm gui.Form;
-     leftp int = windowwidth/2-250;
-     rightp int = windowwidth/2+250;
-     midp int = windowwidth/2;
-     upp int = 60;
-     downp int = windowheight-20;
-     lspc int = 36;
-     bool f;
-    MainForm.Init();
-     title gui.label    ptr = MainForm.CreateLabel("===============< 图形界面选项 >==============");
-     fontbtn gui.button ptr = MainForm.CreateButton("全部使用Unicode字体：" & boolstr(glprt.useUnicodeASCIIFont));
-     backbtn gui.button ptr = MainForm.CreateButton("<< 返回选项菜单");
-    do;
+	gui::Form MainForm;
+	int leftp = windowwidth / 2 - 250;
+	int rightp = windowwidth / 2 + 250;
+	int midp = windowwidth / 2;
+	int upp = 60;
+	int downp = windowheight - 20;
+	int lspc = 36;
+	bool f = false;
+	MainForm.Init();
+	gui::label* title = MainForm.createlabel("===============< 图形界面选项 >==============");
+	gui::button* fontbtn = MainForm.createbutton("全部使用Unicode字体：" + boolstr(glprt::useUnicodeASCIIFont));
+	gui::button* backbtn = MainForm.createbutton("<< 返回选项菜单");
+	do{
         leftp=windowwidth/2-250;
         rightp=windowwidth/2+250;
         midp=windowwidth/2;
@@ -244,37 +232,41 @@ void GUIoptions(){
         title->resize(midp-225,midp+225,20,36);
         fontbtn->resize(leftp,midp-10,upp+lspc*0,upp+lspc*0+24);
         backbtn->resize(leftp,rightp,downp-24,downp);
-        glfwGetMousePos(@mx,@my);
-        mw=glfwGetMouseWheel();
+        glfwGetCursorPos(win,&mx,&my);
         //更新GUI;
-        MainForm.mousedata(mx,my,mw,mb);
+		mb = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ? 1 : 0;
+		MainForm.mousedata((int)mx, (int)my, mw, mb);
         MainForm.update();
-        if( fontbtn->clicked=true then glprt.useUnicodeASCIIFont=true-glprt.useUnicodeASCIIFont;
-        if( backbtn->clicked=true then f=true;
-        fontbtn->text="全部使用Unicode字体：" & boolstr(glprt.useUnicodeASCIIFont);
-        glClear(GL_COLOR_BUFFER_BIT||GL_DEPTH_BUFFER_BIT);
-        glLoadIdentity();
-        glortho(0,windowwidth,windowheight,0,-1.0,1.0);
-        glDepthFunc(GL_ALWAYS);
-        glDisable(GL_CULL_FACE);
-        glEnable(GL_TEXTURE_2D);
-        glcolor4f(1.0,1.0,1.0,1.0);
-        glbindtexture(GL_TEXTURE_2D,guiImage(1));
-        glbegin(GL_QUADS);
-            gltexcoord2f(0.0,1.0),glvertex2i(0,0);
-            gltexcoord2f(1.0,1.0),glvertex2i(windowwidth,0);
-            gltexcoord2f(1.0,0.45),glvertex2i(windowwidth,windowheight);
-            gltexcoord2f(0.0,0.45),glvertex2i(0,windowheight);
-        glend();
-        //渲染控件;
-        glDisable(GL_TEXTURE_2D);
-        MainForm.render();
-        glfwSwapBuffers();
-        if( glfwGetKey(GLFW_KEY_ESC)=GLFW_PRESS||glfwGetWindowParam(GLFW_OPENED)=0 then end;
-    loop until f=true;
+        if(fontbtn->clicked) glprt::useUnicodeASCIIFont=!glprt::useUnicodeASCIIFont;
+        if(backbtn->clicked) f=true;
+        fontbtn->text="全部使用Unicode字体：" + boolstr(glprt::useUnicodeASCIIFont);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, windowwidth, windowheight, 0, -1.0, 1.0);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glDepthFunc(GL_ALWAYS);
+		glDisable(GL_CULL_FACE);
+		glEnable(GL_TEXTURE_2D);
+		glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		glBindTexture(GL_TEXTURE_2D, guiImage[1]);
+		glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f), glVertex2i(0, 0);
+		glTexCoord2f(1.0f, 1.0f), glVertex2i(windowwidth, 0);
+		glTexCoord2f(1.0f, 0.45f), glVertex2i(windowwidth, windowheight);
+		glTexCoord2f(0.0f, 0.45f), glVertex2i(0, windowheight);
+		glEnd();
+		//渲染控件;
+		glDisable(GL_TEXTURE_2D);
+		MainForm.render();
+		glfwSwapBuffers(win);
+		glfwPollEvents();
+		if (glfwWindowShouldClose(win)) exit(0);
+	} while (!f);
     MainForm.cleanup();
 }
-*/
+
 void worldmenu(){
 	//世界选择菜单;
 	int i;
@@ -525,7 +517,7 @@ void worldmenu(){
 		glfwPollEvents();
 		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS&&!ESCP || glfwWindowShouldClose(win)) exit(0);
 		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_RELEASE) ESCP = false;
-	} while (!f);
+	} while (!f && !gamebegin);
 	MainForm.cleanup();
 }
 
@@ -590,5 +582,9 @@ void createworldmenu(){
 		glfwPollEvents();
 		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS || glfwWindowShouldClose(win)) exit(0);
 	} while (!f);
+	if (worldnametbChanged){
+		world::worldname = worldnametb->text;
+		gamebegin = true;
+	}
 	MainForm.cleanup();
 }

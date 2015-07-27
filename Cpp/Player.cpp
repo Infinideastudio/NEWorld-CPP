@@ -4,18 +4,10 @@
 #include <sstream>
 bool FLY;      //飞行;
 bool CROSS;    //穿墙 ←_← (Superman!);
-extern float playerHeight;
-extern float playerHeightExt;
-//extern const uint32 VERSION;
-extern ubyte itemInHand;
-extern block inventorybox[4][10];
-extern block inventorypcs[4][10];
 namespace player{
 	Hitbox::AABB playerbox;
-	//int livesoverall = 100;
-	//int lives = 100;
-	//int livestarget = 100;
-
+	float height = 1.2f;     //玩家的高度
+	float heightExt = 0.0f;
 	double xa, ya, za;
 	bool OnGround = false;
 	bool Running = false;
@@ -28,6 +20,10 @@ namespace player{
 	float xlookspeed, ylookspeed;
 	int intxpos, intypos, intzpos, intxposold, intyposold, intzposold;
 	double renderxpos, renderypos, renderzpos;
+	block BlockInHand = blocks::AIR;
+	ubyte itemInHand = 0;
+	block inventorybox[4][10];
+	block inventorypcs[4][10];
 
 	void InitHitbox(){
 		playerbox.xmin = -0.3;
@@ -98,13 +94,13 @@ namespace player{
 				//半蹲特效;
 				if (player::jump < -0.005){
 					//player::jump /= 2;
-					if (player::jump <= -(playerHeight - 0.5f))
-						playerHeightExt = -(playerHeight - 0.5f);
+					if (player::jump <= -(height - 0.5f))
+						heightExt = -(height - 0.5f);
 					else
-						playerHeightExt = (float)player::jump;
+						heightExt = (float)player::jump;
 				}
 				else{
-					if (playerHeightExt <= -0.05f) playerHeightExt *= 0.8f;
+					if (heightExt <= -0.05f) heightExt *= 0.8f;
 				}
 
 				xa *= 0.7;
@@ -150,7 +146,7 @@ namespace player{
 		uint32 curversion = VERSION;
 
 		std::stringstream ss;
-		ss << "Worlds\\" << worldn << "player.NEWorldPlayer";
+		ss << "Worlds\\" << worldn << "\\player.NEWorldPlayer";
 		std::ofstream isave(ss.str(), std::ios::binary | std::ios::out);
 		if (!isave.is_open()) return;
 		isave << curversion << OnGround << Running << AirJumps << lookupdown << heading << xpos << ypos << zpos
@@ -174,6 +170,40 @@ namespace player{
 		iload.read((char*)inventorybox, sizeof(inventorybox));
 		iload.read((char*)inventorypcs, sizeof(inventorypcs));
 		iload.close();
+	}
+
+	void additem(block itemname){
+		//向背包里加入物品t
+		bool f = false;
+		for (int i = 0; i != 10; i++){
+			if (inventorybox[3][i] == blocks::AIR){
+				inventorybox[3][i] = itemname;
+				inventorypcs[3][i] = 1;
+				f = true;
+			}
+			else if (inventorybox[3][i] == itemname && inventorypcs[3][i] < 255){
+				inventorypcs[3][i]++;
+				f = true;
+			}
+			if (f) break;
+		}
+		if (!f){
+			for (int i = 0; i != 3; i++){
+				for (int j = 0; j != 10; j++){
+					if (inventorybox[i][j] == blocks::AIR){
+						inventorybox[i][j] = itemname;
+						inventorypcs[i][j] = 1;
+						f = true;
+					}
+					else if (inventorybox[i][j] == itemname && inventorypcs[i][j] < 255){
+						inventorypcs[i][j]++;
+						f = true;
+					}
+
+					if (f) break;
+				}
+			}
+		}
 	}
 
 }

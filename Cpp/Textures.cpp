@@ -148,11 +148,11 @@ namespace textures{
 		return bitmap;
 	}
 
-	GLuint LoadFontTexture(string Filename){
+	TextureID LoadFontTexture(string Filename){
 		TEXTURE_RGBA Texture;
 		TEXTURE_RGB image;
 		ubyte *ip, *tp;
-		GLuint ret;
+		TextureID ret;
 		image = LoadRGBImage(Filename);
 		Texture.sizeX = image.sizeX;
 		Texture.sizeY = image.sizeY;
@@ -213,8 +213,8 @@ namespace textures{
 		ofs.close();
 	}
 
-	GLuint LoadRGBATexture(string Filename, string MkFilename){
-		GLuint ret;
+	TextureID LoadRGBATexture(string Filename, string MkFilename){
+		TextureID ret;
 		TEXTURE_RGBA image = LoadRGBAImage(Filename, MkFilename);
 		glGenTextures(1, &ret);
 		glBindTexture(GL_TEXTURE_2D, ret);
