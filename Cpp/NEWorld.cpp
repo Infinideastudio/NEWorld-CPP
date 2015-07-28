@@ -615,12 +615,11 @@ void LoadTextures(){
 }
 
 void saveGame(){
-	world::saveGame();
+	world::saveAllChunks();
 	player::save(world::worldname);
 }
 
 void loadGame(){
-	world::loadGame();
 	player::load(world::worldname);
 }
 
@@ -2027,6 +2026,6 @@ void saveScreenshot(int x, int y, int w, int h, string filename){
 
 void createThumbnail(){
 	std::stringstream ss;
-	ss << "\\Worlds\\" << world::worldname << "\\Thumbnail.bmp";
+	ss << "Worlds\\" << world::worldname << "\\Thumbnail.bmp";
 	saveScreenshot(0, 0, windowwidth, windowheight, ss.str());
 }

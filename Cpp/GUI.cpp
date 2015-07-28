@@ -278,9 +278,13 @@ namespace gui{
 	}
 	   
 	void textbox::update(){
-        
+		static int delt = 0;
+		static int ldel = 0;
+		if (delt > INT_MAX - 2) delt = 0;
+		if (ldel > INT_MAX - 2) delt = 0;
         //更新文本框状态
 		if (enabled){
+			
 			if (parent->mx >= xmin && parent->mx <= xmax && parent->my >= ymin && parent->my <= ymax)                 //鼠标悬停;
 				mouseon = true;
 			else
@@ -296,7 +300,9 @@ namespace gui{
 			if (focused && inputstr != ""){
 				text += inputstr;
 			}
-			if (parent->backspacep && !parent->backspacepl && text.length() >= 1){
+			delt++;
+			if (parent->backspacep && (delt-ldel>50) && text.length() >= 1){
+				ldel = delt;
 				int n = text[text.length() - 1];
 				if (n > 0 && n <= 127)
 					text = text.substr(0, text.length() - 1);

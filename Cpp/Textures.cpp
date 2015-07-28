@@ -198,7 +198,7 @@ namespace textures{
 		bitmapinfoheader.biClrImportant = 0;
 		ubyte* p;
 		ubyte r, g, b;
-		std::ofstream ofs(filename, std::ios::in | std::ios::binary);
+		std::ofstream ofs(filename, std::ios::out | std::ios::binary);
 		ofs.write((char*)&bitmapfileheader, sizeof(bitmapfileheader));
 		ofs.write((char*)&bitmapinfoheader, sizeof(bitmapinfoheader));
 		p = image.buffer.get();

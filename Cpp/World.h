@@ -70,8 +70,6 @@ namespace world{
 
 	void saveAllChunks();
 	void destroyAllChunks();
-	void saveGame();
-	void loadGame();
 
 	void buildtree(int x, int y, int z);
 }

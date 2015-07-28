@@ -2,6 +2,8 @@
 #include "World.h"
 #include "Textures.h"
 #include "glprinting.h"
+#include <io.h>
+#include <fstream>
 
 extern bool gamebegin;
 
@@ -210,6 +212,7 @@ void Renderoptions(){
 	} while (!f);
     MainForm.cleanup();
 }
+
 void GUIoptions(){
     //GUI设置菜单;
 	gui::Form MainForm;
@@ -269,7 +272,6 @@ void GUIoptions(){
 
 void worldmenu(){
 	//世界选择菜单;
-	int i;
 	gui::Form MainForm;
 	int leftp = windowwidth / 2 - 200;
 	int midp = windowwidth / 2;
@@ -279,13 +281,12 @@ void worldmenu(){
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glDisable(GL_CULL_FACE);
 	bool f = false, refresh = true;
-	int worldcount = 0;
 	int selected = 0, mouseon;
-	string  directoryname;
 	ubyte mblast = 1;
 	int  mwlast = 0;
+	string chosenWorldName;
 	vector<string> worldnames;
-	vector<uint> thumbnails, texSizeX, texSizeY;
+	vector<TextureID> thumbnails, texSizeX, texSizeY;
 	int trs = 0;
 	MainForm.Init();
 	auto  title = MainForm.createlabel("==============<  选 择 世 界  >==============");
@@ -298,6 +299,7 @@ void worldmenu(){
 	deletebtn->enabled = false;
 	vscroll->defaultv = true;
 	do{
+		int worldcount = worldnames.size();
 		leftp = windowwidth / 2 - 250;
 		midp = windowwidth / 2;
 		rightp = windowwidth / 2 + 250;
@@ -316,10 +318,10 @@ void worldmenu(){
 		trs = vscroll->barpos / (downp - 36 - 40)*(64 * worldcount + 64);
 		mouseon = -1;
 		if (mx >= midp - 250 && mx <= midp + 250 && my >= 48 && my <= downp - 72){
-			for (i = 0; i != worldcount; i++){
+			for (int i = 0; i != worldcount; i++){
 				if (my >= 48 + i * 64 - trs&&my <= 48 + i * 64 + 60 - trs){
 					if (mb == 1 && mblast == 0){
-						world::worldname = worldnames[i];
+						chosenWorldName = worldnames[i];
 						selected = i;
 					}
 					mouseon = i;
@@ -330,79 +332,68 @@ void worldmenu(){
 					createworldmenu();
 					refresh = true;
 				}
-				mouseon = i;
+				mouseon = worldcount;
 			}
 		}
 		if (enterbtn->clicked){
-			//if (world::worldname == "client") mpclient = true; else mpclient = false;
-			//if (world::worldname == "server") mpserver = true; else mpserver = false;
 			gamebegin = true;
 			f = true;
 		}
 		if (deletebtn->clicked){
 			//删除世界文件;
-			//偷懒
-			//directoryname = dir(exepath & "\\Worlds\\" & world::worldname & "\\chunks\\*.*", FileAttribArchive);
-			//do{
-			//	if (len(directoryname) > 0 && directoryname!="."&&directoryname!=".."){
-			//		kill(exepath & "\\Worlds\\" & world.worldname & "\\chunks\\" & directoryname);
-			//	}
-			//	directoryname = dir();
-			//} while (len(directoryname) > 0);
-			//rmdir(exepath & "\\Worlds\\" & world.worldname & "\\chunks");
-			//kill(exepath & "\\Worlds\\" & world.worldname & "\\Thumbnail.bmp");
-			//kill(exepath & "\\Worlds\\" & world.worldname & "\\player.NEWorldPlayer");
-			//rmdir(exepath & "\\Worlds\\" & world.worldname);
+			system((string("rd /s/q Worlds\\") + chosenWorldName + "\\").c_str());
 			deletebtn->clicked = false;
 			refresh = true;
 		}
-		//if (refresh){
-		//	textures::TEXTURE_RGB tmb; //Thumbnail buffer
-		//	worldcount = 0;
-		//	selected = -1;
-		//	mouseon = -1;
-		//	world::worldname = "";
-		//	//计算存档数量;
-		//	directoryname = dir("Worlds\\*", FileAttribDirectory);
-		//	do{
-		//		if (len(directoryname) > 0 && directoryname!="."&&directoryname!="..") worldcount += 1;
-		//		directoryname = dir();
-		//	} while (directoryname.length() > 0);
-		//	worldnames.push_back("");
-		//	thumbnails.push_back(0);
-		//	texSizeX.push_back(0);
-		//	texSizeY.push_back(0);
-		//	vscroll->barpos = 0;
-		//	//查找所有世界存档;
-		//	directoryname = dir("Worlds\\*", FileAttribDirectory);
-		//	i = 0;
-		//	do{
-		//		if (len(directoryname) > 0 && directoryname!="."&&directoryname!=".."){
-		//			worldnames[i] = directoryname;
-		//			if (fileExists("Worlds\\" & directoryname & "\\Thumbnail.bmp")){
-		//				//printf( "[Console][Event]Loading thumbnail of world " & chr(34) & directoryname & chr(34);
-		//				tmb = textures::LoadRGBTexture("Worlds\\" & directoryname & "\\Thumbnail.bmp");
-		//				glGenTextures(1, &thumbnails[i]);
-		//				glBindTexture(GL_TEXTURE_2D, thumbnails[i]);
-		//				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		//				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tmb.sizeX, tmb.sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, tmb.buffer);
-		//				texSizeX[i] = tmb.sizeX;
-		//				texSizeY[i] = tmb.sizeY;
-		//				free(tmb.buffer);
-		//			}
-		//			else{
-		//				thumbnails[i] = -1;
-		//			}
-		//			i += 1;
-		//		}
-		//		directoryname = dir();
-		//	} while (len(directoryname) > 0);
-		//	refresh = false;
-		//}
+		if (refresh){
+			worldnames.clear();
+			thumbnails.clear();
+			texSizeX.clear();
+			texSizeY.clear();
+			worldcount = 0;
+			selected = -1;
+			mouseon = -1;
+			vscroll->barpos = 0;
+			chosenWorldName = "";
+			//查找所有世界存档;
+			textures::TEXTURE_RGB tmb;
+			long hFile = 0;
+			_finddata_t fileinfo;
+			if ((hFile = _findfirst(string("Worlds\\*").c_str(), &fileinfo)) != -1)
+			{
+				do
+				{
+					if ((fileinfo.attrib &  _A_SUBDIR))
+					{
+						if (strcmp(fileinfo.name, ".") != 0 && strcmp(fileinfo.name, "..") != 0){
+							worldnames.push_back(fileinfo.name);
+							std::fstream file;
+							file.open("Worlds\\" + string(fileinfo.name) + "\\Thumbnail.bmp", std::ios::in);
+							thumbnails.push_back(-1);
+							texSizeX.push_back(0);
+							texSizeY.push_back(0);
+							if (file.is_open()){
+								tmb = textures::LoadRGBImage("Worlds\\" + string(fileinfo.name) + "\\Thumbnail.bmp");
+								glGenTextures(1, &thumbnails[thumbnails.size() - 1]);
+								glBindTexture(GL_TEXTURE_2D, thumbnails[thumbnails.size() - 1]);
+								glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+								glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+								glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, tmb.sizeX, tmb.sizeY, 0, GL_RGB, GL_UNSIGNED_BYTE, tmb.buffer.get());
+								texSizeX[texSizeX.size() - 1] = tmb.sizeX;
+								texSizeY[texSizeY.size() - 1] = tmb.sizeY;
+							}
+							file.close();
+						}
+					}
+				} while (_findnext(hFile, &fileinfo) == 0);
+				_findclose(hFile);
+			}
 
-		enterbtn->enabled = world::worldname != "";
-		deletebtn->enabled = world::worldname != "";
+			refresh = false;
+		}
+
+		enterbtn->enabled = chosenWorldName != "";
+		deletebtn->enabled = chosenWorldName != "";
 
 		if (backbtn->clicked) f = true;
 
@@ -426,7 +417,7 @@ void worldmenu(){
 		glEnable(GL_SCISSOR_TEST);
 		glScissor(0, windowheight - (downp - 72), windowwidth, downp - 72 - 48 + 1);
 		glTranslatef(0.0f, (float)-trs, 0.0f);
-		for (i = 0; i != worldcount; i++){
+		for (int i = 0; i != worldcount; i++){
 			int xmin, xmax, ymin, ymax;
 			xmin = midp - 250, xmax = midp + 250;
 			ymin = 48 + i * 64, ymax = 48 + i * 64 + 60;
@@ -490,6 +481,7 @@ void worldmenu(){
 			}
 			renderChar((windowwidth - getStrWidth(worldnames[i])) / 2, (140 + i * 128) / 2 - trs, worldnames[i]);
 		}
+		int i = worldcount;
 		glDisable(GL_TEXTURE_2D);
 		if (mouseon == i) glColor4f(0.5f, 0.5f, 0.5f, gui::FgA); else glColor4f(gui::FgR, gui::FgG, gui::FgB, gui::FgA);
 		glBegin(GL_QUADS);
@@ -555,7 +547,7 @@ void createworldmenu(){
 			worldnametb->text = "";
 			worldnametbChanged = true;
 		}
-		if (worldnametb->text == "" || !worldnametbChanged) okbtn->enabled = false; else okbtn->enabled = true;
+		if (worldnametb->text == "" || !worldnametbChanged||worldnametb->text.find(" ")!=-1) okbtn->enabled = false; else okbtn->enabled = true;
 		if (okbtn->clicked || backbtn->clicked) f = true;
 		inputstr = "";
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

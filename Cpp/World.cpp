@@ -1028,14 +1028,6 @@ namespace world{
 		loadedChunks = 0;
 	}
 
-	void saveGame(){
-		saveAllChunks();
-	}
-
-	void loadGame(){
-
-	}
-
 	void buildtree(int x, int y, int z){
 
 		block trblock = getblock(x, y, z), tublock = getblock(x, y - 1, z);

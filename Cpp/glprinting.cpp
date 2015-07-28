@@ -131,14 +131,13 @@ void renderChar(int x, int y, string glstring){
 	glOrtho(0, glprt::ww, glprt::wh, 0, -1.0, 1.0);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-
+	glEnable(GL_TEXTURE_2D);
 	for (k = 0; k < lstrlenW(wstr); k++){
 		glLoadIdentity();
 		glColor4f(glprt::r, glprt::g, glprt::b, glprt::a);
 		glTranslated(x + 1 + span, y + 1, 0);
 		uc = wstr[k];
 		if (!glprt::useUnicodeASCIIFont && glstring[i] >= 0 && glstring[i] <= 127){
-			//ftex = glprt::Font;
 			glprint(x + 1 + (int)span, y + 1, string() + glstring[i]);
 		}
 		else{
@@ -158,7 +157,6 @@ void renderChar(int x, int y, string glstring){
 			tx = ((uc % 256) % 16) / 16.0;
 			ty = 1 - ((uc % 256) / 16) / 16.0;
 			//glScaled(2, 2, 2);
-			glEnable(GL_TEXTURE_2D);
 			glBindTexture(GL_TEXTURE_2D, ftex);
 			glBegin(GL_QUADS);
 			glColor4f(0.5, 0.5, 0.5, glprt::a);
