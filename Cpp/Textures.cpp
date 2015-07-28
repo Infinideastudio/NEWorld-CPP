@@ -159,7 +159,7 @@ namespace textures{
 		Texture.buffer = shared_ptr<ubyte>(new unsigned char[image.sizeX * image.sizeY * 4]);
 		if (Texture.buffer == nullptr){
 			printf("[console][Warning] Cannot alloc memory when loading %s\n", Filename.c_str());
-			return -1;
+			return 0;
 		}
 		ip = image.buffer.get();
 		tp = Texture.buffer.get();

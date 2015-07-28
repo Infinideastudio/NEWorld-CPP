@@ -120,6 +120,7 @@ void scrollEvent(GLFWwindow* win, double offsetx, double offsety);
 void saveScreenshot(int x, int y, int w, int h, string filename);
 void createThumbnail();
 void CharInputFun(GLFWwindow * win, unsigned int c);
+void winsizecall(GLFWwindow* window, int width, int height);
 
 //Variables define
 
@@ -173,7 +174,6 @@ int main(){
 	//......
 	//......
 
-
 	memset(player::inventorybox, 0, sizeof(player::inventorybox));
 	memset(player::inventorypcs, 0, sizeof(player::inventorypcs));
 	player::inventorybox[3][0] = blocks::WOOD;
@@ -192,6 +192,7 @@ int main(){
 	glfwSetInputMode(win, GLFW_STICKY_KEYS, true); //?
 	glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glfwSetScrollCallback(win, &scrollEvent);
+	glfwSetWindowSizeCallback(win, &winsizecall);
 	glfwSetCharCallback(win, &CharInputFun);
 	//glfwSetWindowSizeCallback(&WindowSizeFun)
 	//glfwSetMouseButtonCallback(&mousebuttonfun)
@@ -379,21 +380,12 @@ void updateThreadFunc(){
 	MutexUnlock(Mutex);
 }
 
-//glfw callbackº¯Êý
-//  void WindowSizeFun GLFWCALL(int w, int h){
-//    windowwidth=w
-//    windowheight=iif((h>0,h,1)
-//    setupscreen()
-//  }
-//  
-//  void MouseButtonFun GLFWCALL(int button, int action){
-//    mb=0
-//	if (action = GLFW_PRESS){
-//		if (button = GLFW_MOUSE_BUTTON_LEFT) mb++
-//		if (button = GLFW_MOUSE_BUTTON_RIGHT) mb += 2
-//		if (button = GLFW_MOUSE_BUTTON_MIDDLE) mb += 4
-//	}
-//}
+void winsizecall(GLFWwindow* window, int width, int height){
+	windowwidth = width;
+	windowheight = height > 0 ? height : 1;
+	setupscreen();
+}
+  
 
 void scrollEvent(GLFWwindow* win, double offsetx, double offsety){
 	//mw = offsety
@@ -1689,7 +1681,7 @@ void drawmain(){
 	drawcloud(player::xpos, player::zpos);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_CULL_FACE);
-
+	for (int i = 0; i != world::MOs.size(); i++) world::MOs[i]->renderer();
 	MutexLock(Mutex);
 
 	glMatrixMode(GL_PROJECTION);

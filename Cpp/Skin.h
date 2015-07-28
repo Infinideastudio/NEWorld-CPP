@@ -6,8 +6,8 @@ enum SkinType{ NORMALSKIN, CATSKIN };
 class Skin{
 private:
 	double X, Y, Z;
-	TextureID texture = -1;
-	int skinType;
+	TextureID texture = 0;
+	int skinType = 0;
 public:
 	Skin(){};
 	Skin(double x, double y, double z) :X(x), Y(y), Z(z){}

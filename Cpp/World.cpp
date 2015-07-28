@@ -166,7 +166,6 @@ namespace world{
 
 	int getChunkIndex(int x, int y, int z){
 		uint64 cID = getChunkID(x, y, z);
-		//istest << cID << std::endl;
 		int ret;
 		if (ciCacheID == cID && ciCacheIndex != -2){
 			ret = ciCacheIndex;
