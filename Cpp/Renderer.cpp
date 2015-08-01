@@ -94,7 +94,7 @@ namespace renderer{
 			glDrawArrays(GL_QUADS, 0, Vertexes);
 			//================================//;
 
-			//glDeleteBuffers/*ARB*/(3, Buffers);
+			glDeleteBuffers/*ARB*/(3, Buffers);
 
 			//ÖØÖÃ;
 			Init();

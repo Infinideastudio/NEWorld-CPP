@@ -1,5 +1,6 @@
 //#pragma once
 #define _USE_MATH_DEFINES
+#include <Windows.h>
 #include <math.h>
 #include <time.h>
 #include <string>

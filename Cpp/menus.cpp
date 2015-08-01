@@ -166,9 +166,7 @@ void Renderoptions(){
 	int leftp = windowwidth / 2 - 250;
 	int rightp = windowwidth / 2 + 250;
 	int midp = windowwidth / 2;
-	int upp = 60;
 	int downp = windowheight - 20;
-	int lspc = 36;
 	bool f = false;
 	MainForm.Init();
 	gui::label*  title = MainForm.createlabel("==============<  渲 染 选 项  >==============");
@@ -280,7 +278,7 @@ void worldmenu(){
 	glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 	glClearColor(0.0, 0.0, 0.0, 1.0);
 	glDisable(GL_CULL_FACE);
-	bool f = false, refresh = true;
+	bool refresh = true;
 	int selected = 0, mouseon;
 	ubyte mblast = 1;
 	int  mwlast = 0;
@@ -299,7 +297,7 @@ void worldmenu(){
 	deletebtn->enabled = false;
 	vscroll->defaultv = true;
 	do{
-		int worldcount = worldnames.size();
+		unsigned int worldcount = worldnames.size();
 		leftp = windowwidth / 2 - 250;
 		midp = windowwidth / 2;
 		rightp = windowwidth / 2 + 250;
@@ -318,7 +316,7 @@ void worldmenu(){
 		trs = vscroll->barpos / (downp - 36 - 40)*(64 * worldcount + 64);
 		mouseon = -1;
 		if (mx >= midp - 250 && mx <= midp + 250 && my >= 48 && my <= downp - 72){
-			for (int i = 0; i != worldcount; i++){
+			for (unsigned int i = 0; i != worldcount; i++){
 				if (my >= 48 + i * 64 - trs&&my <= 48 + i * 64 + 60 - trs){
 					if (mb == 1 && mblast == 0){
 						chosenWorldName = worldnames[i];
@@ -337,7 +335,8 @@ void worldmenu(){
 		}
 		if (enterbtn->clicked){
 			gamebegin = true;
-			f = true;
+			world::worldname = chosenWorldName;
+			break;
 		}
 		if (deletebtn->clicked){
 			//删除世界文件;
@@ -369,7 +368,7 @@ void worldmenu(){
 							worldnames.push_back(fileinfo.name);
 							std::fstream file;
 							file.open("Worlds\\" + string(fileinfo.name) + "\\Thumbnail.bmp", std::ios::in);
-							thumbnails.push_back(-1);
+							thumbnails.push_back(0);
 							texSizeX.push_back(0);
 							texSizeY.push_back(0);
 							if (file.is_open()){
@@ -395,7 +394,7 @@ void worldmenu(){
 		enterbtn->enabled = chosenWorldName != "";
 		deletebtn->enabled = chosenWorldName != "";
 
-		if (backbtn->clicked) f = true;
+		if (backbtn->clicked) break;
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glMatrixMode(GL_PROJECTION);
@@ -417,13 +416,13 @@ void worldmenu(){
 		glEnable(GL_SCISSOR_TEST);
 		glScissor(0, windowheight - (downp - 72), windowwidth, downp - 72 - 48 + 1);
 		glTranslatef(0.0f, (float)-trs, 0.0f);
-		for (int i = 0; i != worldcount; i++){
+		for (unsigned int i = 0; i != worldcount; i++){
 			int xmin, xmax, ymin, ymax;
 			xmin = midp - 250, xmax = midp + 250;
 			ymin = 48 + i * 64, ymax = 48 + i * 64 + 60;
 			if (thumbnails[i] == -1){
 				glDisable(GL_TEXTURE_2D);
-				if (mouseon == i)
+				if (mouseon == (int)i)
 					glColor4f(0.5, 0.5, 0.5, gui::FgA);
 				else
 					glColor4f(gui::FgR, gui::FgG, gui::FgB, gui::FgA);
@@ -449,7 +448,7 @@ void worldmenu(){
 				}
 				glEnable(GL_TEXTURE_2D);
 				glBindTexture(GL_TEXTURE_2D, thumbnails[i]);
-				if (mouseon == i)
+				if (mouseon == (int)i)
 					glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 				else
 					glColor4f(0.8f, 0.8f, 0.8f, 0.8f);
@@ -469,7 +468,7 @@ void worldmenu(){
 			glVertex2i(xmax, ymax);
 			glVertex2i(xmax, ymin);
 			glEnd();
-			if (selected == i){
+			if (selected == (int)i){
 				glLineWidth(2.0);
 				glColor4f(0.0, 0.0, 0.0, 1.0);
 				glBegin(GL_LINE_LOOP);
@@ -509,7 +508,7 @@ void worldmenu(){
 		glfwPollEvents();
 		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_PRESS&&!ESCP || glfwWindowShouldClose(win)) exit(0);
 		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == GLFW_RELEASE) ESCP = false;
-	} while (!f && !gamebegin);
+	} while (!gamebegin);
 	MainForm.cleanup();
 }
 

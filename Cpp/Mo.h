@@ -56,6 +56,6 @@ public:
 
 	virtual void init(){};
 	virtual void update(){};
-	virtual void renderer(){ skin.renderer(); }
+	virtual void renderer(){};
 
 };

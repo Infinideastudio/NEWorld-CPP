@@ -30,9 +30,9 @@ private:
 
 public:
 	Cat(double x, double y, double z) :XPos(x), YPos(y), ZPos(z), skin(x, y, z){
-		skin.loadSkin("textures\\skins\\Animals\\cat.bmp", "textures\\skins\\Animals\\catmask.bmp", SkinType::CATSKIN);
+		skin.loadSkin(SkinTexture::CAT);
 	}
 
 	virtual void update();
-
+	virtual void renderer(){ skin.renderer(); }
 };

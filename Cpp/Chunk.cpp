@@ -35,7 +35,6 @@ namespace world{
 	}
 
 	void chunk::destroy(){
-		//释放内存;
 		updated = false;
 		unloadedChunks++;
 	}
@@ -45,7 +44,11 @@ namespace world{
 		//生成地形
 
 		int x, y, z, height, h, sh;
-		if (cy < 0) return;
+		if (cy < 0) {
+			memset(pbrightness, sizeof(pbrightness), BRIGHTNESSMIN);
+			isEmptyChunk = true;
+			return;
+		}
 		bool EmptyChunk = true;
 		for (x = 0; x != 16; x++){
 			for (z = 0; z != 16; z++){
@@ -85,7 +88,6 @@ namespace world{
 			}
 		}
 		isEmptyChunk = EmptyChunk;
-		//hiddenChunkTest();
 	}
 
 	void chunk::Load(){
@@ -109,7 +111,6 @@ namespace world{
 	}
 
 	void chunk::Unload(){
-		unloadedChunks++;
 		if (this == nullptr) return;
 #ifndef DEBUG_NO_FILEIO
 		SaveToFile();
@@ -162,8 +163,7 @@ namespace world{
 			list = glGenLists(3);
 			loadAnim = 100.0;
 		}
-
-		glNewList(list, GL_COMPILE);
+		
 		renderer::Init();
 		glBindTexture(GL_TEXTURE_2D, BlockTextures);
 		for (x = 0; x != 16; x++){
@@ -174,10 +174,11 @@ namespace world{
 				}
 			}
 		}
+		glNewList(list, GL_COMPILE);
 		renderer::Flush();
 		glEndList();
 
-		glNewList(list + 1, GL_COMPILE);
+		
 		renderer::Init();
 		glBindTexture(GL_TEXTURE_2D, BlockTextures);
 		for (x = 0; x != 16; x++){
@@ -188,10 +189,10 @@ namespace world{
 				}
 			}
 		}
+		glNewList(list + 1, GL_COMPILE);
 		renderer::Flush();
 		glEndList();
 
-		glNewList(list + 2, GL_COMPILE);
 		renderer::Init();
 		glBindTexture(GL_TEXTURE_2D, BlockTextures);
 		for (x = 0; x != 16; x++){
@@ -202,20 +203,18 @@ namespace world{
 				}
 			}
 		}
+		glNewList(list + 2, GL_COMPILE);
 		renderer::Flush();
 		glEndList();
-
 		updated = false;
 
 	}
 
 	void chunk::destroylists(){
 
-		if (isEmptyChunk || list != 0){
+		if (list != 0){
 
-			glDeleteLists(list + 0, 1);
-			glDeleteLists(list + 1, 1);
-			glDeleteLists(list + 2, 1);
+			glDeleteLists(list, 3);
 			list = 0;
 
 		}

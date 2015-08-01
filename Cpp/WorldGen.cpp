@@ -7,12 +7,8 @@ namespace WorldGen{
 	int   NoiseSmoothed = 1;
 	int   InterpolationMethod = INTERPOLATION_METHOD_POWER2;
 	float NoiseScaleX = 32;
-	float NoiseScaleY = (float)1 / 4;
 	float NoiseScaleZ = 32;
-	int   MountainLevel = 36;
-	float MountainScale = 1;
 	int   WaterLevel = 30;
-	int   SandLevel = 32;
 
 	void perlinNoiseInit(int mapseed){
 		srand(mapseed);
@@ -93,7 +89,7 @@ namespace WorldGen{
 	}
 
 	int getHeight(int x, int y){
-		float NoiseHeight = PerlinNoise2D(x / NoiseScaleX, y / NoiseScaleZ)*NoiseScaleY;
+		float NoiseHeight = PerlinNoise2D(x / NoiseScaleX, y / NoiseScaleZ) / 4.0f;
 		return int(NoiseHeight);
 	}
 

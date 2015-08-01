@@ -55,7 +55,7 @@ NEWorld-CPP第一版作者（翻译作者）：Null (abc612008)
 2. 解决了/W4级别下的绝大多数警告
 3. 各种优化
 
-0.4.9_Preview_0.6
+0.4.9_Preview_0.6(未发布)
 1. 重构方块属性
 2. 继续优化
 3. 调整了控制台的换行
@@ -67,10 +67,14 @@ NEWorld-CPP第一版作者（翻译作者）：Null (abc612008)
 2. 加入猫（但是没有皮肤，所以你看不到它们）
 3. 修复了创建世界菜单的响应问题
 4. 支持中文输入！
+5. 支持任意调整窗口大小
+6. 完成了所有菜单！支持完整的进入世界
 
+0.4.9_Preview_0.8
+1. 更新到VS2015
+2. 优化
 */
 
-#include <Windows.h> //只是要一个Sleep函数而已
 #include "DeveloperOptions.h"
 #include "Def.h"
 #include "blocks.h"
@@ -85,6 +89,7 @@ NEWorld-CPP第一版作者（翻译作者）：Null (abc612008)
 #include "frustum.h"
 #include "menus.h"
 #include "Cat.h"
+#include "Skin.h"
 
 int renderedChunk = 0;
 
@@ -136,13 +141,12 @@ int upsc;
 double uctime;
 bool shouldGetScreenshot, shouldGetThumbnail;
 
-float lx, ly, lz, sidedist[7], sidedistmin;  //选择方块的变量
-
 TextureID splTex;
 TextureID BlockTexture[20];
 TextureID BlockTextures;
 TextureID guiImage[6];
 TextureID DestroyImage[11];
+TextureID Skins[2];
 
 bool GUIrenderswitch;
 bool DEBUGMODE;                  //调试模式;
@@ -318,10 +322,10 @@ main_menu:
 	return 0;
 }
 
-void CharInputFun(GLFWwindow * win, unsigned int c){
+void CharInputFun(GLFWwindow *, unsigned int c){
 	if (c >= 128){
 		wchar_t* pwszUnicode=new wchar_t[2];
-		pwszUnicode[0] = c;
+		pwszUnicode[0] = (wchar_t)c;
 		pwszUnicode[1] = '\0';
 		int iSize;
 		char* pszMultiByte;
@@ -380,14 +384,14 @@ void updateThreadFunc(){
 	MutexUnlock(Mutex);
 }
 
-void winsizecall(GLFWwindow* window, int width, int height){
+void winsizecall(GLFWwindow*, int width, int height){
 	windowwidth = width;
 	windowheight = height > 0 ? height : 1;
 	setupscreen();
 }
   
 
-void scrollEvent(GLFWwindow* win, double offsetx, double offsety){
+void scrollEvent(GLFWwindow*, double, double offsety){
 	//mw = offsety
 	player::itemInHand -= (ubyte)sgn(static_cast<int>(offsety));
 	if (player::itemInHand > 9) player::itemInHand = 0;
@@ -604,6 +608,8 @@ void LoadTextures(){
 	}
 
 	BlockTextures = textures::LoadRGBATexture("textures\\blocks\\Terrain.bmp", "textures\\blocks\\Terrainmask.bmp");
+
+	Skins[SkinTexture::CAT] = textures::LoadRGBATexture("textures\\skins\\Animals\\cat.bmp", "textures\\skins\\Animals\\catmask.bmp");
 }
 
 void saveGame(){
@@ -657,20 +663,20 @@ void drawcloud(double px, double pz){
 	for (i = 0; i != 128; i++){
 		for (j = 0; j != 128; j++){
 			int x, z;
-			int mx, mz;
+			int cloudx, cloudz;
 			x = cx + i;
 			z = cz + j;
 			if (x < 0)
-				mx = 127 + (x % 128);
+				cloudx = 127 + (x % 128);
 			else
-				mx = x % 128;
+				cloudx = x % 128;
 
 			if (z - d < 0)
-				mz = 127 + ((z - d) % 128);
+				cloudz = 127 + ((z - d) % 128);
 			else
-				mz = (z - d) % 128;
+				cloudz = (z - d) % 128;
 
-			if (world::cloud[mx][mz]){
+			if (world::cloud[cloudx][cloudz]){
 				float c = (128 - abs(i - 64) - abs(j - 64)) / 127.0f * 0.5f + 0.25f;
 
 				glColor4f(1.0f, 1.0f, 1.0f, c);
@@ -759,8 +765,8 @@ void updategame(bool FirstUpdateThisFrame){
 
 		//加载区块(Load chunks)
 		world::sortChunkLoadList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
-		int sumLoad = world::chunkLoads > 2 ? 3 : world::chunkLoads;
-		for (int i = 1; i < sumLoad; i++){
+		int sumLoad = world::chunkLoads > 2 ? 2 : world::chunkLoads;
+		for (int i = 1; i <= sumLoad; i++){
 			int cx = world::chunkLoadList[i][1];
 			int cy = world::chunkLoadList[i][2];
 			int cz = world::chunkLoadList[i][3];
@@ -1561,12 +1567,6 @@ void drawGUI(){
 	}
 	fpsc++;
 
-	//glDisable GL_CULL_FACE
-	//glColor4f 0.0,0.0,0.0,1.0
-	//selectFont(48,ANSI_CHARSET,"Courier New")
-	//glRterPos2i(100,100)
-	//DrawString("NEWorld!!!!!!")
-
 	Time_renderGUI = timer() - Time_renderGUI;
 	Time_screensync_ = timer();
 }
@@ -1615,16 +1615,14 @@ void drawmain(){
 			cptr->buildlists();
 		}
 	}
-	//uint lists_(0 to - 1)
-	//double loadAnims_(0 to - 1)
 	vector<uint> lists_;
 	vector<double> loadAnims_;
 	renderedChunk = 0;
-	for (int i = 0; i != world::loadedChunks; i++){
-		if (world::chunkInRange(world::chunks[i].cx, world::chunks[i].cy, world::chunks[i].cz, player::cxt, player::cyt, player::czt, viewdistance)){
-			if (world::chunks[i].list > 0){
+	for (int i = 0; i != world::loadedChunks; i++) {
+		if (world::chunkInRange(world::chunks[i].cx, world::chunks[i].cy, world::chunks[i].cz, player::cxt, player::cyt, player::czt, viewdistance)) {
+			if (world::chunks[i].list > 0) {
 				auto chunknow = world::chunks[i];
-				if (Frustum::aabbInFrustum(chunknow.getChunkAABB())){
+				if (Frustum::aabbInFrustum(chunknow.getChunkAABB())) {
 					lists_.push_back(chunknow.list);
 					loadAnims_.push_back(chunknow.loadAnim);
 					renderedChunk++;
@@ -1634,6 +1632,7 @@ void drawmain(){
 	}
 	int lists_count = lists_.size();
 	MutexUnlock(Mutex);
+	glBindTexture(GL_TEXTURE_2D, BlockTextures);
 	for (int i = 0; i != lists_count; i++){
 		glTranslatef(0.0f, (float)-loadAnims_[i], 0.0f);
 		if (lists_[i] > 0 && glIsList(lists_[i])) glCallList(lists_[i]);
@@ -1646,7 +1645,6 @@ void drawmain(){
 	}
 	glBindTexture(GL_TEXTURE_2D, BlockTextures);
 	particles::renderall();
-
 	glDisable(GL_TEXTURE_2D);
 
 	if (GUIrenderswitch){
@@ -1681,7 +1679,7 @@ void drawmain(){
 	drawcloud(player::xpos, player::zpos);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_CULL_FACE);
-	for (int i = 0; i != world::MOs.size(); i++) world::MOs[i]->renderer();
+	for (unsigned int i = 0; i != world::MOs.size(); i++) world::MOs[i]->renderer();
 	MutexLock(Mutex);
 
 	glMatrixMode(GL_PROJECTION);
@@ -1715,7 +1713,6 @@ void drawmain(){
 	else
 		glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-
 	if (shouldGetScreenshot){
 		shouldGetScreenshot = false;
 		time_t t = time(0);
@@ -1732,14 +1729,12 @@ void drawmain(){
 		createThumbnail();
 	}
 
-	//if( versync ) screensync=true
-
 	//屏幕刷新，千万别删，后果自负！！！
 	//====refresh====//
-	MutexUnlock(Mutex);
+	//MutexUnlock(Mutex);
 	glfwSwapBuffers(win);
 	glfwPollEvents();
-	MutexLock(Mutex);
+	//MutexLock(Mutex);
 	//==refresh end==//
 
 	Time_screensync = timer() - Time_screensync;
@@ -2002,8 +1997,6 @@ void bagUpdate(){
 	}
 	mousebl = mouseb;
 }
-
-
 
 void saveScreenshot(int x, int y, int w, int h, string filename){
 	textures::TEXTURE_RGB scrBuffer;

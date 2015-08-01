@@ -64,7 +64,7 @@ bool MByteToWChar(LPCSTR lpcszStr, LPWSTR lpwszStr, DWORD dwSize)
 
 int getStrWidth(string s){
 	int ret = 0;
-	int i = 0;
+	unsigned int i = 0;
 	LPWSTR wstr = new WCHAR[128];
 	memset(wstr, 0, sizeof(wstr));
 	MByteToWChar(s.c_str(), wstr, 128 / sizeof(wstr[0]));

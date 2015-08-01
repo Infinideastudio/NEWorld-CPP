@@ -19,7 +19,7 @@ namespace world{
 	uint64 ciCacheID = 0;
 	chunkIndexArray ciArray;
 	bool ciArrayAval;
-	sbyte cloud[128][128];
+	sbyte cloud[256][256];
 	int rebuiltChunks, rebuiltChunksCount;
 	int updatedChunks, updatedChunksCount;
 	int unloadedChunks, unloadedChunksCount;
@@ -101,7 +101,7 @@ namespace world{
 	}
 
 	void DeleteChunk(int x, int y, int z){
-		int index = getChunkIndex(x, y, z);
+		unsigned int index = getChunkIndex(x, y, z);
 		if (index!=-1){
 			int i;
 			for (i = index; i < loadedChunks - 1; i++){
@@ -228,31 +228,39 @@ namespace world{
 
 	void ExpandChunkArray(int cc){
 
-		chunks = (chunk*)realloc(chunks, (loadedChunks + cc)*sizeof(chunk));
-		if (chunks == nullptr && (loadedChunks + cc) != 0){
+		auto nchunks = (chunk*)realloc(chunks, (loadedChunks + cc)*sizeof(chunk));
+		if (nchunks == nullptr && (loadedChunks + cc) != 0){
 			printf("[Console][Error]");
 			printf("Chunk Array expanding error.\n");
+			delete chunks;
+			chunks = nullptr;
 			glfwTerminate();
 			saveAllChunks();
 			destroyAllChunks();
 			glfwTerminate();
 			exit(0);
 		}
+		if (nchunks == nullptr) delete chunks;
+		else chunks = nchunks;
 		loadedChunks += cc;
 
 	}
 
 	void ReduceChunkArray(int cc){
 
-		chunks = (chunk*)realloc(chunks, (loadedChunks - cc)*sizeof(chunk));
-		if (chunks == nullptr && loadedChunks - cc>0){
+		auto nchunks = (chunk*)realloc(chunks, (loadedChunks - cc)*sizeof(chunk));
+		if (nchunks == nullptr && loadedChunks - cc>0){
 			printf("[Console][Error]");
 			printf("Chunk Array reducing error.\n");
+			delete chunks;
+			chunks = nullptr;
 			saveAllChunks();
 			destroyAllChunks();
 			glfwTerminate();
 			exit(0);
 		}
+		if (nchunks == nullptr) delete chunks;
+		else chunks = nchunks;
 		loadedChunks -= cc;
 
 	}

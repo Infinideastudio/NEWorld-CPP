@@ -16,11 +16,12 @@ namespace gui{
 	class controls{
 	public:
 		//控件基类，只要是控件都得继承这个
+		virtual ~controls() {};
 		int id;
 		Form* parent;
-		virtual void update(){};  //莫非这个就是传说中的虚函数？
-		virtual void render(){};  //貌似是的！
-		virtual void destroy(){};
+		virtual void update() {};  //莫非这个就是传说中的虚函数？
+		virtual void render() {};  //貌似是的！
+		virtual void destroy() {};
 
 	};
 

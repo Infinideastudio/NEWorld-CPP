@@ -21,7 +21,7 @@ namespace world{
 	extern chunkIndexArray ciArray;
 	extern bool ciArrayAval;
 
-	extern sbyte cloud[128][128];
+	extern sbyte cloud[256][256];
 	extern int rebuiltChunks, rebuiltChunksCount;
 	extern int updatedChunks, updatedChunksCount;
 	extern int unloadedChunks, unloadedChunksCount;

@@ -1,18 +1,18 @@
 #include "Skin.h"
 #include "Textures.h"
 #include <map>
-std::map<string, TextureID> loadedSkins;
+
+extern TextureID Skins[2];
 
 void Skin::renderer(){
-	return; //ÓÐBUG
-
+	/*
 	if (texture == 0) return;
 	glDisable(GL_CULL_FACE);
-	glTranslatef(X, Y, Z);
+	glTranslated(X, Y, Z);
 	glColor4f(1.0, 1.0, 1.0, 1.0);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glBegin(GL_QUADS);
-	if (skinType == CATSKIN){
+
 		//===Head===
 		//Left
 		glNormal3d(-1.0, 0.0, 0.0);
@@ -288,19 +288,13 @@ void Skin::renderer(){
 		glTexCoord2d(1.0 / 8 * 4, 1.0 / 8 * 1);  glVertex3d(0.25, -0.625, -0.0625);
 
 		glEnd();
-	}
-	glTranslatef(-X, -Y, -Z);
+
+	glTranslated(-X, -Y, -Z);
 	glEnable(GL_CULL_FACE);
+	*/
 }
 
-void Skin::loadSkin(string path, string pathMask, int type){
-	auto iter = loadedSkins.find(path);
-	if (iter != loadedSkins.end()){
-		texture = iter->second;
-	}
-	else{
-		texture = textures::LoadRGBATexture(path, pathMask);
-		loadedSkins[path] = texture;
-	}
-	skinType = type;
+void Skin::loadSkin(int _skin){
+	texture = Skins[_skin];
+	skin = _skin;
 }
