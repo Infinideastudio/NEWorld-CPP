@@ -25,9 +25,10 @@ namespace world{
 	extern int rebuiltChunks, rebuiltChunksCount;
 	extern int updatedChunks, updatedChunksCount;
 	extern int unloadedChunks, unloadedChunksCount;
-	extern int chunkRenderList[65536][4]; //1 to
-	extern int chunkLoadList[65536][4]; //1 to
-	extern int chunkUnloadList[65536][4]; //1 to
+	extern int chunkRenderList[65536][4];
+	extern int chunkLoadList[65536][4];
+	extern int chunkUnloadList[65536][4];
+	extern vector<int> displayListUnloadList;
 	extern int chunkRenders, chunkLoads, chunkUnloads;
 
 	extern vector<shared_ptr<Mo>> MOs;

@@ -214,7 +214,7 @@ namespace world{
 
 		if (list != 0){
 
-			glDeleteLists(list, 3);
+			world::displayListUnloadList.push_back(list);
 			list = 0;
 
 		}

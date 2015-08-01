@@ -13,9 +13,13 @@
 
 using std::string;
 using std::vector;
+using std::pair;
 using std::thread;
 using std::mutex;
 using std::shared_ptr;
+using std::cout;
+using std::endl;
+
 #include "..\Project\GLs\glew.h"
 #include "..\Project\GLs\glfw3.h"
 #include "Setting.h"

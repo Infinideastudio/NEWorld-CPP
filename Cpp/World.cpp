@@ -23,9 +23,10 @@ namespace world{
 	int rebuiltChunks, rebuiltChunksCount;
 	int updatedChunks, updatedChunksCount;
 	int unloadedChunks, unloadedChunksCount;
-	int chunkRenderList[65536][4]; //1 to
-	int chunkLoadList[65536][4]; //1 to
-	int chunkUnloadList[65536][4]; //1 to
+	int chunkRenderList[65536][4];
+	int chunkLoadList[65536][4];
+	int chunkUnloadList[65536][4];
+	vector<int> displayListUnloadList;
 	int chunkRenders, chunkLoads, chunkUnloads;
 
 	vector<shared_ptr<Mo>> MOs;
@@ -228,40 +229,33 @@ namespace world{
 
 	void ExpandChunkArray(int cc){
 
-		auto nchunks = (chunk*)realloc(chunks, (loadedChunks + cc)*sizeof(chunk));
-		if (nchunks == nullptr && (loadedChunks + cc) != 0){
+		loadedChunks += cc;
+		chunks = (chunk*)realloc(chunks, loadedChunks * sizeof(chunk));
+		if (chunks == nullptr && loadedChunks!= 0){
 			printf("[Console][Error]");
 			printf("Chunk Array expanding error.\n");
-			delete chunks;
-			chunks = nullptr;
 			glfwTerminate();
 			saveAllChunks();
 			destroyAllChunks();
 			glfwTerminate();
 			exit(0);
 		}
-		if (nchunks == nullptr) delete chunks;
-		else chunks = nchunks;
-		loadedChunks += cc;
 
 	}
 
 	void ReduceChunkArray(int cc){
 
-		auto nchunks = (chunk*)realloc(chunks, (loadedChunks - cc)*sizeof(chunk));
-		if (nchunks == nullptr && loadedChunks - cc>0){
+		loadedChunks -= cc;
+		chunks = (chunk*)realloc(chunks, loadedChunks *sizeof(chunk));
+		if (chunks == nullptr && loadedChunks >0){
 			printf("[Console][Error]");
 			printf("Chunk Array reducing error.\n");
-			delete chunks;
-			chunks = nullptr;
 			saveAllChunks();
 			destroyAllChunks();
 			glfwTerminate();
 			exit(0);
 		}
-		if (nchunks == nullptr) delete chunks;
-		else chunks = nchunks;
-		loadedChunks -= cc;
+		
 
 	}
 

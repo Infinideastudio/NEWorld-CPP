@@ -774,7 +774,7 @@ void updategame(bool FirstUpdateThisFrame){
 			world::AddChunk(cx, cy, cz);
 			world::getChunkPtr(cx, cy, cz)->Load();
 		}
-		if (rnd() < 0.1) world::MOs.push_back(shared_ptr<Mo>(new Cat(player::xa + rand() % 40 - 20, player::ya, player::za + rand() % 40 - 20)));
+		//if (rnd() < 0.1) world::MOs.push_back(shared_ptr<Mo>(new Cat(player::xa + rand() % 40 - 20, player::ya, player::za + rand() % 40 - 20)));
 	}
 
 	//加载动画
@@ -1614,6 +1614,12 @@ void drawmain(){
 		if (cptr->getUpdated()){
 			cptr->buildlists();
 		}
+	}
+	//删除已卸载区块的显示列表
+	for (int i = 0; i != 3; i++) {
+		if (world::displayListUnloadList.size() <= 0) break;
+		glDeleteLists(world::displayListUnloadList[world::displayListUnloadList.size() - 1], 3);
+		world::displayListUnloadList.pop_back();
 	}
 	vector<uint> lists_;
 	vector<double> loadAnims_;

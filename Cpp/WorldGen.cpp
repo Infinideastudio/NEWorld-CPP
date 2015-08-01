@@ -19,7 +19,7 @@ namespace WorldGen{
 		seed = mapseed;
 	}
 
-	float Noise(int x, int y){
+	inline float Noise(int x, int y){
 		return perm[abs(x * 437 + y) % 256];
 	}
 
