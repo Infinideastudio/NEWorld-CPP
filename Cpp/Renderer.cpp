@@ -9,40 +9,35 @@ namespace renderer{
 	void Init(){
 		static bool firstCall = true;
 		if (Vertexes == 0 && !firstCall) return; //Vertexes为0时，判断其已经初始化，无需再次初始化
-		//清空&初始化~
-		firstCall = false;
-		if (VertexArray.capacity() == 0){
-			VertexArray.reserve(ArrayUNITSIZE * 3);
-			TexcoordArray.reserve(ArrayUNITSIZE * 2);
-			ColorArray.reserve(ArrayUNITSIZE * 3);
+		if (firstCall){
+			VertexArray.resize(ArrayUNITSIZE * 3);
+			TexcoordArray.resize(ArrayUNITSIZE * 2);
+			ColorArray.resize(ArrayUNITSIZE * 3);
+			firstCall = false;
 		}
 
-		VertexArray.clear();
-		TexcoordArray.clear();
-		ColorArray.clear();
 		Vertexes = 0;
 		Textured = false;
 		Colored = false;
 	}
 
 	void Vertex3d(double x, double y, double z){
-
-		if (Textured){
-			TexcoordArray.push_back(texcoordX);
-			TexcoordArray.push_back(texcoordY);
+		if (Textured) {
+			TexcoordArray[Vertexes * 2] = texcoordX;
+			TexcoordArray[Vertexes * 2 + 1] = texcoordY;
 		}
 
-		if (Colored){
-			ColorArray.push_back(colorR);
-			ColorArray.push_back(colorG);
-			ColorArray.push_back(colorB);
+		if (Colored) {
+			ColorArray[Vertexes * 3] = colorR;
+			ColorArray[Vertexes * 3 + 1] = colorG;
+			ColorArray[Vertexes * 3 + 2] = colorB;
 		}
+
+		VertexArray[Vertexes * 3] = x;
+		VertexArray[Vertexes * 3 + 1] = y;
+		VertexArray[Vertexes * 3 + 2] = z;
 
 		Vertexes++;
-		VertexArray.push_back(x);
-		VertexArray.push_back(y);
-		VertexArray.push_back(z);
-
 	}
 
 	void TexCoord2d(double x, double y){
@@ -75,20 +70,17 @@ namespace renderer{
 				glBindBuffer/*ARB*/(GL_ARRAY_BUFFER/*_ARB*/, Buffers[1]);
 				glBufferData/*ARB*/(GL_ARRAY_BUFFER/*_ARB*/, Vertexes * 2 * sizeof(double), &TexcoordArray[0], GL_STATIC_DRAW);
 				glTexCoordPointer(2, GL_DOUBLE, 0, 0);
-				//glTexcoordPointer(2,GL_DOUBLE,0,TexcoordArray);
 			}
 
 			if (Colored){
 				glBindBuffer/*ARB*/(GL_ARRAY_BUFFER/*_ARB*/, Buffers[2]);
 				glBufferData/*ARB*/(GL_ARRAY_BUFFER/*_ARB*/, Vertexes * 3 * sizeof(double), &ColorArray[0], GL_STATIC_DRAW);
 				glColorPointer(3, GL_DOUBLE, 0, 0);
-				//glColorPointer(3,GL_DOUBLE,0,ColorArray);
 			}
 
 			glBindBuffer/*ARB*/(GL_ARRAY_BUFFER/*_ARB*/, Buffers[0]);
 			glBufferData/*ARB*/(GL_ARRAY_BUFFER/*_ARB*/, Vertexes * 3 * sizeof(double), &VertexArray[0], GL_STATIC_DRAW);
 			glVertexPointer(3, GL_DOUBLE, 0, 0);
-			//glVertexPointer(3,GL_DOUBLE,0,VertexArray);
 
 			//================================//;
 			glDrawArrays(GL_QUADS, 0, Vertexes);

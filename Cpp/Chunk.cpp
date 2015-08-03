@@ -221,15 +221,6 @@ namespace world{
 
 	}
 
-	block chunk::getblock(ubyte x, ubyte y, ubyte z){
-
-		//获取区块内的方块;
-		if (isEmptyChunk) return blocks::AIR;
-
-		return pblocks[x][y][z];
-
-	}
-
 	brightness chunk::getbrightness(ubyte x, ubyte y, ubyte z){
 
 		//获取区块内的亮度;
@@ -243,14 +234,6 @@ namespace world{
 		else
 			ret = pbrightness[x][y][z];
 		return ret;
-	}
-
-	void chunk::setblock(ubyte x, ubyte y, ubyte z, block iblock){
-		//设置方块;
-		if (this == nullptr) return;
-		pblocks[x][y][z] = iblock;
-		Modified = true;
-		if (iblock != blocks::AIR) isEmptyChunk = false;
 	}
 
 	void chunk::setbrightness(ubyte x, ubyte y, ubyte z, brightness tbrightness){
@@ -275,17 +258,13 @@ namespace world{
 
 	}
 
-	block chunk::getblock(int x, int y, int z){
-		return getblock((ubyte)x, (ubyte)y, (ubyte)z);
-	}
+	
 
 	brightness chunk::getbrightness(int x, int y, int z){
 		return getbrightness((ubyte)x, (ubyte)y, (ubyte)z);
 	}
 
-	void chunk::setblock(int x, int y, int z, block iblock){
-		setblock((ubyte)x, (ubyte)y, (ubyte)z, iblock);
-	}
+
 
 	void chunk::setbrightness(int x, int y, int z, brightness tbrightness){
 		setbrightness((ubyte)x, (ubyte)y, (ubyte)z, tbrightness);

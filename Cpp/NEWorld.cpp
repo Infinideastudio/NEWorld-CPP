@@ -233,13 +233,9 @@ main_menu:
 	glfwSwapBuffers(win);
 	glfwPollEvents();
 
-	//Mutex
 	MutexLock(Mutex);
 	updateThread = thread(updateThreadFunc);
 
-	//SIGN
-	//if (mpclient )  client.clientThread = ThreadCreate(&client.clientThreadFunc(), cast(any ptr, 0))
-	//if (mpserver )  server.serverThread = ThreadCreate(&server.serverThreadFunc(), cast(any ptr, 0))
 
 	//初始化游戏状态
 	printf("[Console][Game]");
@@ -260,22 +256,10 @@ main_menu:
 	glEnable(GL_CULL_FACE);
 	fctime = timer(); uctime = timer(); lastupdate = timer();
 	setupNormalFog();
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glprint(350, 240 + 16 * 3, "Loading...");
-	glprint(350, 240 + 16 * 1, "Creating chunks!");
-	glfwSwapBuffers(win);
-	glfwPollEvents();
 	printf("[Console][Game]");
 	printf("Game start!\n");
-
 	//这才是游戏开始!
-	glClearColor(skycolorR, skycolorG, skycolorB, 1.0);
-	glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-	glfwSetCursorPos(win, windowwidth / 2, windowheight / 2);
-	printf("[Console][Game]");
-	printf("Main loop started\n");
 	updateThreadRun = true;
-
 	do{
 		//主循环，被简化成这样，惨不忍睹啊！
 		//MutexUnlock(Mutex)
@@ -289,7 +273,7 @@ main_menu:
 		}
 
 		drawmain();
-
+		
 		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == 1){
 			createThumbnail();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -347,6 +331,7 @@ void updateThreadFunc(){
 	//Wait until start...
 	MutexLock(Mutex);
 	while (!updateThreadRun){
+		//Sleep(50);
 		MutexUnlock(Mutex);
 		MutexLock(Mutex);
 	}
@@ -754,7 +739,12 @@ void updategame(bool FirstUpdateThisFrame){
 
 		//卸载区块(Unload chunks)
 		world::sortChunkUnloadList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
-		int sumUnload = world::chunkUnloads > 2 ? 2 : world::chunkUnloads;
+		int sumUnload;
+		if (handleLimit > 0)
+			sumUnload = world::chunkUnloads > handleLimit ? handleLimit : world::chunkUnloads;
+		else
+			sumUnload = world::chunkUnloads;
+
 		for (int i = 1; i <= sumUnload; i++){
 			int cx = world::chunkUnloadList[i][1];
 			int cy = world::chunkUnloadList[i][2];
@@ -765,7 +755,12 @@ void updategame(bool FirstUpdateThisFrame){
 
 		//加载区块(Load chunks)
 		world::sortChunkLoadList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
-		int sumLoad = world::chunkLoads > 2 ? 2 : world::chunkLoads;
+		int sumLoad;
+		if (handleLimit > 0)
+			sumLoad = world::chunkLoads > handleLimit ? handleLimit : world::chunkLoads;
+		else
+			sumLoad = world::chunkLoads;
+
 		for (int i = 1; i <= sumLoad; i++){
 			int cx = world::chunkLoadList[i][1];
 			int cy = world::chunkLoadList[i][2];
@@ -1621,73 +1616,100 @@ void drawmain(){
 		glDeleteLists(world::displayListUnloadList[world::displayListUnloadList.size() - 1], 3);
 		world::displayListUnloadList.pop_back();
 	}
-	vector<uint> lists_;
-	vector<double> loadAnims_;
-	renderedChunk = 0;
-	for (int i = 0; i != world::loadedChunks; i++) {
-		if (world::chunkInRange(world::chunks[i].cx, world::chunks[i].cy, world::chunks[i].cz, player::cxt, player::cyt, player::czt, viewdistance)) {
-			if (world::chunks[i].list > 0) {
-				auto chunknow = world::chunks[i];
-				if (Frustum::aabbInFrustum(chunknow.getChunkAABB())) {
-					lists_.push_back(chunknow.list);
-					loadAnims_.push_back(chunknow.loadAnim);
-					renderedChunk++;
+	if ((timer() - uctime) >= 1.0) {
+		uctime = timer();
+		ups = upsc;
+		upsc = 0;
+	}
+	static bool loadingMap = true;
+	//static int lastloadcount=-1;
+	if (loadingMap&&world::loadedChunks == 1728) {
+		handleLimit = 2;
+		glClearColor(skycolorR, skycolorG, skycolorB, 1.0);
+		glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		glfwSetCursorPos(win, windowwidth / 2, windowheight / 2);
+		loadingMap = false;
+	}
+	//lastloadcount = world::loadedChunks;
+	if (!loadingMap) {
+		vector<uint> lists_;
+		vector<double> loadAnims_;
+		renderedChunk = 0;
+		for (int i = 0; i != world::loadedChunks; i++) {
+			if (world::chunkInRange(world::chunks[i].cx, world::chunks[i].cy, world::chunks[i].cz, player::cxt, player::cyt, player::czt, viewdistance)) {
+				if (world::chunks[i].list > 0) {
+					auto chunknow = world::chunks[i];
+					if (Frustum::aabbInFrustum(chunknow.getChunkAABB())) {
+						lists_.push_back(chunknow.list);
+						loadAnims_.push_back(chunknow.loadAnim);
+						renderedChunk++;
+					}
 				}
 			}
 		}
-	}
-	int lists_count = lists_.size();
-	MutexUnlock(Mutex);
-	glBindTexture(GL_TEXTURE_2D, BlockTextures);
-	for (int i = 0; i != lists_count; i++){
-		glTranslatef(0.0f, (float)-loadAnims_[i], 0.0f);
-		if (lists_[i] > 0 && glIsList(lists_[i])) glCallList(lists_[i]);
-		glTranslatef(0.0f, (float)loadAnims_[i], 0.0f);
-	}
-	MutexLock(Mutex);
+		int lists_count = lists_.size();
+		MutexUnlock(Mutex);
+		glBindTexture(GL_TEXTURE_2D, BlockTextures);
+		for (int i = 0; i != lists_count; i++) {
+			glTranslatef(0.0f, (float)-loadAnims_[i], 0.0f);
+			if (lists_[i] > 0 && glIsList(lists_[i])) glCallList(lists_[i]);
+			glTranslatef(0.0f, (float)loadAnims_[i], 0.0f);
+		}
+		MutexLock(Mutex);
 
-	if (seldes > 0.0){
-		renderDestroy(seldes, selx, sely, selz);
-	}
-	glBindTexture(GL_TEXTURE_2D, BlockTextures);
-	particles::renderall();
-	glDisable(GL_TEXTURE_2D);
+		if (seldes > 0.0) {
+			renderDestroy(seldes, selx, sely, selz);
+		}
+		glBindTexture(GL_TEXTURE_2D, BlockTextures);
+		particles::renderall();
+		glDisable(GL_TEXTURE_2D);
 
-	if (GUIrenderswitch){
-		lx = player::xpos; ly = player::ypos + player::height + player::heightExt; lz = player::zpos;
-		for (int i = 1; i <= selectPrecision*selectDistance; i++){
-			lx += sin(M_PI / 180 * (player::heading - 180))*sin(M_PI / 180 * (player::lookupdown + 90)) / selectPrecision;
-			ly += cos(M_PI / 180 * (player::lookupdown + 90)) / selectPrecision;
-			lz += cos(M_PI / 180 * (player::heading - 180))*sin(M_PI / 180 * (player::lookupdown + 90)) / selectPrecision;
-			if (BlockInfo(world::getblock(RoundInt(lx), RoundInt(ly), RoundInt(lz))).isSolid()){
-				drawborder(RoundInt(lx), RoundInt(ly), RoundInt(lz));
-				break;
+		if (GUIrenderswitch) {
+			lx = player::xpos; ly = player::ypos + player::height + player::heightExt; lz = player::zpos;
+			for (int i = 1; i <= selectPrecision*selectDistance; i++) {
+				lx += sin(M_PI / 180 * (player::heading - 180))*sin(M_PI / 180 * (player::lookupdown + 90)) / selectPrecision;
+				ly += cos(M_PI / 180 * (player::lookupdown + 90)) / selectPrecision;
+				lz += cos(M_PI / 180 * (player::heading - 180))*sin(M_PI / 180 * (player::lookupdown + 90)) / selectPrecision;
+				if (BlockInfo(world::getblock(RoundInt(lx), RoundInt(ly), RoundInt(lz))).isSolid()) {
+					drawborder(RoundInt(lx), RoundInt(ly), RoundInt(lz));
+					break;
+				}
 			}
 		}
-	}
 
-	MutexUnlock(Mutex);
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_CULL_FACE);
-	for (int i = 0; i != lists_count; i++){
-		glTranslatef(0.0f, (float)-loadAnims_[i], 0.0f);
-		if (lists_[i] > 1 && glIsList(lists_[i] + 1)) glCallList(lists_[i] + 1);
-		glTranslatef(0.0f, (float)loadAnims_[i], 0.0f);
+		MutexUnlock(Mutex);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_CULL_FACE);
+		for (int i = 0; i != lists_count; i++) {
+			glTranslatef(0.0f, (float)-loadAnims_[i], 0.0f);
+			if (lists_[i] > 1 && glIsList(lists_[i] + 1)) glCallList(lists_[i] + 1);
+			glTranslatef(0.0f, (float)loadAnims_[i], 0.0f);
+		}
+		glDisable(GL_CULL_FACE);
+		for (int i = 0; i != lists_count; i++) {
+			glTranslatef(0.0f, (float)-loadAnims_[i], 0.0f);
+			if (lists_[i] > 2 && glIsList(lists_[i] + 2)) glCallList(lists_[i] + 2);
+			glTranslatef(0.0f, (float)loadAnims_[i], 0.0f);
+		}
+		glDisable(GL_TEXTURE_2D);
+		drawcloud(player::xpos, player::zpos);
+		glEnable(GL_TEXTURE_2D);
+		glEnable(GL_CULL_FACE);
+		for (unsigned int i = 0; i != world::MOs.size(); i++) world::MOs[i]->renderer();
+		MutexLock(Mutex);
 	}
-	glDisable(GL_CULL_FACE);
-	for (int i = 0; i != lists_count; i++){
-		glTranslatef(0.0f, (float)-loadAnims_[i], 0.0f);
-		if (lists_[i] > 2 && glIsList(lists_[i] + 2)) glCallList(lists_[i] + 2);
-		glTranslatef(0.0f, (float)loadAnims_[i], 0.0f);
+	else {
+		glEnable(GL_TEXTURE_2D);
+		glDisable(GL_CULL_FACE);
+		float col = world::loadedChunks / 1728.0;
+		glClearColor(col, col, col, 1);
+		setFontColor(1, 1, 1, 1);
+		glprint(windowwidth / 2 - 50, windowheight / 2 - 50 + 16 * 1, "Loading...");
+		glprint(windowwidth / 2 - 50, windowheight / 2 - 50 + 16 * 3, "Loading chunks!");
+		char strLoadedChunks[12];
+		_itoa_s(world::loadedChunks, strLoadedChunks, 10);
+		glprint(windowwidth / 2 - 50, windowheight / 2 - 50 + 16 * 5, "Processing: " + string(strLoadedChunks));
 	}
-
-	glDisable(GL_TEXTURE_2D);
-	drawcloud(player::xpos, player::zpos);
-	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_CULL_FACE);
-	for (unsigned int i = 0; i != world::MOs.size(); i++) world::MOs[i]->renderer();
-	MutexLock(Mutex);
-
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	glOrtho(0, windowwidth, windowheight, 0, -1.0, 1.0);
@@ -1711,9 +1733,10 @@ void drawmain(){
 	Time_renderscene = timer() - Time_renderscene;
 	Time_renderGUI_ = timer();
 
-	if (GUIrenderswitch){
+	if (!loadingMap && GUIrenderswitch){
 		drawGUI();
 	}
+
 	if (bagOpened)
 		bagUpdate();
 	else
@@ -1737,10 +1760,10 @@ void drawmain(){
 
 	//屏幕刷新，千万别删，后果自负！！！
 	//====refresh====//
-	//MutexUnlock(Mutex);
+	MutexUnlock(Mutex);
 	glfwSwapBuffers(win);
 	glfwPollEvents();
-	//MutexLock(Mutex);
+	MutexLock(Mutex);
 	//==refresh end==//
 
 	Time_screensync = timer() - Time_screensync;

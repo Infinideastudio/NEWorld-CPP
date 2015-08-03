@@ -259,7 +259,7 @@ namespace world{
 
 	}
 
-	void renderblock(int x, int y, int z){
+	void renderblock(int x, int y, int z) {
 
 		//äÖÈ¾·½¿é£¡£¡£¡£¡£¡;
 
@@ -271,7 +271,26 @@ namespace world{
 			getblock(x - 1, y, z, blocks::ROCK),
 			getblock(x, y + 1, z, blocks::ROCK),
 			getblock(x, y - 1, z, blocks::ROCK) };
-
+		auto b01n1 = getblock(x, y + 1, z - 1);
+		auto b011 = getblock(x, y + 1, z + 1);
+		auto b0n11 = getblock(x, y - 1, z + 1);
+		auto b0n1n1 = getblock(x, y - 1, z - 1);
+		auto b111 = getblock(x + 1, y + 1, z + 1);
+		auto b11n1 = getblock(x + 1, y + 1, z - 1);
+		auto b1n11 = getblock(x + 1, y - 1, z + 1);
+		auto b1n1n1 = getblock(x + 1, y - 1, z - 1);
+		auto bn111 = getblock(x - 1, y + 1, z + 1);
+		auto bn11n1 = getblock(x - 1, y + 1, z - 1);
+		auto bn1n11 = getblock(x - 1, y - 1, z + 1);
+		auto bn1n1n1 = getblock(x - 1, y - 1, z - 1);
+		auto b10n1 = getblock(x + 1, y, z - 1);
+		auto b101 = getblock(x + 1, y, z + 1);
+		auto b110 = getblock(x + 1, y + 1, z);
+		auto b1n10 = getblock(x + 1, y - 1, z);
+		auto bn101 = getblock(x - 1, y, z + 1);
+		auto bn10n1 = getblock(x - 1, y, z - 1);
+		auto bn110 = getblock(x - 1, y + 1, z);
+		auto bn1n10 = getblock(x - 1, y - 1, z);
 		brightness brt[7] = { getbrightness(x, y, z),
 			getbrightness(x, y, z + 1),
 			getbrightness(x, y, z - 1),
@@ -282,34 +301,34 @@ namespace world{
 
 		size = BLOCKTEXTURE_UNITSIZE / (double)BLOCKTEXTURE_SIZE - 0.001;
 
-		if (getblock(x, y - 1, z + 1) == blocks::GRASS && blk[0] == blocks::GRASS)
+		if (b0n11 == blocks::GRASS && blk[0] == blocks::GRASS)
 			tcx = textures::getTexcoordX(blk[0], 1) + 0.001;
 		else
 			tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
 
-		if (getblock(x, y - 1, z + 1) == blocks::GRASS && blk[0] == blocks::GRASS)
+		if (b0n11 == blocks::GRASS && blk[0] == blocks::GRASS)
 			tcy = textures::getTexcoordY(blk[0], 1) + 0.001;
 		else
 			tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
 
 		// Front Face;
-		if (!(BlockInfo(blk[1]).isOpaque() || (blk[1] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF){
+		if (!(BlockInfo(blk[1]).isOpaque() || (blk[1] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[1] / (double)BRIGHTNESSMAX;
 			if (blk[0] != blocks::GLOWSTONE) colors *= 0.5;
 			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
 
-			if (blk[0] != blocks::GLOWSTONE){
+			if (blk[0] != blocks::GLOWSTONE) {
 
-				if (BlockInfo(getblock(x, y - 1, z + 1)).isDark()){ color1 = colors*0.5; color2 = colors*0.5; }
-				if (BlockInfo(getblock(x, y + 1, z + 1)).isDark()){ color3 = colors*0.5; color4 = colors*0.5; }
-				if (BlockInfo(getblock(x - 1, y, z + 1)).isDark()){ color1 = colors*0.5; color4 = colors*0.5; }
-				if (BlockInfo(getblock(x + 1, y, z + 1)).isDark()){ color2 = colors*0.5; color3 = colors*0.5; }
+				if (BlockInfo(b0n11).isDark()) { color1 = colors*0.5; color2 = colors*0.5; }
+				if (BlockInfo(b011).isDark()) { color3 = colors*0.5; color4 = colors*0.5; }
+				if (BlockInfo(bn101).isDark()) { color1 = colors*0.5; color4 = colors*0.5; }
+				if (BlockInfo(b101).isDark()) { color2 = colors*0.5; color3 = colors*0.5; }
 
-				if (BlockInfo(getblock(x - 1, y - 1, z + 1)).isDark()) color1 = colors*0.5;
-				if (BlockInfo(getblock(x + 1, y - 1, z + 1)).isDark()) color2 = colors*0.5;
-				if (BlockInfo(getblock(x + 1, y + 1, z + 1)).isDark()) color3 = colors*0.5;
-				if (BlockInfo(getblock(x - 1, y + 1, z + 1)).isDark()) color4 = colors*0.5;
+				if (BlockInfo(bn1n11).isDark()) color1 = colors*0.5;
+				if (BlockInfo(b1n11).isDark()) color2 = colors*0.5;
+				if (BlockInfo(b111).isDark()) color3 = colors*0.5;
+				if (BlockInfo(bn111).isDark()) color4 = colors*0.5;
 
 			}
 			renderer::Color3d(color1, color1, color1);
@@ -321,42 +340,42 @@ namespace world{
 			renderer::Color3d(color4, color4, color4);
 			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, 0.5 + z);
 
-	}	
+		}
 
-		if (getblock(x, y - 1, z - 1) == blocks::GRASS && blk[0] == blocks::GRASS)
+		if (b0n1n1 == blocks::GRASS && blk[0] == blocks::GRASS)
 			tcx = textures::getTexcoordX(blk[0], 1) + 0.001;
 		else
 			tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
-		if (getblock(x, y - 1, z - 1) == blocks::GRASS && blk[0] == blocks::GRASS)
+		if (b0n1n1 == blocks::GRASS && blk[0] == blocks::GRASS)
 			tcy = textures::getTexcoordY(blk[0], 1) + 0.001;
 		else
 			tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
 
 		// Back Face;
-		if (!(BlockInfo(blk[2]).isOpaque() || (blk[2] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF){
+		if (!(BlockInfo(blk[2]).isOpaque() || (blk[2] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[2] / (double)BRIGHTNESSMAX;
 			if (blk[0] != blocks::GLOWSTONE) colors *= 0.5;
 			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
 
-			if (blk[0] != blocks::GLOWSTONE){
+			if (blk[0] != blocks::GLOWSTONE) {
 
-				if (BlockInfo(getblock(x, y - 1, z - 1)).isDark()){
-					color1 = colors*0.5; color4 = colors*0.5; 
+				if (BlockInfo(b0n1n1).isDark()) {
+					color1 = colors*0.5; color4 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x, y + 1, z - 1)).isDark()){
+				if (BlockInfo(b01n1).isDark()) {
 					color2 = colors*0.5; color3 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x - 1, y, z - 1)).isDark()){
+				if (BlockInfo(bn10n1).isDark()) {
 					color1 = colors*0.5; color2 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x + 1, y, z - 1)).isDark()){
+				if (BlockInfo(b10n1).isDark()) {
 					color3 = colors*0.5; color4 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x - 1, y - 1, z - 1)).isDark()) color1 = colors*0.5;
-				if (BlockInfo(getblock(x - 1, y + 1, z - 1)).isDark()) color2 = colors*0.5;
-				if (BlockInfo(getblock(x + 1, y + 1, z - 1)).isDark()) color3 = colors*0.5;
-				if (BlockInfo(getblock(x + 1, y - 1, z - 1)).isDark()) color4 = colors*0.5;
+				if (BlockInfo(bn1n1n1).isDark()) color1 = colors*0.5;
+				if (BlockInfo(bn11n1).isDark()) color2 = colors*0.5;
+				if (BlockInfo(b11n1).isDark()) color3 = colors*0.5;
+				if (BlockInfo(b1n1n1).isDark()) color4 = colors*0.5;
 
 			}
 
@@ -371,34 +390,34 @@ namespace world{
 
 		}
 
-		if (getblock(x + 1, y - 1, z) == blocks::GRASS && blk[0] == blocks::GRASS) tcx = textures::getTexcoordX(blk[0], 1) + 0.001; else tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
-		if (getblock(x + 1, y - 1, z) == blocks::GRASS && blk[0] == blocks::GRASS) tcy = textures::getTexcoordY(blk[0], 1) + 0.001; else tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
+		if (b1n10 == blocks::GRASS && blk[0] == blocks::GRASS) tcx = textures::getTexcoordX(blk[0], 1) + 0.001; else tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
+		if (b1n10 == blocks::GRASS && blk[0] == blocks::GRASS) tcy = textures::getTexcoordY(blk[0], 1) + 0.001; else tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
 
 		// Right face;
-		if (!(BlockInfo(blk[3]).isOpaque() || (blk[3] == blk[0] && !BlockInfo(blk[0]).isOpaque())) || blk[0] == blocks::LEAF){
+		if (!(BlockInfo(blk[3]).isOpaque() || (blk[3] == blk[0] && !BlockInfo(blk[0]).isOpaque())) || blk[0] == blocks::LEAF) {
 
 			colors = brt[3] / (double)BRIGHTNESSMAX;
 			if (blk[0] != blocks::GLOWSTONE) colors *= 0.7;
 			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
 
-			if (blk[0] != blocks::GLOWSTONE){
+			if (blk[0] != blocks::GLOWSTONE) {
 
-				if (BlockInfo(getblock(x + 1, y - 1, z)).isDark()){
+				if (BlockInfo(b1n10).isDark()) {
 					color1 = colors*0.5; color4 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x + 1, y + 1, z)).isDark()){
+				if (BlockInfo(b110).isDark()) {
 					color2 = colors*0.5; color3 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x + 1, y, z - 1)).isDark()){
+				if (BlockInfo(b10n1).isDark()) {
 					color1 = colors*0.5; color2 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x + 1, y, z + 1)).isDark()){
+				if (BlockInfo(b101).isDark()) {
 					color3 = colors*0.5; color4 = colors*0.5;
 				}
 
-				if (BlockInfo(getblock(x + 1, y - 1, z - 1)).isDark()) color1 = colors*0.5;
-				if (BlockInfo(getblock(x + 1, y + 1, z - 1)).isDark()) color2 = colors*0.5;
-				if (BlockInfo(getblock(x + 1, y + 1, z + 1)).isDark()) color3 = colors*0.5;
+				if (BlockInfo(b1n1n1).isDark()) color1 = colors*0.5;
+				if (BlockInfo(b11n1).isDark()) color2 = colors*0.5;
+				if (BlockInfo(b111).isDark()) color3 = colors*0.5;
 				if (BlockInfo(getblock(x + 1, y - 1, z + 1)).isDark()) color4 = colors*0.5;
 
 			}
@@ -414,35 +433,35 @@ namespace world{
 
 		}
 
-		if (getblock(x - 1, y - 1, z) == blocks::GRASS && blk[0] == blocks::GRASS) tcx = textures::getTexcoordX(blk[0], 1) + 0.001; else tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
-		if (getblock(x - 1, y - 1, z) == blocks::GRASS && blk[0] == blocks::GRASS) tcy = textures::getTexcoordY(blk[0], 1) + 0.001; else tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
+		if (bn1n10 == blocks::GRASS && blk[0] == blocks::GRASS) tcx = textures::getTexcoordX(blk[0], 1) + 0.001; else tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
+		if (bn1n10 == blocks::GRASS && blk[0] == blocks::GRASS) tcy = textures::getTexcoordY(blk[0], 1) + 0.001; else tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
 
 		// Left Face;
-		if (!(BlockInfo(blk[4]).isOpaque() || (blk[4] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF){
+		if (!(BlockInfo(blk[4]).isOpaque() || (blk[4] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[4] / (double)BRIGHTNESSMAX;
 			if (blk[0] != blocks::GLOWSTONE) colors *= 0.7;
 			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
 
-			if (blk[0] != blocks::GLOWSTONE){
+			if (blk[0] != blocks::GLOWSTONE) {
 
-				if (BlockInfo(getblock(x - 1, y - 1, z)).isDark()){
+				if (BlockInfo(bn1n10).isDark()) {
 					color1 = colors*0.5; color2 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x - 1, y + 1, z)).isDark()){
+				if (BlockInfo(bn110).isDark()) {
 					color3 = colors*0.5; color4 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x - 1, y, z - 1)).isDark()){
+				if (BlockInfo(bn10n1).isDark()) {
 					color1 = colors*0.5; color4 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x - 1, y, z + 1)).isDark()){
+				if (BlockInfo(bn101).isDark()) {
 					color2 = colors*0.5; color3 = colors*0.5;
 				}
 
-				if (BlockInfo(getblock(x - 1, y - 1, z - 1)).isDark()) color1 = colors*0.5;
-				if (BlockInfo(getblock(x - 1, y - 1, z + 1)).isDark()) color2 = colors*0.5;
-				if (BlockInfo(getblock(x - 1, y + 1, z + 1)).isDark()) color3 = colors*0.5;
-				if (BlockInfo(getblock(x - 1, y + 1, z - 1)).isDark()) color4 = colors*0.5;
+				if (BlockInfo(bn1n1n1).isDark()) color1 = colors*0.5;
+				if (BlockInfo(bn1n11).isDark()) color2 = colors*0.5;
+				if (BlockInfo(bn111).isDark()) color3 = colors*0.5;
+				if (BlockInfo(bn11n1).isDark()) color4 = colors*0.5;
 
 			}
 
@@ -461,31 +480,31 @@ namespace world{
 		tcy = textures::getTexcoordY(blk[0], 1);
 
 		// Top Face;
-		if (!(BlockInfo(blk[5]).isOpaque() || (blk[5] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF){
+		if (!(BlockInfo(blk[5]).isOpaque() || (blk[5] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[5] / (double)BRIGHTNESSMAX;
 			if (blk[0] != blocks::GLOWSTONE) colors *= 1.0;
 			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
 
-			if (blk[0] != blocks::GLOWSTONE){
+			if (blk[0] != blocks::GLOWSTONE) {
 
-				if (BlockInfo(getblock(x, y + 1, z - 1)).isDark()){
+				if (BlockInfo(b01n1).isDark()) {
 					color1 = colors*0.5; color4 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x, y + 1, z + 1)).isDark()){
+				if (BlockInfo(b011).isDark()) {
 					color2 = colors*0.5; color3 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x - 1, y + 1, z)).isDark()){
+				if (BlockInfo(bn110).isDark()) {
 					color1 = colors*0.5; color2 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x + 1, y + 1, z)).isDark()){
+				if (BlockInfo(b110).isDark()) {
 					color3 = colors*0.5; color4 = colors*0.5;
 				}
 
-				if (BlockInfo(getblock(x - 1, y + 1, z - 1)).isDark()) color1 = colors*0.5;
-				if (BlockInfo(getblock(x - 1, y + 1, z + 1)).isDark()) color2 = colors*0.5;
-				if (BlockInfo(getblock(x + 1, y + 1, z + 1)).isDark()) color3 = colors*0.5;
-				if (BlockInfo(getblock(x + 1, y + 1, z - 1)).isDark()) color4 = colors*0.5;
+				if (BlockInfo(bn11n1).isDark()) color1 = colors*0.5;
+				if (BlockInfo(bn111).isDark()) color2 = colors*0.5;
+				if (BlockInfo(b111).isDark()) color3 = colors*0.5;
+				if (BlockInfo(b11n1).isDark()) color4 = colors*0.5;
 
 			}
 
@@ -504,31 +523,31 @@ namespace world{
 		tcy = textures::getTexcoordY(blk[0], 3);
 
 		// Bottom Face;
-		if (!(BlockInfo(blk[6]).isOpaque() || (blk[6] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF){
+		if (!(BlockInfo(blk[6]).isOpaque() || (blk[6] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[6] / (double)BRIGHTNESSMAX;
 			if (blk[0] != blocks::GLOWSTONE) colors *= 1.0;
 			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
 
-			if (blk[0] != blocks::GLOWSTONE){
+			if (blk[0] != blocks::GLOWSTONE) {
 
-				if (BlockInfo(getblock(x, y - 1, z - 1)).isDark()){
-					color1 = colors*0.5; color2 = colors*0.5; 
+				if (BlockInfo(b0n1n1).isDark()) {
+					color1 = colors*0.5; color2 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x, y - 1, z + 1)).isDark()){
+				if (BlockInfo(b0n11).isDark()) {
 					color3 = colors*0.5; color4 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x - 1, y - 1, z)).isDark()){
+				if (BlockInfo(bn1n10).isDark()) {
 					color1 = colors*0.5; color4 = colors*0.5;
 				}
-				if (BlockInfo(getblock(x + 1, y - 1, z)).isDark()){
+				if (BlockInfo(b1n10).isDark()) {
 					color2 = colors*0.5; color3 = colors*0.5;
 				}
 
-				if (BlockInfo(getblock(x - 1, y - 1, z - 1)).isDark()) color1 = colors*0.5;
-				if (BlockInfo(getblock(x + 1, y - 1, z - 1)).isDark()) color2 = colors*0.5;
+				if (BlockInfo(bn1n1n1).isDark()) color1 = colors*0.5;
+				if (BlockInfo(b1n1n1).isDark()) color2 = colors*0.5;
 				if (BlockInfo(getblock(x + 1, y - 1, z + 1)).isDark()) color3 = colors*0.5;
-				if (BlockInfo(getblock(x - 1, y - 1, z + 1)).isDark()) color4 = colors*0.5;
+				if (BlockInfo(bn1n11).isDark()) color4 = colors*0.5;
 
 			}
 

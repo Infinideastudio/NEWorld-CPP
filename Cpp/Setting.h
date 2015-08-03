@@ -6,6 +6,7 @@ const int cloudwidth = 32;		//云的宽度
 
 extern int windowwidth;
 extern int windowheight;
+extern int handleLimit;
 extern bool versync;			//垂直同步
 extern float FOVyNormal;		//视野角度
 extern float FOVyRunning;

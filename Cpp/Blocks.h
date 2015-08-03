@@ -75,9 +75,10 @@ namespace blocks{  //·½¿éID;
 			SingleBlock("Coal Block", true	, true	, false	, true	),
 			SingleBlock("Iron Block", true	, true	, false	, true	)
 		};
-	inline const SingleBlock& BlockInfo(block blockID){
-		return blockData[blockID];
-	}
+	//inline const SingleBlock& BlockInfo(block blockID){
+	//	return blockData[blockID];
+	//}
 }
 
-using blocks::BlockInfo;
+//using blocks::BlockInfo;
+#define BlockInfo(blockID) blocks::blockData[blockID]
