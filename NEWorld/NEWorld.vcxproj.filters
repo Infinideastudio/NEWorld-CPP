@@ -25,11 +25,11 @@
     <Filter Include="Moveable Object\Animals">
       <UniqueIdentifier>{42b60842-aa52-494c-a3b6-f00e3897c9d1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GUI">
+      <UniqueIdentifier>{cd15d114-4568-484d-8301-5011681257fd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Cpp\GUI.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="..\Cpp\Hitbox.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -55,9 +55,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\Cpp\glprinting.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Cpp\menus.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="..\Cpp\frustum.h">
@@ -96,15 +93,18 @@
     <ClInclude Include="..\Cpp\Control.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\Cpp\GUI.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Cpp\menus.h">
+      <Filter>GUI</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Cpp\Def.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\Cpp\glprinting.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Cpp\GUI.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\Cpp\Hitbox.cpp">
@@ -123,9 +123,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\Cpp\Textures.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Cpp\menus.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="..\Cpp\frustum.cpp">
@@ -160,6 +157,12 @@
     </ClCompile>
     <ClCompile Include="..\Cpp\Control.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Cpp\GUI.cpp">
+      <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Cpp\menus.cpp">
+      <Filter>GUI</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

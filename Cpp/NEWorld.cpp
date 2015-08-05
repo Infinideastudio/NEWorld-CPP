@@ -73,6 +73,9 @@ NEWorld-CPP第一版作者（翻译作者）：Null (abc612008)
 0.4.9_Preview_0.8
 1. 更新到VS2015
 2. 优化
+3. 加入了加载界面
+4. 修复了一些BUG
+
 */
 
 #include "DeveloperOptions.h"
@@ -186,12 +189,12 @@ int main(){
 
 	windowwidth = defaultwindowwidth;
 	windowheight = defaultwindowheight;
-	std::cout << "[Console][Debug] Init OpenGL... "<<glfwInit() << "/1 ";
+	cout << "[Console][Debug] Init OpenGL... "<<glfwInit() << "/1 ";
 	std::stringstream ss;
 	ss << "NEWorld " << MAJOR_VERSION << MINOR_VERSION << EXT_VERSION;
 	win = glfwCreateWindow(windowwidth, windowheight, ss.str().c_str(), NULL, NULL);
 	glfwMakeContextCurrent(win);
-	std::cout << glewInit() << "/0" << std::endl;
+	cout << glewInit() << "/0" << std::endl;
 	CenterScreen();
 	glfwSetInputMode(win, GLFW_STICKY_KEYS, true); //?
 	glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -256,6 +259,7 @@ main_menu:
 	glEnable(GL_CULL_FACE);
 	fctime = timer(); uctime = timer(); lastupdate = timer();
 	setupNormalFog();
+	handleLimit = 5;
 	printf("[Console][Game]");
 	printf("Game start!\n");
 	//这才是游戏开始!
@@ -375,7 +379,6 @@ void winsizecall(GLFWwindow*, int width, int height){
 	setupscreen();
 }
   
-
 void scrollEvent(GLFWwindow*, double, double offsety){
 	//mw = offsety
 	player::itemInHand -= (ubyte)sgn(static_cast<int>(offsety));
@@ -677,7 +680,6 @@ void drawcloud(double px, double pz){
 	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 }
 
-
 void updategame(bool FirstUpdateThisFrame){
 
 	Time_updategame_ = timer();
@@ -745,7 +747,13 @@ void updategame(bool FirstUpdateThisFrame){
 		else
 			sumUnload = world::chunkUnloads;
 
-		for (int i = 1; i <= sumUnload; i++){
+		//for (int i = 1; i <= sumUnload; i++){
+		//	auto cptr = world::chunkUnloadList[i].second;
+		//	cptr -> Unload();
+		//	world::DeleteChunk(cptr->cx,cptr->cy,cptr->cz);
+		//}
+
+		for (int i = 1; i <= sumUnload; i++) {
 			int cx = world::chunkUnloadList[i][1];
 			int cy = world::chunkUnloadList[i][2];
 			int cz = world::chunkUnloadList[i][3];
@@ -1602,13 +1610,8 @@ void drawmain(){
 	//更新区块显示列表
 	world::sortChunkRenderList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
 	for (int i = 1; i <= world::chunkRenders; i++){
-		cx = world::chunkRenderList[i][1];
-		cy = world::chunkRenderList[i][2];
-		cz = world::chunkRenderList[i][3];
-		auto cptr = world::getChunkPtr(cx, cy, cz);
-		if (cptr->getUpdated()){
-			cptr->buildlists();
-		}
+		auto cptr = world::chunkRenderList[i].second;
+		cptr->buildlists();
 	}
 	//删除已卸载区块的显示列表
 	for (int i = 0; i != 3; i++) {
@@ -1701,7 +1704,7 @@ void drawmain(){
 	else {
 		glEnable(GL_TEXTURE_2D);
 		glDisable(GL_CULL_FACE);
-		float col = world::loadedChunks / 1728.0;
+		float col = world::loadedChunks / 1728.0f;
 		glClearColor(col, col, col, 1);
 		setFontColor(1, 1, 1, 1);
 		glprint(windowwidth / 2 - 50, windowheight / 2 - 50 + 16 * 1, "Loading...");

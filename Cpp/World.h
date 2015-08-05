@@ -25,9 +25,11 @@ namespace world{
 	extern int rebuiltChunks, rebuiltChunksCount;
 	extern int updatedChunks, updatedChunksCount;
 	extern int unloadedChunks, unloadedChunksCount;
-	extern int chunkRenderList[65536][4];
+	//extern int chunkRenderList[65536][4];
+	extern pair<int, chunk*> chunkRenderList[65536];
 	extern int chunkLoadList[65536][4];
 	extern int chunkUnloadList[65536][4];
+	//extern pair<int, chunk*> chunkUnloadList[65536];
 	extern vector<int> displayListUnloadList;
 	extern int chunkRenders, chunkLoads, chunkUnloads;
 
@@ -68,6 +70,7 @@ namespace world{
 	void sortChunkLoadList(int xpos, int ypos, int zpos);
 	void sortChunkUnloadList(int xpos, int ypos, int zpos);
 	void qsortList(int List[][4], int first, int last, bool unloadsort);
+	void qsortListPtr(pair<int, chunk*> List[], int first, int last, bool unloadsort);
 
 	void saveAllChunks();
 	void destroyAllChunks();

@@ -23,9 +23,11 @@ namespace world{
 	int rebuiltChunks, rebuiltChunksCount;
 	int updatedChunks, updatedChunksCount;
 	int unloadedChunks, unloadedChunksCount;
-	int chunkRenderList[65536][4];
+	//int chunkRenderList[65536][4];
+	pair<int, chunk*> chunkRenderList[65536];
 	int chunkLoadList[65536][4];
 	int chunkUnloadList[65536][4];
+	//pair<int,chunk*> chunkUnloadList[65536];
 	vector<int> displayListUnloadList;
 	int chunkRenders, chunkLoads, chunkUnloads;
 
@@ -102,7 +104,7 @@ namespace world{
 	}
 
 	void DeleteChunk(int x, int y, int z){
-		unsigned int index = getChunkIndex(x, y, z);
+		int index = getChunkIndex(x, y, z);
 		if (index!=-1){
 			int i;
 			for (i = index; i < loadedChunks - 1; i++){
@@ -877,35 +879,34 @@ namespace world{
 	void sortChunkRenderList(int xpos, int ypos, int zpos){
 
 		//根据chunk与一个点的距离对chunk的渲染顺序进行排序，离玩家越近的chunk先渲染;
-		int cxp, cyp, czp, cx, cy, cz, p=0, i;
-		int xd, yd, zd, distsqr;
+		int cxp, cyp, czp, p=0, i;
+		int xd, yd, zd;
 
 		cxp = getchunkpos(xpos);
 		cyp = getchunkpos(ypos);
 		czp = getchunkpos(zpos);
 
 		for (i = 0; i != loadedChunks; i++){
-			if (world::chunks[i].isEmptyChunk) continue;
-			if (p >= 65536){
+			if (p >= 65536) {
 				printf("[Console][Error]");
 				printf("Chunk render list overflow.\n");
 				return;
 			}
+
+			auto cptr = &world::chunks[i];
+			if (cptr->isEmptyChunk || !cptr->getUpdated()) continue;
+
 			p++;
-			cx = world::chunks[i].cx;
-			cy = world::chunks[i].cy;
-			cz = world::chunks[i].cz;
-			chunkRenderList[p][1] = cx;
-			chunkRenderList[p][2] = cy;
-			chunkRenderList[p][3] = cz;
-			xd = cx * 16 + 7 - xpos;
-			yd = cy * 16 + 7 - ypos;
-			zd = cz * 16 + 7 - zpos;
-			distsqr = xd*xd + yd*yd + zd*zd;
-			chunkRenderList[p][0] = distsqr;
+
+			xd = cptr->cx * 16 + 7 - xpos;
+			yd = cptr->cy * 16 + 7 - ypos;
+			zd = cptr->cz * 16 + 7 - zpos;
+			chunkRenderList[p].first = xd*xd + yd*yd + zd*zd;
+
+			chunkRenderList[p].second = cptr;
 		}
 
-		qsortList(chunkRenderList, 1, p, false);
+		qsortListPtr(chunkRenderList, 1, p, false);
 
 		chunkRenders = p;
 
@@ -969,6 +970,7 @@ namespace world{
 					return;
 				}
 				p++;
+				
 				chunkUnloadList[p][1] = cx;
 				chunkUnloadList[p][2] = cy;
 				chunkUnloadList[p][3] = cz;
@@ -984,7 +986,44 @@ namespace world{
 		chunkUnloads = p;
 
 	}
-
+	
+	void qsortListPtr(pair<int, chunk*> List[], int first, int last, bool unloadsort) {
+		if (first >= last) return;
+		int key = List[first].first;
+		auto k1 = List[first].second;
+		int i = first, j = last;
+		while (i != j) {
+			if (unloadsort) {
+				while (i < j && List[j].first <= key) {
+					j -= 1;
+				}
+			}
+			else {
+				while (i < j && List[j].first >= key) {
+					j -= 1;
+				}
+			}
+			List[i].first = List[j].first;
+			List[i].second = List[j].second;
+			if (unloadsort) {
+				while (i < j && List[j].first >= key) {
+					i += 1;
+				}
+			}
+			else {
+				while (i < j && List[i].first <= key) {
+					i += 1;
+				}
+			}
+			List[j].first = List[i].first;
+			List[j].second = List[i].second;
+		}
+		List[i].first = key;
+		List[i].second = k1;
+		qsortListPtr(List, first, i - 1, unloadsort);
+		qsortListPtr(List, i + 1, last, unloadsort);
+	}
+	
 	void qsortList(int List[][4], int first, int last, bool unloadsort){
 		if (first >= last) return;
 		int key = List[first][0], k1 = List[first][1], k2 = List[first][2], k3 = List[first][3];
@@ -1006,7 +1045,7 @@ namespace world{
 			List[i][3] = List[j][3];
 			if (unloadsort){
 				while (i < j && List[j][0] >= key){
-					j -= 1;
+					i += 1;
 				}
 			}
 			else{

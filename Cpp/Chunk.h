@@ -31,16 +31,13 @@ namespace world{
 		void buildlists();
 		void destroylists();
 
-		inline block chunk::getblock(ubyte x, ubyte y, ubyte z) {
-
+		inline block getblock(ubyte x, ubyte y, ubyte z) {
 			//获取区块内的方块;
 			if (isEmptyChunk) return blocks::AIR;
-
 			return pblocks[x][y][z];
-
 		}
 		brightness getbrightness(ubyte x, ubyte y, ubyte z);
-		inline void chunk::setblock(ubyte x, ubyte y, ubyte z, block iblock) {
+		inline void setblock(ubyte x, ubyte y, ubyte z, block iblock) {
 			//设置方块;
 			if (this == nullptr) return;
 			pblocks[x][y][z] = iblock;
@@ -51,11 +48,11 @@ namespace world{
 		void putblock(ubyte x, ubyte y, ubyte z, block iblock);
 		void pickblock(ubyte x, ubyte y, ubyte z);
 
-		inline block chunk::getblock(int x, int y, int z) {
+		inline block getblock(int x, int y, int z) {
 			return getblock((ubyte)x, (ubyte)y, (ubyte)z);
 		}
 		brightness getbrightness(int x, int y, int z);
-		inline void chunk::setblock(int x, int y, int z, block iblock) {
+		inline void setblock(int x, int y, int z, block iblock) {
 			setblock((ubyte)x, (ubyte)y, (ubyte)z, iblock);
 		}
 		void setbrightness(int x, int y, int z, brightness tbrightness);

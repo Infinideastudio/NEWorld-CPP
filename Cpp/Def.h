@@ -10,10 +10,12 @@
 #include <thread>
 #include <mutex>
 #include <memory>
+#include <set>
 
 using std::string;
 using std::vector;
 using std::pair;
+using std::set;
 using std::thread;
 using std::mutex;
 using std::shared_ptr;
@@ -75,9 +77,16 @@ inline void MutexLock(mutex &mt){
 inline void MutexUnlock(mutex &mt){
 	mt.unlock();
 }
+inline int GoInt(float d) {
+	if (d >= 0) return int(d);
+	else return -(int(-d));
+}
+inline int RoundInt(float d) {
+	if (d >= 0) return int(d + 0.5);
+	else return -(int(-d + 0.5));
+}
 inline int RoundInt(double d){
-	bool n = d < 0;
-	if (!n) return int(d + 0.5);
+	if (d >= 0) return int(d + 0.5);
 	else return -(int(-d + 0.5));
 }
 inline string itos(int i){

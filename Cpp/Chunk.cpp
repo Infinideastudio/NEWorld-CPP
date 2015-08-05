@@ -142,7 +142,7 @@ namespace world{
 	}
 
 	void chunk::SaveToFile(){
-		if (this == nullptr) return;
+		//if (this == nullptr) return;
 		if (!isEmptyChunk&&Modified){
 			std::ofstream file(getFileName(), std::ios::binary | std::ios::out);
 			file.write((char*)pblocks, sizeof(pblocks));

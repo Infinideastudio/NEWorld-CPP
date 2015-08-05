@@ -114,11 +114,11 @@ namespace gui{
 		void update();
 		void render();
 		void mousedata(int x, int y, int w, int b);
-		label* Form::createlabel(string t);
-		button* Form::createbutton(string t);
-		trackbar* Form::createtrackbar(string t, int w, int p);
-		textbox* Form::createtextbox(string t);
-		vscroll* Form::createvscroll(int h, int p);
+		label* createlabel(string t);
+		button* createbutton(string t);
+		trackbar* createtrackbar(string t, int w, int p);
+		textbox* createtextbox(string t);
+		vscroll* createvscroll(int h, int p);
 		controls* getControlByID(int cid);
 		void cleanup();
 	};

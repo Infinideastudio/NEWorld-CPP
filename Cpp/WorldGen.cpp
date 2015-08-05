@@ -25,8 +25,8 @@ namespace WorldGen{
 
 	float SmoothedNoise(float x, float y){
 		float corners, sides, center;
-		int intx = static_cast<int>(x);
-		int inty = static_cast<int>(y);
+		int intx = GoInt(x);
+		int inty = GoInt(y);
 		corners = (Noise(intx - 1, inty - 1) + Noise(intx + 1, inty - 1) + Noise(intx - 1, inty + 1) + Noise(intx + 1, inty + 1)) / 32;
 		sides = (Noise(intx - 1, inty) + Noise(intx + 1, inty) + Noise(intx, inty - 1) + Noise(intx, inty + 1)) / 16;
 		center = Noise(intx, inty) / 8;
@@ -34,13 +34,17 @@ namespace WorldGen{
 	}
 
 	float Interpolate(float a, float b, float x){
+		float temp, x2;
 		switch (InterpolationMethod){
 		case INTERPOLATION_METHOD_LINEAR:
-			return a*(1 - x) + b*(x);
+			return a*(1 - x) + b*x;
 		case INTERPOLATION_METHOD_COSINE:
-			return float(a*(1 - (1 - cos(x*M_PI))*0.5) + b*(1 - cos(x*M_PI))*0.5);
+			return float(a*(1 - (1 - cos(x*M_PI))*0.5) + b*(1 - cos(x*M_PI))*0.5);	
 		case INTERPOLATION_METHOD_POWER2:
-			return (a*pow(1 - x, 2) + b*pow(x, 2)) / (pow(1 - x, 2) + pow(x, 2));
+			temp = 1 - x;
+			temp *= temp;
+			x2 = x*x;
+			return (a* temp + b * x2) / (temp + x2);
 		case INTERPOLATION_METHOD_POWER3:
 			return (a*pow(1 - x, 3) + b*pow(x, 3)) / (pow(1 - x, 3) + pow(x, 3));
 		case INTERPOLATION_METHOD_JELAWAT:
@@ -53,9 +57,9 @@ namespace WorldGen{
 	float InterpolatedNoise(float x, float y){
 		int int_X, int_Y;
 		float fractional_X, fractional_Y, v1, v2, v3, v4, i1, i2;
-		int_X = int(x);
+		int_X = GoInt(x);
 		fractional_X = x - int_X;
-		int_Y = int(y);
+		int_Y = GoInt(y);
 		fractional_Y = y - int_Y;
 		if (NoiseSmoothed == 1){
 			v1 = SmoothedNoise((float)int_X, (float)int_Y);
