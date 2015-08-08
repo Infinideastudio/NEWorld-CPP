@@ -12,6 +12,16 @@
 *.gch
 *.out
 
+*.plist
+
+release/*
+temp/*
+__pycache__/*
+
+*.pyc
+*.pyo
+*.pyx
+
 # User-specific files
 *.suo
 *.user
