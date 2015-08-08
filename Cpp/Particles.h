@@ -1,7 +1,6 @@
 #pragma once
 #include "Def.h"
 #include "Hitbox.h"
-#include "frustum.h"
 
 namespace particles{
 	const int PARTICALE_MAX = 4096;

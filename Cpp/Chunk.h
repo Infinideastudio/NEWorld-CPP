@@ -65,6 +65,7 @@ namespace world{
 		void callList(int l);
 
 		Hitbox::AABB chunk::getChunkAABB();
+		Hitbox::AABB getRelativeAABB(double x, double y, double z);
 		void hiddenChunkTest();
 	};
 }

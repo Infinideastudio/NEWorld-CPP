@@ -2,7 +2,7 @@
 
 namespace Frustum{
 	double m_Frustum[24];
-	float proj[16], modl[16];
+	double proj[16], modl[16];
 	double clip[16];
 
 	void normalize(int side){
@@ -18,8 +18,8 @@ namespace Frustum{
 	}
 
 	void calc(){
-		glGetFloatv(GL_PROJECTION_MATRIX, proj);
-		glGetFloatv(GL_MODELVIEW_MATRIX, modl);
+		glGetDoublev(GL_PROJECTION_MATRIX, proj);
+		glGetDoublev(GL_MODELVIEW_MATRIX, modl);
 
 		clip[0] = modl[0] * proj[0] + modl[1] * proj[4] + modl[2] * proj[8] + modl[3] * proj[12];
 		clip[1] = modl[0] * proj[1] + modl[1] * proj[5] + modl[2] * proj[9] + modl[3] * proj[13];

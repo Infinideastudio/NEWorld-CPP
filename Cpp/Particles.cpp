@@ -1,8 +1,9 @@
 #include "Particles.h"
-#include "Hitbox.h"
 #include "World.h"
 #include "Textures.h"
 #include "Renderer.h"
+#include "Player.h"
+#include "frustum.h"
 
 namespace particles{
 	vector<particle> ptcs;
@@ -67,7 +68,7 @@ namespace particles{
 	}
 
 	void render(particle &ptc){
-		if (!Frustum::aabbInFrustum(ptc.hb)) return;
+		//if (!Frustum::aabbInFrustum(ptc.hb)) return;
 		ptcsrendered++;
 		float size = BLOCKTEXTURE_UNITSIZE / BLOCKTEXTURE_SIZE*ptc.psize;
 		float col = world::getbrightness((int)ptc.xpos, (int)ptc.ypos, (int)ptc.zpos) / (float)world::BRIGHTNESSMAX;
@@ -76,9 +77,9 @@ namespace particles{
 		float tcx = ptc.tcX;
 		float tcy = ptc.tcY;
 		float psize = ptc.psize;
-		double xpos = ptc.xpos;
-		double ypos = ptc.ypos;
-		double zpos = ptc.zpos;
+		double xpos = ptc.xpos - player::xpos;
+		double ypos = ptc.ypos - player::ypos - player::height - player::heightExt;
+		double zpos = ptc.zpos - player::zpos;
 
 		renderer::Color3d(col1, col1, col1);
 		renderer::TexCoord2d(tcx + size * 0.0, tcy + size * 0.0);
