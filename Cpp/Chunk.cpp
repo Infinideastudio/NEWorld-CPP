@@ -3,6 +3,7 @@
 #include "World.h"
 #include "Renderer.h"
 #include <fstream>
+
 namespace world{
 	void chunk::Init(int cxi, int cyi, int czi, uint64 idi){
 
@@ -29,6 +30,17 @@ namespace world{
 		aabb.zmax = cz * 16 + 16 - 0.5;
 
 		return aabb;
+	}
+	
+	Hitbox::AABB chunk::getRelativeAABB(double x, double y, double z) {
+		Hitbox::AABB ret;
+		ret.xmin = cx * 16 - 0.5 - x;
+		ret.xmax = cx * 16 + 16 - 0.5 - x;
+		ret.ymin = cy * 16 - 0.5 - loadAnim - y;
+		ret.ymax = cy * 16 + 16 - 0.5 - loadAnim - y;
+		ret.zmin = cz * 16 - 0.5 - z;
+		ret.zmax = cz * 16 + 16 - 0.5 - z;
+		return ret;
 	}
 
 	void chunk::create(){
@@ -93,7 +105,6 @@ namespace world{
 	void chunk::Load(){
 		create();
 #ifndef DEBUG_NO_FILEIO
-
 		if (fileExist())
 			LoadFromFile();
 		else
@@ -102,12 +113,12 @@ namespace world{
 		build();
 #endif
 		updated = true;
-		setChunkUpdated(cx, cy + 1, cz, true);
-		setChunkUpdated(cx, cy - 1, cz, true);
-		setChunkUpdated(cx + 1, cy, cz, true);
-		setChunkUpdated(cx - 1, cy, cz, true);
-		setChunkUpdated(cx, cy, cz + 1, true);
-		setChunkUpdated(cx, cy, cz - 1, true);
+		if (cy < worldheight - 1) setChunkUpdated(cx, cy + 1, cz, true);
+		if (cy > -worldheight) setChunkUpdated(cx, cy - 1, cz, true);
+		if (cx < worldsize - 1) setChunkUpdated(cx + 1, cy, cz, true);
+		if (cx > -worldsize) setChunkUpdated(cx - 1, cy, cz, true);
+		if (cz < worldsize - 1) setChunkUpdated(cx, cy, cz + 1, true);
+		if (cz > -worldsize) setChunkUpdated(cx, cy, cz - 1, true);
 	}
 
 	void chunk::Unload(){
@@ -170,7 +181,7 @@ namespace world{
 			for (y = 0; y != 16; y++){
 				for (z = 0; z != 16; z++){
 					if (BlockInfo(pblocks[x][y][z]).isOpaque())
-						renderblock(cx * 16 + x, cy * 16 + y, cz * 16 + z);
+						renderblock(x, y, z, this);
 				}
 			}
 		}
@@ -185,7 +196,7 @@ namespace world{
 			for (y = 0; y != 16; y++){
 				for (z = 0; z != 16; z++){
 					if (!BlockInfo(pblocks[x][y][z]).isOpaque() && BlockInfo(pblocks[x][y][z]).isSolid())
-						renderblock(cx * 16 + x, cy * 16 + y, cz * 16 + z);
+						renderblock(x, y, z, this);
 				}
 			}
 		}
@@ -199,7 +210,7 @@ namespace world{
 			for (y = 0; y != 16; y++){
 				for (z = 0; z != 16; z++){
 					if (!BlockInfo(pblocks[x][y][z]).isSolid() && pblocks[x][y][z] != 0)
-						renderblock(cx * 16 + x, cy * 16 + y, cz * 16 + z);
+						renderblock(x, y, z, this);
 				}
 			}
 		}
@@ -258,13 +269,9 @@ namespace world{
 
 	}
 
-	
-
 	brightness chunk::getbrightness(int x, int y, int z){
 		return getbrightness((ubyte)x, (ubyte)y, (ubyte)z);
 	}
-
-
 
 	void chunk::setbrightness(int x, int y, int z, brightness tbrightness){
 		setbrightness((ubyte)x, (ubyte)y, (ubyte)z, tbrightness);

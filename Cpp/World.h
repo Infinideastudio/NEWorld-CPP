@@ -8,10 +8,10 @@ namespace world{
 	extern string worldname;
 	const int worldsize = 134217728;
 	const int worldheight = 128;
-	extern brightness skylight;         //Sky light level;
-	extern brightness BRIGHTNESSMAX;     //Maximum brightness;
-	extern brightness BRIGHTNESSMIN;    //Mimimum brightness;
-	extern brightness BRIGHTNESSDEC;    //Brightness decree;
+	extern brightness skylight;         //Sky light level
+	extern brightness BRIGHTNESSMAX;     //Maximum brightness
+	extern brightness BRIGHTNESSMIN;    //Mimimum brightness
+	extern brightness BRIGHTNESSDEC;    //Brightness decree
 	extern uint EmptyList;
 
 	extern chunk* chunks;
@@ -25,7 +25,6 @@ namespace world{
 	extern int rebuiltChunks, rebuiltChunksCount;
 	extern int updatedChunks, updatedChunksCount;
 	extern int unloadedChunks, unloadedChunksCount;
-	//extern int chunkRenderList[65536][4];
 	extern pair<int, chunk*> chunkRenderList[65536];
 	extern int chunkLoadList[65536][4];
 	extern int chunkUnloadList[65536][4];
@@ -53,7 +52,9 @@ namespace world{
 	vector<Hitbox::AABB> getHitboxes(Hitbox::AABB box);
 	bool inWater(Hitbox::AABB box);
 
-	void renderblock(int x, int y, int z);
+	//void renderblock(int x, int y, int z);
+	void renderblock(int x, int y, int z, int cx, int cy, int cz);
+	void renderblock(int x, int y, int z, chunk* chunkptr);
 	void updateblock(int x, int y, int z, bool blockchanged);
 	block getblock(int x, int y, int z, block defaultRet = blocks::AIR);
 	brightness getbrightness(int x, int y, int z);

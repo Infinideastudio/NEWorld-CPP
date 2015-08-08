@@ -4,36 +4,32 @@
 namespace WorldGen{
 
 	enum{
-		INTERPOLATION_METHOD_LINEAR,       //性能最好的插值算法
+		INTERPOLATION_METHOD_LINEAR,      //性能最好的插值算法
 		INTERPOLATION_METHOD_COSINE,      //来自国外网站的插值算法
 		INTERPOLATION_METHOD_POWER2,      //原创插值算法
 		INTERPOLATION_METHOD_POWER3,      //原创插值算法2
 		INTERPOLATION_METHOD_JELAWAT,     //Jelawat地鼠 使用的算法
 	};
 
+	extern int seed;
+	extern int WaterLevel;
 	void perlinNoiseInit(int mapseed);
+	
 	int getHeight(int x, int y);
+
 	int getSandHeight(int x, int y);
 
-	extern float perm[256];
-	extern int seed;
-	extern int NoiseSmoothed;
-	extern int InterpolationMethod;
-	extern float NoiseScaleX;
-	extern float NoiseScaleZ;
-	extern int WaterLevel;
-
 	void perlinNoiseInit(int mapseed);
 
-	float Noise(int x, int y);
+	double Noise(int x, int y);
 
-	float SmoothedNoise(float x, float y);
+	double SmoothedNoise(double x, double y);
 
-	float Interpolate(float a, float b, float x);
+	double Interpolate(double a, double b, double x);
 
-	float InterpolatedNoise(float x, float y);
+	double InterpolatedNoise(double x, double y);
 
-	float PerlinNoise2D(float x, float y);
+	double PerlinNoise2D(double x, double y);
 
 	int getHeight(int x, int y);
 

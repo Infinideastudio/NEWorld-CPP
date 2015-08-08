@@ -1,4 +1,7 @@
 //#pragma once
+#ifndef _DEBUG
+#pragma comment(linker, "/subsystem:\"windows\" /entry:\"mainCRTStartup\"")
+#endif
 #define _USE_MATH_DEFINES
 #include <Windows.h>
 #include <math.h>
@@ -56,7 +59,7 @@ extern GLFWwindow* win;
 const uint32 VERSION = 35;
 const string MAJOR_VERSION = "Alpha_0.";
 const string MINOR_VERSION = "4.9 ";
-const string EXT_VERSION = " [Preview Not Release(C++ Edition)]";
+const string EXT_VERSION = " [Preview Not Release(C++ Edition)] v4 without bone upgrade";
 
 inline string boolstr(bool b){
 	return b ? "True" : "False";

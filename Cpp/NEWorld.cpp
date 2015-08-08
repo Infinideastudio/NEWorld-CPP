@@ -76,6 +76,9 @@ NEWorld-CPP第一版作者（翻译作者）：Null (abc612008)
 3. 加入了加载界面
 4. 修复了一些BUG
 
+0.4.9_Preview_0.9
+1. 更新到0.4.9r4版本
+
 */
 
 #include "DeveloperOptions.h"
@@ -119,6 +122,7 @@ void saveGame();
 void updateThreadFunc();
 void drawcloud(double px, double pz);
 void updategame(bool FirstUpdateThisFrame);
+void drawLoading(bool& loading);
 void drawmain();
 void drawborder(int x, int y, int z);
 void renderDestroy(float level, int x, int y, int z);
@@ -134,6 +138,7 @@ void winsizecall(GLFWwindow* window, int width, int height);
 
 
 bool gamebegin;
+bool loading;
 bool bagOpened;
 
 int fps;                               //帧速率;
@@ -264,6 +269,8 @@ main_menu:
 	printf("Game start!\n");
 	//这才是游戏开始!
 	updateThreadRun = true;
+	loading = true;
+	MutexUnlock(Mutex);
 	do{
 		//主循环，被简化成这样，惨不忍睹啊！
 		//MutexUnlock(Mutex)
@@ -275,8 +282,10 @@ main_menu:
 			ups = upsc;
 			upsc = 0;
 		}
-
-		drawmain();
+		if (!loading)
+			drawmain();
+		else
+			drawLoading(loading);
 		
 		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == 1){
 			createThumbnail();
@@ -709,16 +718,8 @@ void updategame(bool FirstUpdateThisFrame){
 
 	player::BlockInHand = player::inventorybox[3][player::itemInHand];
 
-	while (glfwGetKey(win, GLFW_KEY_P) == GLFW_PRESS){
-		glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-		glfwPollEvents();
-		// glfwSleep(0.05)
-	}
-
-	//设置鼠标
-	//glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN)
 	glfwGetCursorPos(win, &mx, &my);
-	if (!bagOpened)
+	if (!bagOpened && !loading)
 		glfwSetCursorPos(win, windowwidth / 2, windowheight / 2);
 
 	//获得鼠标按下情况
@@ -776,10 +777,14 @@ void updategame(bool FirstUpdateThisFrame){
 
 			world::AddChunk(cx, cy, cz);
 			world::getChunkPtr(cx, cy, cz)->Load();
+			if (loading) {
+				MutexUnlock(Mutex);
+				MutexLock(Mutex);
+			}
 		}
 		//if (rnd() < 0.1) world::MOs.push_back(shared_ptr<Mo>(new Cat(player::xa + rand() % 40 - 20, player::ya, player::za + rand() % 40 - 20)));
 	}
-
+	if (loading) return;
 	//加载动画
 	for (int i = 0; i != world::loadedChunks; i++){
 		world::chunk* cp = &world::chunks[i];
@@ -831,16 +836,16 @@ void updategame(bool FirstUpdateThisFrame){
 	selb = 0;
 	selbr = 0;
 	puted = false;
-	if (!bagOpened){
+	if (!bagOpened) {
 		//从玩家位置发射一条线段
-		for (int i = 0; i < selectPrecision*selectDistance; i++){
+		for (int i = 0; i < selectPrecision*selectDistance; i++) {
 			//线段延伸
 			lx += sin(M_PI / 180 * (player::heading - 180))*sin(M_PI / 180 * (player::lookupdown + 90)) / (double)selectPrecision;
 			ly += cos(M_PI / 180 * (player::lookupdown + 90)) / (double)selectPrecision;
 			lz += cos(M_PI / 180 * (player::heading - 180))*sin(M_PI / 180 * (player::lookupdown + 90)) / (double)selectPrecision;
 
 			//碰到方块
-			if (BlockInfo(world::getblock(RoundInt(lx), RoundInt(ly), RoundInt(lz))).isSolid()){
+			if (BlockInfo(world::getblock(RoundInt(lx), RoundInt(ly), RoundInt(lz))).isSolid()) {
 				int x, y, z;
 				x = RoundInt(lx);
 				y = RoundInt(ly);
@@ -863,15 +868,15 @@ void updategame(bool FirstUpdateThisFrame){
 				sidedist[5] = abs(z + 0.5 - lz);		  //前面;
 				sidedist[6] = abs(z - 0.5 - lz);		  //后面;
 				sidedistmin = 1;						  //离哪个面最近;
-				for (int j = 2; j <= 6; j++){
+				for (int j = 2; j <= 6; j++) {
 					if (sidedist[j] < sidedist[sidedistmin]) sidedistmin = j;
 				}
 
-				if (world::chunkOutOfBound(selcx, selcy, selcz) == false){
+				if (world::chunkOutOfBound(selcx, selcy, selcz) == false) {
 					selb = world::getChunkPtr(selcx, selcy, selcz)->getblock(selbx, selby, selbz);
 				}
 
-				switch (sidedistmin){
+				switch (sidedistmin) {
 				case 1:
 					if (world::chunkOutOfBound(selcx, selcy, selcz) == false)
 						selbr = world::getbrightness(selx, sely + 1, selz);
@@ -898,7 +903,7 @@ void updategame(bool FirstUpdateThisFrame){
 					break;
 				}
 
-				if (mb == 1 || enterp){
+				if (mb == 1 || enterp) {
 					particles::throwParticle(world::getblock(x, y, z),
 						float(x + rnd() - 0.5f), float(y + rnd() - 0.2f), float(z + rnd() - 0.5f),
 						float(rnd()*0.2f - 0.1f), float(rnd()*0.2f - 0.1f), float(rnd()*0.2f - 0.1f),
@@ -908,9 +913,9 @@ void updategame(bool FirstUpdateThisFrame){
 						seldes = 0.0;
 					else
 						seldes += 5.0;
-					if (seldes >= 100.0){
+					if (seldes >= 100.0) {
 						player::additem(world::getblock(x, y, z));
-						for (int j = 1; j <= 25; j++){
+						for (int j = 1; j <= 25; j++) {
 							particles::throwParticle(world::getblock(x, y, z),
 								float(x + rnd() - 0.5f), float(y + rnd() - 0.2f), float(z + rnd() - 0.5f),
 								float(rnd()*0.2f - 0.1f), float(rnd()*0.2f - 0.1f), float(rnd()*0.2f - 0.1f),
@@ -920,9 +925,9 @@ void updategame(bool FirstUpdateThisFrame){
 					}
 				}
 				//放置方块
-				if ((mb == 2 && mbp == false) || (tabp && tabpl == false) && player::inventorypcs[3][player::itemInHand] > 0){
+				if ((mb == 2 && mbp == false) || (tabp && tabpl == false) && player::inventorypcs[3][player::itemInHand] > 0) {
 					puted = true;
-					switch (sidedistmin){
+					switch (sidedistmin) {
 					case 1:
 						if (player::putblock(x, y + 1, z, player::BlockInHand) == false) puted = false;
 						break;
@@ -942,7 +947,7 @@ void updategame(bool FirstUpdateThisFrame){
 						if (player::putblock(x, y, z - 1, player::BlockInHand) == false) puted = false;
 						break;
 					}
-					if (puted){
+					if (puted) {
 						player::inventorypcs[3][player::itemInHand]--;
 						if (player::inventorypcs[3][player::itemInHand] == 0) player::inventorypcs[3][player::itemInHand] = blocks::AIR;
 					}
@@ -965,13 +970,13 @@ void updategame(bool FirstUpdateThisFrame){
 
 		//移动！(生命在于运动)
 
-		if (glfwGetKey(win, GLFW_KEY_W) == 1){
-			if (!WP){
-				if (Wprstm == 0.0){
+		if (glfwGetKey(win, GLFW_KEY_W) == 1) {
+			if (!WP) {
+				if (Wprstm == 0.0) {
 					Wprstm = timer();
 				}
-				else{
-					if (timer() - Wprstm <= 0.5){ player::Running = true; Wprstm = 0.0; }
+				else {
+					if (timer() - Wprstm <= 0.5) { player::Running = true; Wprstm = 0.0; }
 					else Wprstm = timer();
 				}
 			}
@@ -980,63 +985,63 @@ void updategame(bool FirstUpdateThisFrame){
 			player::xa = -sin(player::heading*M_PI / (double)180) * player::speed;
 			player::za = -cos(player::heading*M_PI / (double)180) * player::speed;
 		}
-		else{
+		else {
 			player::Running = false;
 			WP = false;
 		}
-		if (player::Running){
+		if (player::Running) {
 			player::speed = runspeed;
-			if (FOVyExt<9.8)
+			if (FOVyExt < 9.8)
 				FOVyExt = 10.0f - (10.0f - FOVyExt)*0.8f;
 			else
 				FOVyExt = 10.0f;
 		}
-		else{
+		else {
 			player::speed = walkspeed;
-			if (FOVyExt>0.2)
+			if (FOVyExt > 0.2)
 				FOVyExt *= 0.8f;
 			else
 				FOVyExt = 0.0f;
 		}
 
-		if (glfwGetKey(win, GLFW_KEY_S) == GLFW_PRESS){
+		if (glfwGetKey(win, GLFW_KEY_S) == GLFW_PRESS) {
 			player::xa = sin(player::heading*M_PI / (double)180) * player::speed;
 			player::za = cos(player::heading*M_PI / (double)180) * player::speed;
 			Wprstm = 0.0;
 		}
 
-		if (glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS){
+		if (glfwGetKey(win, GLFW_KEY_A) == GLFW_PRESS) {
 			player::xa = sin((player::heading - 90)*M_PI / (double)180) * player::speed;
 			player::za = cos((player::heading - 90)*M_PI / (double)180) * player::speed;
 			Wprstm = 0.0;
 		}
 
-		if (glfwGetKey(win, GLFW_KEY_D) == GLFW_PRESS){
+		if (glfwGetKey(win, GLFW_KEY_D) == GLFW_PRESS) {
 			player::xa = -sin((player::heading - 90)*M_PI / (double)180) * player::speed;
 			player::za = -cos((player::heading - 90)*M_PI / (double)180) * player::speed;
 			Wprstm = 0.0;
 		}
 
-		if (glfwGetKey(win, GLFW_KEY_R) == GLFW_PRESS){
+		if (glfwGetKey(win, GLFW_KEY_R) == GLFW_PRESS) {
 			player::xa = -sin(player::heading*M_PI / (double)180) * runspeed * 10;
 			player::za = -cos(player::heading*M_PI / (double)180) * runspeed * 10;
 		}
 
-		if (glfwGetKey(win, GLFW_KEY_F) == GLFW_PRESS){
+		if (glfwGetKey(win, GLFW_KEY_F) == GLFW_PRESS) {
 			player::xa = sin(player::heading*M_PI / (double)180) * runspeed * 10;
 			player::za = cos(player::heading*M_PI / (double)180) * runspeed * 10;
 		}
 
 		//切换方块
 
-		if (glfwGetKey(win, GLFW_KEY_Z) == GLFW_PRESS){
+		if (glfwGetKey(win, GLFW_KEY_Z) == GLFW_PRESS) {
 			if (player::itemInHand > 0 && ZP == false) player::itemInHand--;
 			ZP = true;
 		}
-		else{
+		else {
 			ZP = false;
 		}
-		if (glfwGetKey(win, GLFW_KEY_X) == GLFW_PRESS){
+		if (glfwGetKey(win, GLFW_KEY_X) == GLFW_PRESS) {
 			if (player::itemInHand < 9 && XP == false) player::itemInHand++;
 			XP = true;
 		}
@@ -1045,51 +1050,9 @@ void updategame(bool FirstUpdateThisFrame){
 			XP = false;
 		}
 
-		//if (player::itemInHand + (mwl - mw) <= 9 && mwl>mw) player::itemInHand += mwl - mw
-		//if (player::itemInHand - (mw - mwl) >= 0 && mw > mwl) player::itemInHand -= mw - mwl
-		/*player::BlockInHand = player::inventorybox[3][player::itemInHand];*/
 		mwl = mw;
-
-		//转头！你治好了我多年的颈椎病！
-
-		if (mx > int(windowwidth / 2))
-			player::heading -= (mx - int(windowwidth / 2))*mousemove;
-
-		if (mx < int(windowwidth / 2))
-			player::heading += (int(windowwidth / 2) - mx)*mousemove;
-
-		if (my<int(windowheight / 2))
-			player::lookupdown -= (int(windowheight / 2) - my)*mousemove;
-
-		if (my>windowheight / 2)
-			player::lookupdown += (my - int(windowheight / 2))*mousemove;
-
-
-		if (glfwGetKey(win, GLFW_KEY_RIGHT) == 1){
-			player::xlookspeed -= mousemove * 4;
-		}
-		if (glfwGetKey(win, GLFW_KEY_LEFT) == 1){
-			player::xlookspeed += mousemove * 4;
-		}
-		if (glfwGetKey(win, GLFW_KEY_UP) == 1){
-			player::ylookspeed -= mousemove * 4;
-		}
-		if (glfwGetKey(win, GLFW_KEY_DOWN) == 1){
-			player::ylookspeed += mousemove * 4;
-		}
-
-		player::heading += player::xlookspeed;
-		player::lookupdown += player::ylookspeed;
-		player::xlookspeed *= 0.8f;
-		player::ylookspeed *= 0.8f;
 	}
 
-	//限制角度，别把头转掉下来了 ←_←
-	if (player::lookupdown <-90) player::lookupdown = -90;
-	if (player::lookupdown > 90) player::lookupdown = 90;
-
-	//if (player::lookupdown <-120) player::lookupdown = -120
-	//if (player::lookupdown > 120) player::lookupdown = 120
 	if (!bagOpened){
 
 		enterpl = enterp;
@@ -1264,7 +1227,12 @@ void show(string s, bool init = false){
 }
 
 void drawGUI(){
-
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, windowwidth, windowheight, 0, -1.0, 1.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glDepthFunc(GL_ALWAYS);
 	glDisable(GL_TEXTURE_2D);
 	glEnable(GL_LINE_SMOOTH);
 	int seldes_100 = int(seldes / 100);
@@ -1569,20 +1537,96 @@ void drawGUI(){
 		fctime = timer();
 	}
 	fpsc++;
-
 	Time_renderGUI = timer() - Time_renderGUI;
 	Time_screensync_ = timer();
 }
 
-void drawmain(){
+void drawLoading(bool& loading) {
+	MutexLock(Mutex);
+	int loadedChunks = world::loadedChunks;
+	world::sortChunkRenderList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
+	for (int i = 1; i <= world::chunkRenders; i++) {
+		auto cptr = world::chunkRenderList[i].second;
+		cptr->buildlists();
+	}
+	MutexUnlock(Mutex);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, windowwidth, windowheight, 0, -1.0, 1.0);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glEnable(GL_TEXTURE_2D);
+	glDisable(GL_CULL_FACE);
+	if (loadedChunks == 1728) {   //加载完毕
+		handleLimit = 2;
+		glClearColor(skycolorR, skycolorG, skycolorB, 1.0);
+		glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		glfwSetCursorPos(win, windowwidth / 2, windowheight / 2);
+		loading = false;
+		MutexLock(Mutex);
+		return;
+	}
+	float col = loadedChunks / 1728.0f;
+	glClearColor(col, col, col, 1);
+	setFontColor(1, 1, 1, 1);
+	glprint(windowwidth / 2 - 50, windowheight / 2 - 50 + 16 * 1, "Loading...");
+	glprint(windowwidth / 2 - 50, windowheight / 2 - 50 + 16 * 3, "Loading chunks!");
+	char strLoadedChunks[12];
+	_itoa_s(loadedChunks, strLoadedChunks, 10);
+	glprint(windowwidth / 2 - 50, windowheight / 2 - 50 + 16 * 5, "Processing: " + string(strLoadedChunks));
+	glfwSwapBuffers(win);
+	glfwPollEvents();
+}
+
+void drawmain() {
 	//画场景
 
 	Time_renderscene_ = timer();
+	if (!bagOpened) {
+		glfwGetCursorPos(win, &mx, &my);
+		//转头！你治好了我多年的颈椎病！
 
-	int cx = 0, cy = 0, cz = 0;
+		if (mx > int(windowwidth / 2))
+			player::heading -= (mx - int(windowwidth / 2))*mousemove;
+
+		if (mx < int(windowwidth / 2))
+			player::heading += (int(windowwidth / 2) - mx)*mousemove;
+
+		if (my < int(windowheight / 2))
+			player::lookupdown -= (int(windowheight / 2) - my)*mousemove;
+
+		if (my > windowheight / 2)
+			player::lookupdown += (my - int(windowheight / 2))*mousemove;
+
+
+		if (glfwGetKey(win, GLFW_KEY_RIGHT) == 1) {
+			player::xlookspeed -= mousemove * 4;
+		}
+		if (glfwGetKey(win, GLFW_KEY_LEFT) == 1) {
+			player::xlookspeed += mousemove * 4;
+		}
+		if (glfwGetKey(win, GLFW_KEY_UP) == 1) {
+			player::ylookspeed -= mousemove * 4;
+		}
+		if (glfwGetKey(win, GLFW_KEY_DOWN) == 1) {
+			player::ylookspeed += mousemove * 4;
+		}
+
+		player::heading += player::xlookspeed;
+		player::lookupdown += player::ylookspeed;
+		player::xlookspeed *= 0.8f;
+		player::ylookspeed *= 0.8f;
+
+		//限制角度，别把头转掉下来了 ←_←
+		if (player::lookupdown < -90) player::lookupdown = -90;
+		if (player::lookupdown > 90) player::lookupdown = 90;
+	}
+
 	double lx, ly, lz;
-	//double ticktime, ftime
-
+	double xpos = player::xpos;
+	double ypos = player::ypos + player::height + player::heightExt;
+	double zpos = player::zpos;
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -1591,15 +1635,13 @@ void drawmain(){
 	glLoadIdentity();
 	glRotated(player::lookupdown, 1, 0, 0);
 	glRotated(360.0 - player::heading, 0, 1, 0);
-	glTranslated(-player::xpos, -player::ypos - player::height - player::heightExt, -player::zpos);
+	glTranslated(-xpos, -ypos, -zpos);
 
 	glDepthFunc(GL_LEQUAL);
 	glDepthMask(GL_TRUE);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-
-	Frustum::calc();
 
 	glColor4f(1.0, 1.0, 1.0, 1.0);
 
@@ -1609,10 +1651,11 @@ void drawmain(){
 
 	//更新区块显示列表
 	world::sortChunkRenderList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
-	for (int i = 1; i <= world::chunkRenders; i++){
+	for (int i = 1; i <= world::chunkRenders; i++) {
 		auto cptr = world::chunkRenderList[i].second;
 		cptr->buildlists();
 	}
+
 	//删除已卸载区块的显示列表
 	for (int i = 0; i != 3; i++) {
 		if (world::displayListUnloadList.size() <= 0) break;
@@ -1624,105 +1667,86 @@ void drawmain(){
 		ups = upsc;
 		upsc = 0;
 	}
-	static bool loadingMap = true;
-	//static int lastloadcount=-1;
-	if (loadingMap&&world::loadedChunks == 1728) {
-		handleLimit = 2;
-		glClearColor(skycolorR, skycolorG, skycolorB, 1.0);
-		glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-		glfwSetCursorPos(win, windowwidth / 2, windowheight / 2);
-		loadingMap = false;
+	glLoadIdentity();
+	glRotated(player::lookupdown, 1, 0, 0);
+	glRotated(360.0 - player::heading, 0, 1, 0);
+	Frustum::calc();
+	vector<world::chunk*> displayChunks;
+	for (int i = 0; i != world::loadedChunks; i++) {
+		if (world::chunks[i].list > 0 && world::chunkInRange(world::chunks[i].cx, world::chunks[i].cy, world::chunks[i].cz, player::cxt, player::cyt, player::czt, viewdistance)) {
+			if (Frustum::aabbInFrustum(world::chunks[i].getRelativeAABB(xpos, ypos, zpos))) displayChunks.push_back(&world::chunks[i]);
+		}
 	}
-	//lastloadcount = world::loadedChunks;
-	if (!loadingMap) {
-		vector<uint> lists_;
-		vector<double> loadAnims_;
-		renderedChunk = 0;
-		for (int i = 0; i != world::loadedChunks; i++) {
-			if (world::chunkInRange(world::chunks[i].cx, world::chunks[i].cy, world::chunks[i].cz, player::cxt, player::cyt, player::czt, viewdistance)) {
-				if (world::chunks[i].list > 0) {
-					auto chunknow = world::chunks[i];
-					if (Frustum::aabbInFrustum(chunknow.getChunkAABB())) {
-						lists_.push_back(chunknow.list);
-						loadAnims_.push_back(chunknow.loadAnim);
-						renderedChunk++;
-					}
-				}
-			}
-		}
-		int lists_count = lists_.size();
-		MutexUnlock(Mutex);
-		glBindTexture(GL_TEXTURE_2D, BlockTextures);
-		for (int i = 0; i != lists_count; i++) {
-			glTranslatef(0.0f, (float)-loadAnims_[i], 0.0f);
-			if (lists_[i] > 0 && glIsList(lists_[i])) glCallList(lists_[i]);
-			glTranslatef(0.0f, (float)loadAnims_[i], 0.0f);
-		}
-		MutexLock(Mutex);
+	renderedChunk = displayChunks.size();
+	glBindTexture(GL_TEXTURE_2D, BlockTextures);
+	for (int i = 0; i != renderedChunk; i++) {
+		auto cptr = displayChunks[i];
+		glTranslatef(cptr->cx * 16 - xpos, cptr->cy * 16 - cptr->loadAnim - ypos, cptr->cz * 16 - zpos);
+		glCallList(cptr->list);
+		glTranslatef(-cptr->cx * 16 + xpos, -cptr->cy * 16 + cptr->loadAnim + ypos, -cptr->cz * 16 + zpos);
+	}
+	if (seldes > 0.0) {
+		glTranslatef(selx - xpos, sely - ypos, selz - zpos);
+		renderDestroy(seldes, 0.0, 0.0, 0.0);
+		glTranslatef(-selx + xpos, -sely + ypos, -selz + zpos);
+	}
+	glBindTexture(GL_TEXTURE_2D, BlockTextures);
+	particles::renderall();
 
-		if (seldes > 0.0) {
-			renderDestroy(seldes, selx, sely, selz);
-		}
-		glBindTexture(GL_TEXTURE_2D, BlockTextures);
-		particles::renderall();
-		glDisable(GL_TEXTURE_2D);
+	glDisable(GL_TEXTURE_2D);
+	glTranslatef(selx - xpos, sely - ypos, selz - zpos);
+	if (GUIrenderswitch) drawborder(0.0, 0.0, 0.0);
+	glTranslatef(-selx + xpos, -sely + ypos, -selz + zpos);
+	//for (unsigned int i = 0; i != world::MOs.size(); i++) world::MOs[i]->renderer();
+	glLoadIdentity();
+	glRotated(player::lookupdown, 1, 0, 0);
+	glRotated(360.0 - player::heading, 0, 1, 0);
+	glTranslated(-xpos, -ypos, -zpos);
+	glLoadIdentity();
+	glRotated(player::lookupdown, 1, 0, 0);
+	glRotated(360.0 - player::heading, 0, 1, 0);
+	glBindTexture(GL_TEXTURE_2D, BlockTextures);
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_CULL_FACE);
+	for (int i = 0; i != renderedChunk; i++) {
+		auto cptr = displayChunks[i];
+		glTranslatef(cptr->cx * 16 - xpos, cptr->cy * 16 - cptr->loadAnim - ypos, cptr->cz * 16 - zpos);
+		glCallList(cptr->list + 1);
+		glTranslatef(-cptr->cx * 16 + xpos, -cptr->cy * 16 + cptr->loadAnim + ypos, -cptr->cz * 16 + zpos);
+	}
+	glDisable(GL_CULL_FACE);
+	for (int i = 0; i != renderedChunk; i++) {
+		auto cptr = displayChunks[i];
+		glTranslatef(cptr->cx * 16 - xpos, cptr->cy * 16 - cptr->loadAnim - ypos, cptr->cz * 16 - zpos);
+		glCallList(cptr->list + 2);
+		glTranslatef(-cptr->cx * 16 + xpos, -cptr->cy * 16 + cptr->loadAnim + ypos, -cptr->cz * 16 + zpos);
+	}
 
-		if (GUIrenderswitch) {
-			lx = player::xpos; ly = player::ypos + player::height + player::heightExt; lz = player::zpos;
-			for (int i = 1; i <= selectPrecision*selectDistance; i++) {
-				lx += sin(M_PI / 180 * (player::heading - 180))*sin(M_PI / 180 * (player::lookupdown + 90)) / selectPrecision;
-				ly += cos(M_PI / 180 * (player::lookupdown + 90)) / selectPrecision;
-				lz += cos(M_PI / 180 * (player::heading - 180))*sin(M_PI / 180 * (player::lookupdown + 90)) / selectPrecision;
-				if (BlockInfo(world::getblock(RoundInt(lx), RoundInt(ly), RoundInt(lz))).isSolid()) {
-					drawborder(RoundInt(lx), RoundInt(ly), RoundInt(lz));
-					break;
-				}
-			}
-		}
+	glLoadIdentity();
+	glRotated(player::lookupdown, 1, 0, 0);
+	glRotated(360.0 - player::heading, 0, 1, 0);
+	glTranslated(-xpos, -ypos, -zpos);
 
-		MutexUnlock(Mutex);
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_CULL_FACE);
-		for (int i = 0; i != lists_count; i++) {
-			glTranslatef(0.0f, (float)-loadAnims_[i], 0.0f);
-			if (lists_[i] > 1 && glIsList(lists_[i] + 1)) glCallList(lists_[i] + 1);
-			glTranslatef(0.0f, (float)loadAnims_[i], 0.0f);
-		}
-		glDisable(GL_CULL_FACE);
-		for (int i = 0; i != lists_count; i++) {
-			glTranslatef(0.0f, (float)-loadAnims_[i], 0.0f);
-			if (lists_[i] > 2 && glIsList(lists_[i] + 2)) glCallList(lists_[i] + 2);
-			glTranslatef(0.0f, (float)loadAnims_[i], 0.0f);
-		}
-		glDisable(GL_TEXTURE_2D);
-		drawcloud(player::xpos, player::zpos);
-		glEnable(GL_TEXTURE_2D);
-		glEnable(GL_CULL_FACE);
-		for (unsigned int i = 0; i != world::MOs.size(); i++) world::MOs[i]->renderer();
-		MutexLock(Mutex);
+	glDisable(GL_TEXTURE_2D);
+	drawcloud(player::xpos, player::zpos);
+	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_CULL_FACE);
+	//MutexLock(Mutex);
+
+	Time_renderscene = timer() - Time_renderscene;
+	Time_renderGUI_ = timer();
+
+	if (GUIrenderswitch) {
+		drawGUI();
 	}
 	else {
-		glEnable(GL_TEXTURE_2D);
-		glDisable(GL_CULL_FACE);
-		float col = world::loadedChunks / 1728.0f;
-		glClearColor(col, col, col, 1);
-		setFontColor(1, 1, 1, 1);
-		glprint(windowwidth / 2 - 50, windowheight / 2 - 50 + 16 * 1, "Loading...");
-		glprint(windowwidth / 2 - 50, windowheight / 2 - 50 + 16 * 3, "Loading chunks!");
-		char strLoadedChunks[12];
-		_itoa_s(world::loadedChunks, strLoadedChunks, 10);
-		glprint(windowwidth / 2 - 50, windowheight / 2 - 50 + 16 * 5, "Processing: " + string(strLoadedChunks));
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, windowwidth, windowheight, 0, -1.0, 1.0);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
 	}
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0, windowwidth, windowheight, 0, -1.0, 1.0);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-
-	glDepthFunc(GL_ALWAYS);
-
-	if (world::getblock((int)player::xpos, int(player::ypos + player::height + player::heightExt), (int)player::zpos) == blocks::WATER){
+	if (world::getblock((int)player::xpos, int(player::ypos + player::height + player::heightExt), (int)player::zpos) == blocks::WATER) {
 		glColor4f(1.0, 1.0, 1.0, 1.0);
 		glBindTexture(GL_TEXTURE_2D, BlockTexture[textures::getTextureIndex(blocks::WATER, 1)]);
 		glBegin(GL_QUADS);
@@ -1733,19 +1757,10 @@ void drawmain(){
 		glEnd();
 	}
 
-	Time_renderscene = timer() - Time_renderscene;
-	Time_renderGUI_ = timer();
-
-	if (!loadingMap && GUIrenderswitch){
-		drawGUI();
-	}
-
 	if (bagOpened)
 		bagUpdate();
-	else
-		glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-	if (shouldGetScreenshot){
+	if (shouldGetScreenshot) {
 		shouldGetScreenshot = false;
 		time_t t = time(0);
 		char tmp[64];
@@ -1756,7 +1771,7 @@ void drawmain(){
 		ss << "\\screenshots\\" << tmp << ".bmp";
 		saveScreenshot(0, 0, windowwidth, windowheight, ss.str());
 	}
-	if (shouldGetThumbnail){
+	if (shouldGetThumbnail) {
 		shouldGetThumbnail = false;
 		createThumbnail();
 	}
@@ -1773,8 +1788,8 @@ void drawmain(){
 
 }
 
-//绘制选择边框，建议用GL_LINE_LOOP，别学我QAQ
 void drawborder(int x, int y, int z){
+	//绘制选择边框，建议用GL_LINE_LOOP，别学我QAQ
 	static float extrize = 0.002f; //实际上这个边框应该比方块大一些，否则很难看;
 	glEnable(GL_LINE_SMOOTH);
 	glLineWidth(1.0f);

@@ -6,6 +6,12 @@ namespace renderer{
 	double texcoordX, texcoordY;
 	double colorR, colorG, colorB;
 	uint Buffers[3];
+	bool ShaderAval, EnableShaders = false;
+	GLhandleARB shaders[16];
+	GLhandleARB shaderPrograms[16];
+	int shadercount = 0;
+
+
 	void Init(){
 		static bool firstCall = true;
 		if (Vertexes == 0 && !firstCall) return; //Vertexes为0时，判断其已经初始化，无需再次初始化
@@ -63,6 +69,12 @@ namespace renderer{
 		//OpenGL有个函数glFlush()，翻译过来就是GL冲厕所() ←_←;
 
 		if (Vertexes > 0){
+			if (EnableShaders) {
+				for (int i = 0; i != shadercount; i++) {
+					glUseProgramObjectARB(shaderPrograms[i]);
+				}
+			}
+
 			memset(Buffers, 0, sizeof(Buffers));
 			glGenBuffers/*ARB*/(3, Buffers);
 
@@ -91,6 +103,51 @@ namespace renderer{
 			//重置;
 			Init();
 
+			if (EnableShaders) glUseProgramObjectARB(0);
 		}
 	}
+	//GLhandleARB  loadShader(string filename  ,uint mode ){
+ //       
+	//	GLhandleARB shader;
+ //       dim as zstring ptr ptr 
+ //       dim as integer ptr shaderSourceLen
+ //       dim as integer shaderLineNums
+ //       dim shaderSourceCurLine as zstring ptr
+ //       dim shaderSourceCurLineStr as string
+ //       dim f as integer
+ //       f=freefile
+ //       open filename for input as #f
+ //       do until eof(f)
+ //           line input #f,shaderSourceCurLineStr
+ //           print shaderSourceCurLineStr
+ //           shaderSourceCurLine=allocate(len(shaderSourceCurLineStr)+1)
+ //           *shaderSourceCurLine=shaderSourceCurLineStr+chr(10)
+ //           print *shaderSourceCurLine
+ //           shaderlinenums+=1
+ //           shaderSource=reallocate(shaderSource,shaderlinenums*sizeof(zstring ptr))
+ //           shaderSource[shaderlinenums-1]=shaderSourceCurLine
+ //           shaderSourceLen=reallocate(shaderSourceLen,shaderlinenums*sizeof(integer))
+ //           shaderSourceLen[shaderlinenums-1]=len(shaderSourceCurLineStr)+1
+ //           'print shaderlinenums
+ //       loop
+ //       close #f
+ //       shader=glCreateShaderObjectARB(mode)
+ //       glShaderSourceARB(shader,shaderLineNums,shaderSource,shaderSourceLen)
+ //       glCompileShaderARB(shader)
+ //       return shader
+ //       
+ //  }
+ //   
+ //   sub initShader()
+ //       dim as integer i
+ //       
+ //       'shaders(0)=loadShader(exepath+"\Shaders\Main.fsh",GL_VERTEX_SHADER_ARB)
+ //       'shaders(0)=loadShader(exepath+"\Shaders\Main.fsh",GL_FRAGMENT_SHADER_ARB)
+ //       for i=0 to shadercount-1
+ //           shaderPrograms(i)=glCreateProgramObjectARB()
+ //           glAttachObjectARB(shaderPrograms(i),shaders(i))
+ //           glLinkProgramARB(shaderPrograms(i))
+ //       next i
+ //       
+ //   end sub
 }
