@@ -4,19 +4,18 @@
 
 #include "../include/LogSystem.hpp"
 
-#include "../include/Tools.hpp"
-
-#include <iostream>
-#include <fstream>
-#include <stdexcept>
-
 #include "boost/filesystem.hpp"
-
-#define FMT_HEADER_ONLY
-#include "../include/cppformat/format.h"
 
 using namespace std;
 using namespace boost;
+
+bool LogSystem::m_logToFile;
+bool LogSystem::m_logToStdout;
+string LogSystem::m_regionName;
+ofstream LogSystem::m_logFile;
+bitset<NUMBER_OF_LOGTYPE> LogSystem::m_logFiliter;
+mutex LogSystem::m_writeMtx;
+unordered_map<thread::id, string> LogSystem::m_threadMap;
 
 void LogSystem::SetLogDirectory(const string &directory) {
     // 确保目录存在
@@ -27,104 +26,15 @@ void LogSystem::SetLogDirectory(const string &directory) {
     unsigned cnt = 1;
     string today = GetDateString();
 
-    while (filesystem::exists(today + '-' + to_string(cnt) + ".log")) {
+    while (filesystem::exists(directory + today + '-' + to_string(cnt) + ".log")) {
         ++cnt;
     }   // while
 
-    m_logFile.open(today + '-' + to_string(cnt) + ".log");
+    m_logFile.open(directory + today + '-' + to_string(cnt) + ".log");
 
     // 可能权限不够导致文件打开失败
     if (!m_logFile.is_open()) {
         throw runtime_error("Failed to open log file. Unknown reason...");
-    }
-}
-
-
-template <typename ... Args>
-void LogSystem::Info(const string &fmt, const Args ... args) {
-    _Log(fmt, LogType::Info, args...);
-}
-
-
-template <typename ... Args>
-void LogSystem::Warning(const string &fmt, const Args ... args) {
-    _Log(fmt, LogType::Warning, args...);
-}
-
-
-template <typename ... Args>
-void LogSystem::Error(const string &fmt, const Args ... args) {
-    _Log(fmt, LogType::Error, args...);
-}
-
-
-template <typename ... Args>
-void LogSystem::Fatal(const string &fmt, const Args ... args) {
-    _Log(fmt, LogType::Fatal, args...);
-}
-
-
-template <typename ... Args>
-void LogSystem::Debug(const string &fmt, const Args ... args) {
-    _Log(fmt, LogType::Debug, args...);
-}
-
-
-template <typename ... Args>
-void LogSystem::Trace(const string &fmt, const Args ... args) {
-    _Log(fmt, LogType::Trace, args...);
-}
-
-
-// 日志记录的真正实现
-template <typename ... Args>
-void LogSystem::_Log(const std::string &fmt, const LogType &logType, const Args ... args) {
-    // 过滤信息
-    if (m_logFiliter.test(static_cast<unsigned>(logType))) {
-        return;
-    }
-
-    // 日志信息的通常大小
-    constexpr int MessageNormalSize = 80;
-
-    string buf;
-    buf.reserve(MessageNormalSize);
-
-    // 格式：[TIME][REGION NAME][THREAD NAME][MESSAGE TYPE] MESSAGE\n\t ...
-    // 每个空行后默认带一个缩进
-
-    AddSelectionInMessage(buf, GetTimeString());
-    AddSelectionInMessage(buf, m_regionName);
-    AddSelectionInMessage(buf, FindThreadName());
-    AddSelectionInMessage(buf, LogTypeString[static_cast<unsigned>(logType)]);
-
-    buf += ' ';
-    buf += format(fmt, args...);  // 使用cppformat
-
-    for (string::size_type i = 0;
-            i != buf.size() - 1;
-            ++i) {
-        if (buf[i] == '\n') {
-            buf.insert(i + 1, "\t");  // 插入缩进
-        }
-    }  // for
-
-    // 保证写入的数据不被打乱
-    lock_guard<mutex> lock(m_writeMtx);
-
-    if (m_logToStdout) {
-        cout.clear();
-        cout << buf << endl;
-    }
-
-    if (m_logToFile) {
-        if (!m_logFile.is_open()) {
-            throw runtime_error("Log file invaild! Have you ever set log file directory?");
-        } else {
-            m_logFile.clear();
-            m_logFile << buf << endl;
-            m_logFile.flush();  // 自动刷新
-        }
     }
 }
 
@@ -191,4 +101,9 @@ void LogSystem::DisableAll() {
 
 void LogSystem::EnableAll() {
     m_logFiliter.reset();
+}
+
+
+bool LogSystem::IsVaild() {
+    return m_logFile.is_open();
 }

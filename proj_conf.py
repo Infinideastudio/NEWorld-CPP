@@ -19,7 +19,9 @@ COMPILER_IGNORE_WARNINGS = [
     'padded',
     'gnu-zero-variadic-macro-arguments',
     'undef',
-    'switch-enum'
+    'switch-enum',
+    'global-constructors',
+    'exit-time-destructors'
 ]
 
 COMPILER_LIBRARYS = [
