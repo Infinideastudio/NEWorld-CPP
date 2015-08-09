@@ -15,6 +15,7 @@ string LogSystem::m_regionName;
 ofstream LogSystem::m_logFile;
 bitset<NUMBER_OF_LOGTYPE> LogSystem::m_logFiliter;
 mutex LogSystem::m_writeMtx;
+mutex LogSystem::m_threadNameMtx;
 unordered_map<thread::id, string> LogSystem::m_threadMap;
 
 void LogSystem::SetLogDirectory(const string &directory) {
@@ -68,6 +69,8 @@ void LogSystem::SetThreadName(const string &name) {
     if (iter != m_threadMap.end()) {
         iter->second = std::move(name);
     } else {
+        lock_guard<mutex> guard(m_threadNameMtx);
+
         m_threadMap.insert({this_thread::get_id(), std::move(name)});
     }
 }

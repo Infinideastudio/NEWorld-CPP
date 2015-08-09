@@ -16,8 +16,9 @@ def main():
 
     # 编译
     print('(info) Compiling unittest...')
-    if os.system('clang++ -std=c++1z {} {} -o exec.out'.format(
+    if os.system('clang++ -std=c++1z {} {} {} -o exec.out'.format(
         unittest_conf.UNITTEST_MAIN,
+        unittest_conf.UNITTEST_DEST_SOURCES,
         unittest_conf.UNITTEST_LINK_LIBRARY,
     )) == 0:
         print('(info) Running unittest...')

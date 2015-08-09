@@ -30,7 +30,7 @@ std::string CorrectPath(const std::string &originPath, const PathType &destType)
 
 std::string GetDateString() {
     constexpr unsigned TimeStringLength = 11;
-    constexpr char TimeFormat[] = "%Y-%m-&d";
+    constexpr char TimeFormat[] = "%Y-%m-%d";
 
     char buf[TimeStringLength];
     time_t timer = time(nullptr);

@@ -95,6 +95,7 @@ private:
     static std::ofstream m_logFile;
     static std::bitset<NUMBER_OF_LOGTYPE> m_logFiliter;
     static std::mutex m_writeMtx;
+    static std::mutex m_threadNameMtx;  // 防止出现插入冲突的情况
     static std::unordered_map<std::thread::id, std::string> m_threadMap;
 };  // class LogSystem
 
