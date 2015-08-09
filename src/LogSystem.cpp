@@ -1,5 +1,5 @@
 //
-// Copyright 2015 infinideastudio
+// Copyright 2015 infinideas
 //
 
 #include "../include/LogSystem.hpp"

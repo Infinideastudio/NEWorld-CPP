@@ -1,5 +1,5 @@
 //
-// Copyright 2015 infinideastudio
+// Copyright 2015 infinideas
 //
 
 int main(int argc, char *argv[]) {

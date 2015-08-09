@@ -1,5 +1,5 @@
 //
-// Copyright 2015 infinideastudio
+// Copyright 2015 infinideas
 //
 
 #ifndef NEWORLD_LOG_SYSTEM_HPP
@@ -16,7 +16,7 @@
 #include <unordered_map>
 
 #define FMT_HEADER_ONLY
-#include "../include/cppformat/format.h"
+#include "cppformat/format.h"
 
 constexpr int NUMBER_OF_LOGTYPE = 7;
 
