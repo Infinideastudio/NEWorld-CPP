@@ -52,7 +52,7 @@
     <ClCompile Include="..\Cpp\Player.cpp" />
     <ClCompile Include="..\Cpp\Renderer.cpp" />
     <ClCompile Include="..\Cpp\server.cpp" />
-    <ClCompile Include="..\Cpp\setting.cpp" />
+    <ClCompile Include="..\Cpp\Setting.cpp" />
     <ClCompile Include="..\Cpp\Skin.cpp" />
     <ClCompile Include="..\Cpp\Textures.cpp" />
     <ClCompile Include="..\Cpp\World.cpp" />
@@ -127,6 +127,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

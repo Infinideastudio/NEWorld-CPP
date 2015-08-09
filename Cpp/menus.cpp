@@ -96,7 +96,8 @@ void options(){
 	gui::trackbar*  FOVyBar = MainForm.createtrackbar(strWithVar("视野角度：", FOVyNormal), 120, (int)FOVyNormal - 1);
 	gui::trackbar*  mmsBar = MainForm.createtrackbar(strWithVar("鼠标灵敏度,", mousemove), 120, (int)mousemove * 40 * 2 - 1);
 	gui::trackbar*  viewdistBar = MainForm.createtrackbar(strWithVar("渲染距离,", viewdistance), 120, (viewdistance - 1) * 8 - 1);
-	gui::button*	ciArrayBtn = MainForm.createbutton("使用区块索引数组：" + boolstr(UseCIArray));
+	//gui::button*	ciArrayBtn = MainForm.createbutton("使用区块索引数组：" + boolstr(UseCIArray));
+	gui::button*	LoadingBtn = MainForm.createbutton("使用加载界面：" + boolstr(useLoading));
 	gui::button*	rdstbtn = MainForm.createbutton(">> 渲染选项...");
 	gui::button*	gistbtn = MainForm.createbutton(">> 图形界面选项...");
 	gui::button*	backbtn = MainForm.createbutton("<< 返回主菜单");
@@ -112,7 +113,8 @@ void options(){
 		FOVyBar->resize(leftp, midp - 10, upp + lspc * 0, upp + lspc * 0 + 24);
 		mmsBar->resize(midp + 10, rightp, upp + lspc * 0, upp + lspc * 0 + 24);
 		viewdistBar->resize(leftp, midp - 10, upp + lspc * 1, upp + lspc * 1 + 24);
-		ciArrayBtn->resize(midp + 10, rightp, upp + lspc * 1, upp + lspc * 1 + 24);
+		//ciArrayBtn->resize(midp + 10, rightp, upp + lspc * 1, upp + lspc * 1 + 24);
+		LoadingBtn->resize(midp + 10, rightp, upp + lspc * 1, upp + lspc * 1 + 24);
 		rdstbtn->resize(leftp, midp - 10, upp + lspc * 4, upp + lspc * 4 + 24);
 		gistbtn->resize(midp + 10, rightp, upp + lspc * 4, upp + lspc * 4 + 24);
 		backbtn->resize(leftp, midp - 10, downp - 24, downp);
@@ -128,8 +130,10 @@ void options(){
 		FOVyBar->text = strWithVar("视野角度：", FOVyNormal);
 		mmsBar->text = strWithVar("鼠标灵敏度：", mousemove);
 		viewdistBar->text = strWithVar("渲染距离：", viewdistance);
-		ciArrayBtn->text = strWithVar("使用区块索引数组, ", boolstr(UseCIArray));
-		if (ciArrayBtn->clicked) UseCIArray = !UseCIArray;
+		//ciArrayBtn->text = strWithVar("使用区块索引数组, ", boolstr(UseCIArray));
+		LoadingBtn->text = "使用加载界面：" + boolstr(useLoading);
+		//if (ciArrayBtn->clicked) UseCIArray = !UseCIArray;
+		if (LoadingBtn->clicked) useLoading = !useLoading;
 		if (rdstbtn->clicked) Renderoptions();
 		if (gistbtn->clicked) GUIoptions();
 		if (backbtn->clicked) f = true;
