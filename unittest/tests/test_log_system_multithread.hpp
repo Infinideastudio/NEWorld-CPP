@@ -10,7 +10,6 @@
 #define NUMBER_OF_LOG 100
 #define NUMBER_OF_THREAD 8
 
-
 void test_log_system_multithread();
 
 void WriteLog(int id);
@@ -34,6 +33,8 @@ void test_log_system_multithread() {
     for (auto &t : threads) {
         t.join();
     }  // foreach in threads
+
+    LogSystem::CopyToLatest();
 
 }
 

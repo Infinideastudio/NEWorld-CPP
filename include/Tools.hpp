@@ -16,4 +16,6 @@ std::string CorrectPath(const std::string &originPath, const PathType &destType)
 std::string GetDateString();
 std::string GetTimeString();
 
+std::string ReadFile(const std::string &filePath);
+
 #endif  // NEWORLD_TOOLS_HPP

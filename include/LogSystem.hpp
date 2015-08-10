@@ -82,6 +82,8 @@ public:
 
     static bool IsVaild();
 
+    static void CopyToLatest();
+
 private:
     template <typename ... Args>
     static void _Log(const std::string &fmt, const LogType &logType, const Args ... args);
@@ -91,6 +93,7 @@ private:
 
     static bool m_logToFile;
     static bool m_logToStdout;
+    static std::string m_llogFileName;
     static std::string m_regionName;
     static std::ofstream m_logFile;
     static std::bitset<NUMBER_OF_LOGTYPE> m_logFiliter;

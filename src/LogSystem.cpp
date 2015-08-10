@@ -4,6 +4,8 @@
 
 #include "../include/LogSystem.hpp"
 
+#include <cwchar>
+
 #include "boost/filesystem.hpp"
 
 using namespace std;
@@ -11,6 +13,7 @@ using namespace boost;
 
 bool LogSystem::m_logToFile;
 bool LogSystem::m_logToStdout;
+string LogSystem::m_llogFileName;
 string LogSystem::m_regionName;
 ofstream LogSystem::m_logFile;
 bitset<NUMBER_OF_LOGTYPE> LogSystem::m_logFiliter;
@@ -31,7 +34,8 @@ void LogSystem::SetLogDirectory(const string &directory) {
         ++cnt;
     }   // while
 
-    m_logFile.open(directory + today + '-' + to_string(cnt) + ".log");
+    m_llogFileName = directory + today + '-' + to_string(cnt) + ".log";
+    m_logFile.open(m_llogFileName);
 
     // 可能权限不够导致文件打开失败
     if (!m_logFile.is_open()) {
@@ -109,4 +113,23 @@ void LogSystem::EnableAll() {
 
 bool LogSystem::IsVaild() {
     return m_logFile.is_open();
+}
+
+void LogSystem::CopyToLatest() {
+    if (m_llogFileName.empty()) {
+        throw runtime_error("No log file.");
+    }
+
+    if (!filesystem::exists(m_llogFileName)) {
+        throw runtime_error("Log file does not exist.");
+    }
+
+    filesystem::path latest = filesystem::path(m_llogFileName).parent_path();
+    latest /= "latest.log";
+
+    if (filesystem::exists(latest)) {
+        filesystem::remove(latest);
+    }
+
+    filesystem::copy(m_llogFileName, latest);
 }
