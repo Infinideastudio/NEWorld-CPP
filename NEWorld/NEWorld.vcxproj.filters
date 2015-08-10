@@ -152,9 +152,6 @@
     <ClCompile Include="..\Cpp\Cat.cpp">
       <Filter>Moveable Object\Animals</Filter>
     </ClCompile>
-    <ClCompile Include="..\Cpp\setting.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\Cpp\Control.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -163,6 +160,9 @@
     </ClCompile>
     <ClCompile Include="..\Cpp\menus.cpp">
       <Filter>GUI</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Cpp\Setting.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

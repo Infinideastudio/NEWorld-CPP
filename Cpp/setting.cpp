@@ -3,6 +3,7 @@
 int windowwidth;
 int windowheight;
 int handleLimit = 2;
+bool useLoading = true;         //加载界面
 bool SmoothLighting = true;		//平滑光照
 bool versync = false;			//垂直同步
 float FOVyNormal = 60.0;		//视野角度

@@ -14,7 +14,7 @@ namespace world{
 	brightness BRIGHTNESSDEC = 1;    //Brightness decree;
 	uint EmptyList;
 	chunk* chunks;
-	int loadedChunks;
+	int loadedChunks, allocChunks;
 	int ciCacheIndex = -2;
 	uint64 ciCacheID = 0;
 	chunkIndexArray ciArray;
@@ -37,6 +37,7 @@ namespace world{
 
 		glNewList(EmptyList, GL_COMPILE); glEndList();
 		loadedChunks = 0;
+		allocChunks = 0;
 		if (chunks != nullptr){
 			free(chunks);
 			chunks = nullptr;
@@ -232,15 +233,21 @@ namespace world{
 	void ExpandChunkArray(int cc){
 
 		loadedChunks += cc;
-		chunks = (chunk*)realloc(chunks, loadedChunks * sizeof(chunk));
-		if (chunks == nullptr && loadedChunks!= 0){
-			printf("[Console][Error]");
-			printf("Chunk Array expanding error.\n");
-			glfwTerminate();
-			saveAllChunks();
-			destroyAllChunks();
-			glfwTerminate();
-			exit(0);
+		if (loadedChunks > allocChunks) {
+			if (allocChunks < 1024) allocChunks = 1024;
+			else allocChunks *= 2;
+			while (allocChunks < loadedChunks) allocChunks *= 2;
+			chunks = (chunk*)realloc(chunks, allocChunks * sizeof(chunk));
+			//memset(chunks + loadedChunks - cc, 0, sizeof(chunk*)*cc);
+			if (chunks == nullptr && loadedChunks != 0) {
+				printf("[Console][Error]");
+				printf("Chunk Array expanding error.\n");
+				glfwTerminate();
+				saveAllChunks();
+				destroyAllChunks();
+				glfwTerminate();
+				exit(0);
+			}
 		}
 
 	}
@@ -248,16 +255,6 @@ namespace world{
 	void ReduceChunkArray(int cc){
 
 		loadedChunks -= cc;
-		chunks = (chunk*)realloc(chunks, loadedChunks *sizeof(chunk));
-		if (chunks == nullptr && loadedChunks >0){
-			printf("[Console][Error]");
-			printf("Chunk Array reducing error.\n");
-			saveAllChunks();
-			destroyAllChunks();
-			glfwTerminate();
-			exit(0);
-		}
-		
 
 	}
 

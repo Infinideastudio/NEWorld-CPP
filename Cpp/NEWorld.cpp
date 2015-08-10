@@ -78,7 +78,10 @@ NEWorld-CPP第一版作者（翻译作者）：Null (abc612008)
 
 0.4.9_Preview_0.9
 1. 更新到0.4.9r4版本
+2. 优化（加载、卸载区块加速）
+3. 用是否使用加载界面的选项代替了是否使用ChunkIndexArray
 
+(未翻译：shader，VBO开关，渲染器更新，骨骼，皮肤)
 */
 
 #include "DeveloperOptions.h"
@@ -234,13 +237,6 @@ main_menu:
 	printf("Starting game...\n");
 	//游戏开始(还没呢QAQ)
 	//各种初始化ing...
-	glEnable(GL_TEXTURE_2D);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glprint(350, 240 + 16 * 3, ("Loading... "));
-	glprint(350, 240 + 16 * 1, ("Initializing!\n"));
-	glfwSwapBuffers(win);
-	glfwPollEvents();
-
 	MutexLock(Mutex);
 	updateThread = thread(updateThreadFunc);
 
@@ -287,22 +283,23 @@ main_menu:
 		else
 			drawLoading(loading);
 		
-		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == 1){
+		if (glfwGetKey(win, GLFW_KEY_ESCAPE) == 1&&!loading){
 			createThumbnail();
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			setFontColor(1.0, 1.0, 1.0, 1.0);
 			glprint(0, 0, "Saving world...");
 			glfwSwapBuffers(win);
 			glfwPollEvents();
+			MutexUnlock(Mutex);
+			MutexLock(Mutex);
+			updateThreadRun = false;
 			saveGame();
 			world::destroyAllChunks();
-			updateThreadRun = false;
 			MutexUnlock(Mutex);
 			updateThread.join();
 			printf("[Console][Game]");
 			printf("Returned to main menu\n");
 			ESCP = true;
-			//exit(0)
 			goto main_menu;
 		}
 
@@ -354,8 +351,6 @@ void updateThreadFunc(){
 	MutexLock(Mutex);
 	while (updateThreadRun){
 
-		MutexUnlock(Mutex);
-		MutexLock(Mutex);
 		while (updateThreadPaused){
 			MutexUnlock(Mutex);
 			MutexLock(Mutex);
@@ -377,6 +372,8 @@ void updateThreadFunc(){
 			ups = upsc;
 			upsc = 0;
 		}
+		MutexUnlock(Mutex);
+		MutexLock(Mutex);
 
 	}
 	MutexUnlock(Mutex);
@@ -1051,9 +1048,43 @@ void updategame(bool FirstUpdateThisFrame){
 		}
 
 		mwl = mw;
-	}
+		glfwGetCursorPos(win, &mx, &my);
+		//转头！你治好了我多年的颈椎病！
 
-	if (!bagOpened){
+		if (mx > int(windowwidth / 2))
+			player::heading -= (mx - int(windowwidth / 2))*mousemove;
+
+		if (mx < int(windowwidth / 2))
+			player::heading += (int(windowwidth / 2) - mx)*mousemove;
+
+		if (my < int(windowheight / 2))
+			player::lookupdown -= (int(windowheight / 2) - my)*mousemove;
+
+		if (my > windowheight / 2)
+			player::lookupdown += (my - int(windowheight / 2))*mousemove;
+
+
+		if (glfwGetKey(win, GLFW_KEY_RIGHT) == 1) {
+			player::xlookspeed -= mousemove * 4;
+		}
+		if (glfwGetKey(win, GLFW_KEY_LEFT) == 1) {
+			player::xlookspeed += mousemove * 4;
+		}
+		if (glfwGetKey(win, GLFW_KEY_UP) == 1) {
+			player::ylookspeed -= mousemove * 4;
+		}
+		if (glfwGetKey(win, GLFW_KEY_DOWN) == 1) {
+			player::ylookspeed += mousemove * 4;
+		}
+
+		player::heading += player::xlookspeed;
+		player::lookupdown += player::ylookspeed;
+		player::xlookspeed *= 0.8f;
+		player::ylookspeed *= 0.8f;
+
+		//限制角度，别把头转掉下来了 ←_←
+		if (player::lookupdown < -90) player::lookupdown = -90;
+		if (player::lookupdown > 90) player::lookupdown = 90;
 
 		enterpl = enterp;
 		if (glfwGetKey(win, GLFW_KEY_ENTER) == GLFW_PRESS){
@@ -1107,20 +1138,20 @@ void updategame(bool FirstUpdateThisFrame){
 			shouldGetScreenshot = true;
 			F2P = true;
 		}
-		if (!glfwGetKey(win, GLFW_KEY_F2) == GLFW_PRESS) F2P = false;
+		if (glfwGetKey(win, GLFW_KEY_F2) != GLFW_PRESS) F2P = false;
 
 		if (glfwGetKey(win, GLFW_KEY_F3) == GLFW_PRESS && F3P == false){
 			DEBUGMODE = !DEBUGMODE;
 			F3P = true;
 		}
-		if (!glfwGetKey(win, GLFW_KEY_F3) == GLFW_PRESS) F3P = false;
+		if (glfwGetKey(win, GLFW_KEY_F3) != GLFW_PRESS) F3P = false;
 
 		if (glfwGetKey(win, GLFW_KEY_F3) == GLFW_PRESS && glfwGetKey(win, GLFW_KEY_H) == GLFW_PRESS && F3_HP == false){
 			DebugHitbox = !DebugHitbox;
 			DEBUGMODE = true;
 			F3_HP = true;
 		}
-		if (!(glfwGetKey(win, GLFW_KEY_F3) == GLFW_PRESS && glfwGetKey(win, GLFW_KEY_H) == GLFW_PRESS)) F3_HP = false;
+		if (glfwGetKey(win, GLFW_KEY_F3) != GLFW_PRESS || glfwGetKey(win, GLFW_KEY_H) != GLFW_PRESS) F3_HP = false;
 
 		if (glfwGetKey(win, GLFW_KEY_F4) == GLFW_PRESS && F4P == false){
 			CROSS = !CROSS;
@@ -1398,8 +1429,6 @@ void drawGUI(){
 		show(ss.str()); ss.str("");
 		ss << "Flying: " << boolstr(FLY);
 		show(ss.str()); ss.str("");
-		ss << "Render GUI: " << boolstr(GUIrenderswitch);
-		show(ss.str()); ss.str("");
 		ss << "Debug Mode: " << boolstr(DEBUGMODE);
 		show(ss.str()); ss.str("");
 		ss << "Crosswall: " << boolstr(CROSS);
@@ -1430,7 +1459,7 @@ void drawGUI(){
 		ss << "In water: " << boolstr(player::inWater);
 		show(ss.str()); ss.str("");
 
-		ss << world::loadedChunks << " chunks loaded";
+		ss << world::loadedChunks << " / "<< world::allocChunks <<" chunks loaded";
 		show(ss.str()); ss.str("");
 		ss << renderedChunk << " chunks rendered";
 		show(ss.str()); ss.str("");
@@ -1442,8 +1471,8 @@ void drawGUI(){
 		ss << "ChunkIndexCache Index = " << world::ciCacheIndex;
 		show(ss.str()); ss.str("");
 
-		ss << "MO count: " << world::MOs.size();
-		show(ss.str()); ss.str("");
+		//ss << "MO count: " << world::MOs.size();
+		//show(ss.str()); ss.str("");
 
 		//ss << "Particle count: " & particles::ptcsrendered & "/" & particles::ptcs.size()
 		//show(ss.str())
@@ -1558,7 +1587,7 @@ void drawLoading(bool& loading) {
 	glLoadIdentity();
 	glEnable(GL_TEXTURE_2D);
 	glDisable(GL_CULL_FACE);
-	if (loadedChunks == 1728) {   //加载完毕
+	if (loadedChunks == 1728 || !useLoading) {   //加载完毕
 		handleLimit = 2;
 		glClearColor(skycolorR, skycolorG, skycolorB, 1.0);
 		glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
@@ -1579,51 +1608,25 @@ void drawLoading(bool& loading) {
 	glfwPollEvents();
 }
 
+struct RenderChunk
+{
+public:
+	RenderChunk(world::chunk* c) {
+		cx = c->cx;
+		cy = c->cy;
+		cz = c->cz;
+		list = c->list;
+		loadAnim = c->loadAnim;
+	}
+	int cx, cy, cz;
+	uint list = 0;
+	float loadAnim = 0;
+};
+
 void drawmain() {
 	//画场景
 
 	Time_renderscene_ = timer();
-	if (!bagOpened) {
-		glfwGetCursorPos(win, &mx, &my);
-		//转头！你治好了我多年的颈椎病！
-
-		if (mx > int(windowwidth / 2))
-			player::heading -= (mx - int(windowwidth / 2))*mousemove;
-
-		if (mx < int(windowwidth / 2))
-			player::heading += (int(windowwidth / 2) - mx)*mousemove;
-
-		if (my < int(windowheight / 2))
-			player::lookupdown -= (int(windowheight / 2) - my)*mousemove;
-
-		if (my > windowheight / 2)
-			player::lookupdown += (my - int(windowheight / 2))*mousemove;
-
-
-		if (glfwGetKey(win, GLFW_KEY_RIGHT) == 1) {
-			player::xlookspeed -= mousemove * 4;
-		}
-		if (glfwGetKey(win, GLFW_KEY_LEFT) == 1) {
-			player::xlookspeed += mousemove * 4;
-		}
-		if (glfwGetKey(win, GLFW_KEY_UP) == 1) {
-			player::ylookspeed -= mousemove * 4;
-		}
-		if (glfwGetKey(win, GLFW_KEY_DOWN) == 1) {
-			player::ylookspeed += mousemove * 4;
-		}
-
-		player::heading += player::xlookspeed;
-		player::lookupdown += player::ylookspeed;
-		player::xlookspeed *= 0.8f;
-		player::ylookspeed *= 0.8f;
-
-		//限制角度，别把头转掉下来了 ←_←
-		if (player::lookupdown < -90) player::lookupdown = -90;
-		if (player::lookupdown > 90) player::lookupdown = 90;
-	}
-
-	double lx, ly, lz;
 	double xpos = player::xpos;
 	double ypos = player::ypos + player::height + player::heightExt;
 	double zpos = player::zpos;
@@ -1662,71 +1665,75 @@ void drawmain() {
 		glDeleteLists(world::displayListUnloadList[world::displayListUnloadList.size() - 1], 3);
 		world::displayListUnloadList.pop_back();
 	}
-	if ((timer() - uctime) >= 1.0) {
-		uctime = timer();
-		ups = upsc;
-		upsc = 0;
-	}
+	//if ((timer() - uctime) >= 1.0) {
+	//	uctime = timer();
+	//	ups = upsc;
+	//	upsc = 0;
+	//}
+	double plookupdown = player::lookupdown;
+	double pheading = player::heading;
 	glLoadIdentity();
-	glRotated(player::lookupdown, 1, 0, 0);
-	glRotated(360.0 - player::heading, 0, 1, 0);
+	glRotated(plookupdown, 1, 0, 0);
+	glRotated(360.0 - pheading, 0, 1, 0);
 	Frustum::calc();
-	vector<world::chunk*> displayChunks;
+	vector<RenderChunk> displayChunks;
 	for (int i = 0; i != world::loadedChunks; i++) {
 		if (world::chunks[i].list > 0 && world::chunkInRange(world::chunks[i].cx, world::chunks[i].cy, world::chunks[i].cz, player::cxt, player::cyt, player::czt, viewdistance)) {
 			if (Frustum::aabbInFrustum(world::chunks[i].getRelativeAABB(xpos, ypos, zpos))) displayChunks.push_back(&world::chunks[i]);
 		}
 	}
+	MutexUnlock(Mutex);
 	renderedChunk = displayChunks.size();
 	glBindTexture(GL_TEXTURE_2D, BlockTextures);
 	for (int i = 0; i != renderedChunk; i++) {
-		auto cptr = displayChunks[i];
-		glTranslatef(cptr->cx * 16 - xpos, cptr->cy * 16 - cptr->loadAnim - ypos, cptr->cz * 16 - zpos);
-		glCallList(cptr->list);
-		glTranslatef(-cptr->cx * 16 + xpos, -cptr->cy * 16 + cptr->loadAnim + ypos, -cptr->cz * 16 + zpos);
+		auto cr = displayChunks[i];
+		glTranslated(cr.cx * 16 - xpos, cr.cy * 16 - cr.loadAnim - ypos, cr.cz * 16 - zpos);
+		glCallList(cr.list);
+		glTranslated(-cr.cx * 16 + xpos, -cr.cy * 16 + cr.loadAnim + ypos, -cr.cz * 16 + zpos);
 	}
 	if (seldes > 0.0) {
-		glTranslatef(selx - xpos, sely - ypos, selz - zpos);
+		glTranslated(selx - xpos, sely - ypos, selz - zpos);
 		renderDestroy(seldes, 0.0, 0.0, 0.0);
-		glTranslatef(-selx + xpos, -sely + ypos, -selz + zpos);
+		glTranslated(-selx + xpos, -sely + ypos, -selz + zpos);
 	}
+	MutexLock(Mutex);
 	glBindTexture(GL_TEXTURE_2D, BlockTextures);
 	particles::renderall();
-
+	MutexUnlock(Mutex);
 	glDisable(GL_TEXTURE_2D);
 	glTranslatef(selx - xpos, sely - ypos, selz - zpos);
 	if (GUIrenderswitch) drawborder(0.0, 0.0, 0.0);
 	glTranslatef(-selx + xpos, -sely + ypos, -selz + zpos);
 	//for (unsigned int i = 0; i != world::MOs.size(); i++) world::MOs[i]->renderer();
 	glLoadIdentity();
-	glRotated(player::lookupdown, 1, 0, 0);
-	glRotated(360.0 - player::heading, 0, 1, 0);
+	glRotated(plookupdown, 1, 0, 0);
+	glRotated(360.0 - pheading, 0, 1, 0);
 	glTranslated(-xpos, -ypos, -zpos);
 	glLoadIdentity();
-	glRotated(player::lookupdown, 1, 0, 0);
-	glRotated(360.0 - player::heading, 0, 1, 0);
+	glRotated(plookupdown, 1, 0, 0);
+	glRotated(360.0 - pheading, 0, 1, 0);
 	glBindTexture(GL_TEXTURE_2D, BlockTextures);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_CULL_FACE);
 	for (int i = 0; i != renderedChunk; i++) {
-		auto cptr = displayChunks[i];
-		glTranslatef(cptr->cx * 16 - xpos, cptr->cy * 16 - cptr->loadAnim - ypos, cptr->cz * 16 - zpos);
-		glCallList(cptr->list + 1);
-		glTranslatef(-cptr->cx * 16 + xpos, -cptr->cy * 16 + cptr->loadAnim + ypos, -cptr->cz * 16 + zpos);
+		auto cr = displayChunks[i];
+		glTranslated(cr.cx * 16 - xpos, cr.cy * 16 - cr.loadAnim - ypos, cr.cz * 16 - zpos);
+		glCallList(cr.list + 1);
+		glTranslated(-cr.cx * 16 + xpos, -cr.cy * 16 + cr.loadAnim + ypos, -cr.cz * 16 + zpos);
 	}
 	glDisable(GL_CULL_FACE);
 	for (int i = 0; i != renderedChunk; i++) {
-		auto cptr = displayChunks[i];
-		glTranslatef(cptr->cx * 16 - xpos, cptr->cy * 16 - cptr->loadAnim - ypos, cptr->cz * 16 - zpos);
-		glCallList(cptr->list + 2);
-		glTranslatef(-cptr->cx * 16 + xpos, -cptr->cy * 16 + cptr->loadAnim + ypos, -cptr->cz * 16 + zpos);
+		auto cr = displayChunks[i];
+		glTranslated(cr.cx * 16 - xpos, cr.cy * 16 - cr.loadAnim - ypos, cr.cz * 16 - zpos);
+		glCallList(cr.list + 2);
+		glTranslated(-cr.cx * 16 + xpos, -cr.cy * 16 + cr.loadAnim + ypos, -cr.cz * 16 + zpos);
 	}
 
 	glLoadIdentity();
 	glRotated(player::lookupdown, 1, 0, 0);
 	glRotated(360.0 - player::heading, 0, 1, 0);
 	glTranslated(-xpos, -ypos, -zpos);
-
+	MutexLock(Mutex);
 	glDisable(GL_TEXTURE_2D);
 	drawcloud(player::xpos, player::zpos);
 	glEnable(GL_TEXTURE_2D);

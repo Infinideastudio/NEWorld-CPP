@@ -16,6 +16,7 @@ namespace world{
 
 	extern chunk* chunks;
 	extern int loadedChunks;
+	extern int allocChunks;
 	extern int ciCacheIndex;
 	extern uint64 ciCacheID;
 	extern chunkIndexArray ciArray;
