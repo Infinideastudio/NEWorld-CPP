@@ -42,6 +42,12 @@
 # include <windows.h>
 #endif
 
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wweak-vtables"
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#endif
+
 using fmt::internal::Arg;
 
 // Check if exceptions are disabled.
@@ -133,7 +139,7 @@ typedef void (*FormatFunc)(fmt::Writer &, int, fmt::StringRef);
 //   other  - failure
 // Buffer should be at least of size 1.
 int safe_strerror(
-    int error_code, char *&buffer, std::size_t buffer_size) FMT_NOEXCEPT {
+  int error_code, char *&buffer, std::size_t buffer_size) FMT_NOEXCEPT {
   assert(buffer != 0 && buffer_size != 0);
   int result = 0;
 #if ((_POSIX_C_SOURCE >= 200112L || _XOPEN_SOURCE >= 600) && !_GNU_SOURCE) || __ANDROID__
@@ -177,7 +183,7 @@ void format_error_code(fmt::Writer &out, int error_code,
   fmt::internal::IntTraits<int>::MainType ec_value = error_code;
   // Subtract 2 to account for terminating null characters in SEP and ERR.
   std::size_t error_code_size =
-      sizeof(SEP) + sizeof(ERR) + fmt::internal::count_digits(ec_value) - 2;
+  sizeof(SEP) + sizeof(ERR) + fmt::internal::count_digits(ec_value) - 2;
   if (message.size() <= fmt::internal::INLINE_BUFFER_SIZE - error_code_size)
     out << message << SEP;
   out << ERR << error_code;
@@ -185,7 +191,7 @@ void format_error_code(fmt::Writer &out, int error_code,
 }
 
 void report_error(FormatFunc func,
-    int error_code, fmt::StringRef message) FMT_NOEXCEPT {
+                  int error_code, fmt::StringRef message) FMT_NOEXCEPT {
   fmt::MemoryWriter full_message;
   func(full_message, error_code, message);
   // Use Writer::data instead of Writer::c_str to avoid potential memory
@@ -196,7 +202,7 @@ void report_error(FormatFunc func,
 
 // IsZeroInt::visit(arg) returns true iff arg is a zero integer.
 class IsZeroInt : public fmt::internal::ArgVisitor<IsZeroInt, bool> {
- public:
+public:
   template <typename T>
   bool visit_any_int(T value) { return value == 0; }
 };
@@ -224,7 +230,7 @@ int parse_nonnegative_int(const Char *&s) {
 inline void require_numeric_argument(const Arg &arg, char spec) {
   if (arg.type > Arg::LAST_NUMERIC_TYPE) {
     std::string message =
-        fmt::format("format specifier '{}' requires numeric argument", spec);
+      fmt::format("format specifier '{}' requires numeric argument", spec);
     FMT_THROW(fmt::FormatError(message));
   }
 }
@@ -235,7 +241,7 @@ void check_sign(const Char *&s, const Arg &arg) {
   require_numeric_argument(arg, sign);
   if (arg.type == Arg::UINT || arg.type == Arg::ULONG_LONG) {
     FMT_THROW(fmt::FormatError(fmt::format(
-      "format specifier '{}' requires signed argument", sign)));
+                                 "format specifier '{}' requires signed argument", sign)));
   }
   ++s;
 }
@@ -243,12 +249,12 @@ void check_sign(const Char *&s, const Arg &arg) {
 // Checks if an argument is a valid printf width specifier and sets
 // left alignment if it is negative.
 class WidthHandler : public fmt::internal::ArgVisitor<WidthHandler, unsigned> {
- private:
+private:
   fmt::FormatSpec &spec_;
 
   FMT_DISALLOW_COPY_AND_ASSIGN(WidthHandler);
 
- public:
+public:
   explicit WidthHandler(fmt::FormatSpec &spec) : spec_(spec) {}
 
   unsigned visit_unhandled_arg() {
@@ -271,8 +277,8 @@ class WidthHandler : public fmt::internal::ArgVisitor<WidthHandler, unsigned> {
 };
 
 class PrecisionHandler :
-    public fmt::internal::ArgVisitor<PrecisionHandler, int> {
- public:
+  public fmt::internal::ArgVisitor<PrecisionHandler, int> {
+public:
   unsigned visit_unhandled_arg() {
     FMT_THROW(fmt::FormatError("precision is not integer"));
     FMT_RETURN_AFTER_THROW(0);
@@ -289,13 +295,13 @@ class PrecisionHandler :
 // Converts an integer argument to an integral type T for printf.
 template <typename T>
 class ArgConverter : public fmt::internal::ArgVisitor<ArgConverter<T>, void> {
- private:
+private:
   fmt::internal::Arg &arg_;
   wchar_t type_;
 
   FMT_DISALLOW_COPY_AND_ASSIGN(ArgConverter);
 
- public:
+public:
   ArgConverter(fmt::internal::Arg &arg, wchar_t type)
     : arg_(arg), type_(type) {}
 
@@ -311,17 +317,17 @@ class ArgConverter : public fmt::internal::ArgVisitor<ArgConverter<T>, void> {
       } else {
         arg_.type = Arg::UINT;
         arg_.uint_value = static_cast<unsigned>(
-            static_cast<typename fmt::internal::MakeUnsigned<T>::Type>(value));
+                            static_cast<typename fmt::internal::MakeUnsigned<T>::Type>(value));
       }
     } else {
       if (is_signed) {
         arg_.type = Arg::LONG_LONG;
         arg_.long_long_value =
-            static_cast<typename fmt::internal::MakeUnsigned<U>::Type>(value);
+          static_cast<typename fmt::internal::MakeUnsigned<U>::Type>(value);
       } else {
         arg_.type = Arg::ULONG_LONG;
         arg_.ulong_long_value =
-            static_cast<typename fmt::internal::MakeUnsigned<U>::Type>(value);
+          static_cast<typename fmt::internal::MakeUnsigned<U>::Type>(value);
       }
     }
   }
@@ -329,12 +335,12 @@ class ArgConverter : public fmt::internal::ArgVisitor<ArgConverter<T>, void> {
 
 // Converts an integer argument to char for printf.
 class CharConverter : public fmt::internal::ArgVisitor<CharConverter, void> {
- private:
+private:
   fmt::internal::Arg &arg_;
 
   FMT_DISALLOW_COPY_AND_ASSIGN(CharConverter);
 
- public:
+public:
   explicit CharConverter(fmt::internal::Arg &arg) : arg_(arg) {}
 
   template <typename T>
@@ -352,15 +358,15 @@ Arg::StringValue<Char> ignore_incompatible_str(Arg::StringValue<wchar_t>);
 
 template <>
 inline Arg::StringValue<char> ignore_incompatible_str(
-    Arg::StringValue<wchar_t>) { return Arg::StringValue<char>(); }
+  Arg::StringValue<wchar_t>) { return Arg::StringValue<char>(); }
 
 template <>
 inline Arg::StringValue<wchar_t> ignore_incompatible_str(
-    Arg::StringValue<wchar_t> s) { return s; }
+  Arg::StringValue<wchar_t> s) { return s; }
 }  // namespace
 
 FMT_FUNC void fmt::SystemError::init(
-    int err_code, StringRef format_str, ArgList args) {
+  int err_code, StringRef format_str, ArgList args) {
   error_code_ = err_code;
   MemoryWriter w;
   internal::format_system_error(w, err_code, format(format_str, args));
@@ -370,39 +376,39 @@ FMT_FUNC void fmt::SystemError::init(
 
 template <typename T>
 int fmt::internal::CharTraits<char>::format_float(
-    char *buffer, std::size_t size, const char *format,
-    unsigned width, int precision, T value) {
+  char *buffer, std::size_t size, const char *format,
+  unsigned width, int precision, T value) {
   if (width == 0) {
     return precision < 0 ?
-        FMT_SNPRINTF(buffer, size, format, value) :
-        FMT_SNPRINTF(buffer, size, format, precision, value);
+           FMT_SNPRINTF(buffer, size, format, value) :
+           FMT_SNPRINTF(buffer, size, format, precision, value);
   }
   return precision < 0 ?
-      FMT_SNPRINTF(buffer, size, format, width, value) :
-      FMT_SNPRINTF(buffer, size, format, width, precision, value);
+         FMT_SNPRINTF(buffer, size, format, width, value) :
+         FMT_SNPRINTF(buffer, size, format, width, precision, value);
 }
 
 template <typename T>
 int fmt::internal::CharTraits<wchar_t>::format_float(
-    wchar_t *buffer, std::size_t size, const wchar_t *format,
-    unsigned width, int precision, T value) {
+  wchar_t *buffer, std::size_t size, const wchar_t *format,
+  unsigned width, int precision, T value) {
   if (width == 0) {
     return precision < 0 ?
-        swprintf(buffer, size, format, value) :
-        swprintf(buffer, size, format, precision, value);
+           swprintf(buffer, size, format, value) :
+           swprintf(buffer, size, format, precision, value);
   }
   return precision < 0 ?
-      swprintf(buffer, size, format, width, value) :
-      swprintf(buffer, size, format, width, precision, value);
+         swprintf(buffer, size, format, width, value) :
+         swprintf(buffer, size, format, width, precision, value);
 }
 
 template <typename T>
 const char fmt::internal::BasicData<T>::DIGITS[] =
-    "0001020304050607080910111213141516171819"
-    "2021222324252627282930313233343536373839"
-    "4041424344454647484950515253545556575859"
-    "6061626364656667686970717273747576777879"
-    "8081828384858687888990919293949596979899";
+  "0001020304050607080910111213141516171819"
+  "2021222324252627282930313233343536373839"
+  "4041424344454647484950515253545556575859"
+  "6061626364656667686970717273747576777879"
+  "8081828384858687888990919293949596979899";
 
 #define FMT_POWERS_OF_10(factor) \
   factor * 10, \
@@ -433,24 +439,24 @@ const uint64_t fmt::internal::BasicData<T>::POWERS_OF_10_64[] = {
 FMT_FUNC void fmt::internal::report_unknown_type(char code, const char *type) {
   if (std::isprint(static_cast<unsigned char>(code))) {
     FMT_THROW(fmt::FormatError(
-        fmt::format("unknown format code '{}' for {}", code, type)));
+                fmt::format("unknown format code '{}' for {}", code, type)));
   }
   FMT_THROW(fmt::FormatError(
-      fmt::format("unknown format code '\\x{:02x}' for {}",
-        static_cast<unsigned>(code), type)));
+              fmt::format("unknown format code '\\x{:02x}' for {}",
+                          static_cast<unsigned>(code), type)));
 }
 
 #ifdef _WIN32
 
 FMT_FUNC fmt::internal::UTF8ToUTF16::UTF8ToUTF16(fmt::StringRef s) {
   int length = MultiByteToWideChar(
-      CP_UTF8, MB_ERR_INVALID_CHARS, s.c_str(), -1, 0, 0);
+                 CP_UTF8, MB_ERR_INVALID_CHARS, s.c_str(), -1, 0, 0);
   static const char ERROR_MSG[] = "cannot convert string from UTF-8 to UTF-16";
   if (length == 0)
     FMT_THROW(WindowsError(GetLastError(), ERROR_MSG));
   buffer_.resize(length);
   length = MultiByteToWideChar(
-    CP_UTF8, MB_ERR_INVALID_CHARS, s.c_str(), -1, &buffer_[0], length);
+             CP_UTF8, MB_ERR_INVALID_CHARS, s.c_str(), -1, &buffer_[0], length);
   if (length == 0)
     FMT_THROW(WindowsError(GetLastError(), ERROR_MSG));
 }
@@ -458,7 +464,7 @@ FMT_FUNC fmt::internal::UTF8ToUTF16::UTF8ToUTF16(fmt::StringRef s) {
 FMT_FUNC fmt::internal::UTF16ToUTF8::UTF16ToUTF8(fmt::WStringRef s) {
   if (int error_code = convert(s)) {
     FMT_THROW(WindowsError(error_code,
-        "cannot convert string from UTF-16 to UTF-8"));
+                           "cannot convert string from UTF-16 to UTF-8"));
   }
 }
 
@@ -468,14 +474,14 @@ FMT_FUNC int fmt::internal::UTF16ToUTF8::convert(fmt::WStringRef s) {
     return GetLastError();
   buffer_.resize(length);
   length = WideCharToMultiByte(
-    CP_UTF8, 0, s.c_str(), -1, &buffer_[0], length, 0, 0);
+             CP_UTF8, 0, s.c_str(), -1, &buffer_[0], length, 0, 0);
   if (length == 0)
     return GetLastError();
   return 0;
 }
 
 FMT_FUNC void fmt::WindowsError::init(
-    int err_code, StringRef format_str, ArgList args) {
+  int err_code, StringRef format_str, ArgList args) {
   error_code_ = err_code;
   MemoryWriter w;
   internal::format_windows_error(w, err_code, format(format_str, args));
@@ -486,8 +492,8 @@ FMT_FUNC void fmt::WindowsError::init(
 #endif
 
 FMT_FUNC void fmt::internal::format_system_error(
-    fmt::Writer &out, int error_code,
-    fmt::StringRef message) FMT_NOEXCEPT {
+  fmt::Writer &out, int error_code,
+  fmt::StringRef message) FMT_NOEXCEPT {
   FMT_TRY {
     MemoryBuffer<char, INLINE_BUFFER_SIZE> buffer;
     buffer.resize(INLINE_BUFFER_SIZE);
@@ -508,24 +514,24 @@ FMT_FUNC void fmt::internal::format_system_error(
 
 #ifdef _WIN32
 FMT_FUNC void fmt::internal::format_windows_error(
-    fmt::Writer &out, int error_code,
-    fmt::StringRef message) FMT_NOEXCEPT {
+  fmt::Writer &out, int error_code,
+  fmt::StringRef message) FMT_NOEXCEPT {
   class String {
-   private:
+  private:
     LPWSTR str_;
 
-   public:
+  public:
     String() : str_() {}
     ~String() { LocalFree(str_); }
-    LPWSTR *ptr() { return &str_; }
+    LPWSTR * ptr() { return &str_; }
     LPCWSTR c_str() const { return str_; }
   };
   FMT_TRY {
     String system_message;
     if (FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER |
-        FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0,
-        error_code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-        reinterpret_cast<LPWSTR>(system_message.ptr()), 0, 0)) {
+    FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, 0,
+    error_code, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+    reinterpret_cast<LPWSTR>(system_message.ptr()), 0, 0)) {
       UTF16ToUTF8 utf8_message;
       if (utf8_message.convert(system_message.c_str()) == ERROR_SUCCESS) {
         out << message << ": " << utf8_message;
@@ -540,8 +546,8 @@ FMT_FUNC void fmt::internal::format_windows_error(
 // An argument formatter.
 template <typename Char>
 class fmt::internal::ArgFormatter :
-    public fmt::internal::ArgVisitor<fmt::internal::ArgFormatter<Char>, void> {
- private:
+  public fmt::internal::ArgVisitor<fmt::internal::ArgFormatter<Char>, void> {
+private:
   fmt::BasicFormatter<Char> &formatter_;
   fmt::BasicWriter<Char> &writer_;
   fmt::FormatSpec &spec_;
@@ -549,10 +555,10 @@ class fmt::internal::ArgFormatter :
 
   FMT_DISALLOW_COPY_AND_ASSIGN(ArgFormatter);
 
- public:
+public:
   ArgFormatter(
-      fmt::BasicFormatter<Char> &f,fmt::FormatSpec &s, const Char *fmt)
-  : formatter_(f), writer_(f.writer()), spec_(s), format_(fmt) {}
+    fmt::BasicFormatter<Char> &f, fmt::FormatSpec &s, const Char *fmt)
+    : formatter_(f), writer_(f.writer()), spec_(s), format_(fmt) {}
 
   template <typename T>
   void visit_any_int(T value) { writer_.write_int(value, spec_); }
@@ -619,7 +625,7 @@ void fmt::internal::FixedBuffer<Char>::grow(std::size_t) {
 template <typename Char>
 template <typename StrChar>
 void fmt::BasicWriter<Char>::write_str(
-    const Arg::StringValue<StrChar> &s, const FormatSpec &spec) {
+  const Arg::StringValue<StrChar> &s, const FormatSpec &spec) {
   // Check if StrChar is convertible to Char.
   internal::CharTraits<Char>::convert(StrChar());
   if (spec.type_ && spec.type_ != 's')
@@ -642,7 +648,7 @@ template <typename Char>
 inline Arg fmt::BasicFormatter<Char>::parse_arg_index(const Char *&s) {
   const char *error = 0;
   Arg arg = *s < '0' || *s > '9' ?
-        next_arg(error) : get_arg(parse_nonnegative_int(s), error);
+            next_arg(error) : get_arg(parse_nonnegative_int(s), error);
   if (error) {
     FMT_THROW(FormatError(
                 *s != '}' && *s != ':' ? "invalid format string" : error));
@@ -651,7 +657,7 @@ inline Arg fmt::BasicFormatter<Char>::parse_arg_index(const Char *&s) {
 }
 
 FMT_FUNC Arg fmt::internal::FormatterBase::do_get_arg(
-    unsigned arg_index, const char *&error) {
+  unsigned arg_index, const char *&error) {
   Arg arg = args_[arg_index];
   if (arg.type == Arg::NONE)
     error = "argument index out of range";
@@ -666,7 +672,7 @@ inline Arg fmt::internal::FormatterBase::next_arg(const char *&error) {
 }
 
 inline Arg fmt::internal::FormatterBase::get_arg(
-    unsigned arg_index, const char *&error) {
+  unsigned arg_index, const char *&error) {
   if (next_arg_index_ <= 0) {
     next_arg_index_ = -1;
     return do_get_arg(arg_index, error);
@@ -677,37 +683,37 @@ inline Arg fmt::internal::FormatterBase::get_arg(
 
 template <typename Char>
 void fmt::internal::PrintfFormatter<Char>::parse_flags(
-    FormatSpec &spec, const Char *&s) {
+  FormatSpec &spec, const Char *&s) {
   for (;;) {
     switch (*s++) {
-      case '-':
-        spec.align_ = ALIGN_LEFT;
-        break;
-      case '+':
-        spec.flags_ |= SIGN_FLAG | PLUS_FLAG;
-        break;
-      case '0':
-        spec.fill_ = '0';
-        break;
-      case ' ':
-        spec.flags_ |= SIGN_FLAG;
-        break;
-      case '#':
-        spec.flags_ |= HASH_FLAG;
-        break;
-      default:
-        --s;
-        return;
+    case '-':
+      spec.align_ = ALIGN_LEFT;
+      break;
+    case '+':
+      spec.flags_ |= SIGN_FLAG | PLUS_FLAG;
+      break;
+    case '0':
+      spec.fill_ = '0';
+      break;
+    case ' ':
+      spec.flags_ |= SIGN_FLAG;
+      break;
+    case '#':
+      spec.flags_ |= HASH_FLAG;
+      break;
+    default:
+      --s;
+      return;
     }
   }
 }
 
 template <typename Char>
 Arg fmt::internal::PrintfFormatter<Char>::get_arg(
-    const Char *s, unsigned arg_index) {
+  const Char *s, unsigned arg_index) {
   const char *error = 0;
   Arg arg = arg_index == UINT_MAX ?
-    next_arg(error) : FormatterBase::get_arg(arg_index - 1, error);
+            next_arg(error) : FormatterBase::get_arg(arg_index - 1, error);
   if (error)
     FMT_THROW(FormatError(!*s ? "invalid format string" : error));
   return arg;
@@ -749,8 +755,8 @@ unsigned fmt::internal::PrintfFormatter<Char>::parse_header(
 
 template <typename Char>
 void fmt::internal::PrintfFormatter<Char>::format(
-    BasicWriter<Char> &writer, BasicStringRef<Char> format_str,
-    const ArgList &args) {
+  BasicWriter<Char> &writer, BasicStringRef<Char> format_str,
+  const ArgList &args) {
   const Char *start = format_str.c_str();
   set_args(args);
   const Char *s = start;
@@ -895,7 +901,7 @@ void fmt::internal::PrintfFormatter<Char>::format(
     case Arg::POINTER:
       if (spec.type_ && spec.type_ != 'p')
         internal::report_unknown_type(spec.type_, "pointer");
-      spec.flags_= HASH_FLAG;
+      spec.flags_ = HASH_FLAG;
       spec.type_ = 'x';
       writer.write_int(reinterpret_cast<uintptr_t>(arg.pointer), spec);
       break;
@@ -916,7 +922,7 @@ void fmt::internal::PrintfFormatter<Char>::format(
 
 template <typename Char>
 const Char *fmt::BasicFormatter<Char>::format(
-    const Char *&format_str, const Arg &arg) {
+  const Char *&format_str, const Arg &arg) {
   const Char *s = format_str;
   FormatSpec spec;
   if (*s == ':') {
@@ -931,18 +937,18 @@ const Char *fmt::BasicFormatter<Char>::format(
       spec.align_ = ALIGN_DEFAULT;
       do {
         switch (*p) {
-          case '<':
-            spec.align_ = ALIGN_LEFT;
-            break;
-          case '>':
-            spec.align_ = ALIGN_RIGHT;
-            break;
-          case '=':
-            spec.align_ = ALIGN_NUMERIC;
-            break;
-          case '^':
-            spec.align_ = ALIGN_CENTER;
-            break;
+        case '<':
+          spec.align_ = ALIGN_LEFT;
+          break;
+        case '>':
+          spec.align_ = ALIGN_RIGHT;
+          break;
+        case '=':
+          spec.align_ = ALIGN_NUMERIC;
+          break;
+        case '^':
+          spec.align_ = ALIGN_CENTER;
+          break;
         }
         if (spec.align_ != ALIGN_DEFAULT) {
           if (p != s) {
@@ -961,18 +967,18 @@ const Char *fmt::BasicFormatter<Char>::format(
 
     // Parse sign.
     switch (*s) {
-      case '+':
-        check_sign(s, arg);
-        spec.flags_ |= SIGN_FLAG | PLUS_FLAG;
-        break;
-      case '-':
-        check_sign(s, arg);
-        spec.flags_ |= MINUS_FLAG;
-        break;
-      case ' ':
-        check_sign(s, arg);
-        spec.flags_ |= SIGN_FLAG;
-        break;
+    case '+':
+      check_sign(s, arg);
+      spec.flags_ |= SIGN_FLAG | PLUS_FLAG;
+      break;
+    case '-':
+      check_sign(s, arg);
+      spec.flags_ |= MINUS_FLAG;
+      break;
+    case ' ':
+      check_sign(s, arg);
+      spec.flags_ |= SIGN_FLAG;
+      break;
     }
 
     if (*s == '#') {
@@ -1006,24 +1012,24 @@ const Char *fmt::BasicFormatter<Char>::format(
           FMT_THROW(FormatError("invalid format string"));
         ULongLong value = 0;
         switch (precision_arg.type) {
-          case Arg::INT:
-            if (precision_arg.int_value < 0)
-              FMT_THROW(FormatError("negative precision"));
-            value = precision_arg.int_value;
-            break;
-          case Arg::UINT:
-            value = precision_arg.uint_value;
-            break;
-          case Arg::LONG_LONG:
-            if (precision_arg.long_long_value < 0)
-              FMT_THROW(FormatError("negative precision"));
-            value = precision_arg.long_long_value;
-            break;
-          case Arg::ULONG_LONG:
-            value = precision_arg.ulong_long_value;
-            break;
-          default:
-            FMT_THROW(FormatError("precision is not integer"));
+        case Arg::INT:
+          if (precision_arg.int_value < 0)
+            FMT_THROW(FormatError("negative precision"));
+          value = precision_arg.int_value;
+          break;
+        case Arg::UINT:
+          value = precision_arg.uint_value;
+          break;
+        case Arg::LONG_LONG:
+          if (precision_arg.long_long_value < 0)
+            FMT_THROW(FormatError("negative precision"));
+          value = precision_arg.long_long_value;
+          break;
+        case Arg::ULONG_LONG:
+          value = precision_arg.ulong_long_value;
+          break;
+        default:
+          FMT_THROW(FormatError("precision is not integer"));
         }
         if (value > INT_MAX)
           FMT_THROW(FormatError("number is too big"));
@@ -1033,8 +1039,8 @@ const Char *fmt::BasicFormatter<Char>::format(
       }
       if (arg.type < Arg::LAST_INTEGER_TYPE || arg.type == Arg::POINTER) {
         FMT_THROW(FormatError(
-            fmt::format("precision not allowed in {} format specifier",
-            arg.type == Arg::POINTER ? "pointer" : "integer")));
+                    fmt::format("precision not allowed in {} format specifier",
+                                arg.type == Arg::POINTER ? "pointer" : "integer")));
       }
     }
 
@@ -1054,7 +1060,7 @@ const Char *fmt::BasicFormatter<Char>::format(
 
 template <typename Char>
 void fmt::BasicFormatter<Char>::format(
-    BasicStringRef<Char> format_str, const ArgList &args) {
+  BasicStringRef<Char> format_str, const ArgList &args) {
   const Char *s = start_ = format_str.c_str();
   set_args(args);
   while (*s) {
@@ -1075,13 +1081,13 @@ void fmt::BasicFormatter<Char>::format(
 }
 
 FMT_FUNC void fmt::report_system_error(
-    int error_code, fmt::StringRef message) FMT_NOEXCEPT {
+  int error_code, fmt::StringRef message) FMT_NOEXCEPT {
   report_error(internal::format_system_error, error_code, message);
 }
 
 #ifdef _WIN32
 FMT_FUNC void fmt::report_windows_error(
-    int error_code, fmt::StringRef message) FMT_NOEXCEPT {
+  int error_code, fmt::StringRef message) FMT_NOEXCEPT {
   report_error(internal::format_windows_error, error_code, message);
 }
 #endif
@@ -1124,7 +1130,7 @@ FMT_FUNC int fmt::fprintf(std::FILE *f, StringRef format, ArgList args) {
 template void fmt::internal::FixedBuffer<char>::grow(std::size_t);
 
 template const char *fmt::BasicFormatter<char>::format(
-    const char *&format_str, const fmt::internal::Arg &arg);
+  const char *&format_str, const fmt::internal::Arg &arg);
 
 template void fmt::BasicFormatter<char>::format(
   BasicStringRef<char> format, const ArgList &args);
@@ -1133,37 +1139,41 @@ template void fmt::internal::PrintfFormatter<char>::format(
   BasicWriter<char> &writer, BasicStringRef<char> format, const ArgList &args);
 
 template int fmt::internal::CharTraits<char>::format_float(
-    char *buffer, std::size_t size, const char *format,
-    unsigned width, int precision, double value);
+  char *buffer, std::size_t size, const char *format,
+  unsigned width, int precision, double value);
 
 template int fmt::internal::CharTraits<char>::format_float(
-    char *buffer, std::size_t size, const char *format,
-    unsigned width, int precision, long double value);
+  char *buffer, std::size_t size, const char *format,
+  unsigned width, int precision, long double value);
 
 // Explicit instantiations for wchar_t.
 
 template void fmt::internal::FixedBuffer<wchar_t>::grow(std::size_t);
 
 template const wchar_t *fmt::BasicFormatter<wchar_t>::format(
-    const wchar_t *&format_str, const fmt::internal::Arg &arg);
+  const wchar_t *&format_str, const fmt::internal::Arg &arg);
 
 template void fmt::BasicFormatter<wchar_t>::format(
-    BasicStringRef<wchar_t> format, const ArgList &args);
+  BasicStringRef<wchar_t> format, const ArgList &args);
 
 template void fmt::internal::PrintfFormatter<wchar_t>::format(
-    BasicWriter<wchar_t> &writer, BasicStringRef<wchar_t> format,
-    const ArgList &args);
+  BasicWriter<wchar_t> &writer, BasicStringRef<wchar_t> format,
+  const ArgList &args);
 
 template int fmt::internal::CharTraits<wchar_t>::format_float(
-    wchar_t *buffer, std::size_t size, const wchar_t *format,
-    unsigned width, int precision, double value);
+  wchar_t *buffer, std::size_t size, const wchar_t *format,
+  unsigned width, int precision, double value);
 
 template int fmt::internal::CharTraits<wchar_t>::format_float(
-    wchar_t *buffer, std::size_t size, const wchar_t *format,
-    unsigned width, int precision, long double value);
+  wchar_t *buffer, std::size_t size, const wchar_t *format,
+  unsigned width, int precision, long double value);
 
 #endif  // FMT_HEADER_ONLY
 
 #if _MSC_VER
 # pragma warning(pop)
+#endif
+
+#if __clang__
+#pragma clang diagnostic pop
 #endif

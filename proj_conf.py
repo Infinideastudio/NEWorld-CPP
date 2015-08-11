@@ -26,7 +26,9 @@ COMPILER_IGNORE_WARNINGS = [
 
 COMPILER_LIBRARYS = [
     'pthread',
-    'SDL2', 'SDL2_image'
+    'boost_filesystem', 'boost_system', 'boost_signals',
+    'SDL2', 'SDL2_image',
+    'GL', 'GLEW'
 ]
 COMPILER_LIBRARYS_DIRECTORY = [
 
@@ -40,7 +42,8 @@ COMPILER_SYSTEM_INCLUDES_DIRECTORY = [
 ]
 
 COMPILER_OTHER_PARAMETERS = [
-    '-D__LINUX__'
+    '-D __LINUX__'
+    # '-D __WINDOWS__'
 ]
 
 # 输出设置
@@ -48,7 +51,7 @@ COMPILER_OTHER_PARAMETERS = [
 # executable: 编译成可执行文件
 # OUTPUT_MODE = 'shared'
 OUTPUT_MODE = 'executable'
-OUTPUT_LOCATION = './release/'
+OUTPUT_LOCATION = './release/neworld.out'
 OUTPUT_WITH_VERSION = True
 OUTPUT_LINK_TO_LATEST = True
 
@@ -91,8 +94,8 @@ CHECK_USE_CPPCHECK = True
 #  * c++11
 #         C++ code is C++11 compatible (default)
 # 可以使用多标准
-CPPCHECK_STD = ["c++11"]
-CPPCHECK_ENABLE = ["all"]
+CPPCHECK_STD = ['c++11']
+CPPCHECK_ENABLE = ['warning', 'performance', 'portability']
 # 指定cppcheck使用多少个线程并行
-CPPCHECK_JOBS = 2
+CPPCHECK_JOBS = 4
 # ============================

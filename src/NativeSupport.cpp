@@ -6,10 +6,15 @@
 
 #include <stdexcept>
 
+#include <GL/glew.h>
+
 using namespace std;
 
 void InitNativeSupport() {
     SDL_Init(SDL_INIT_VIDEO);
+
+    glewExperimental = true;
+    glewInit();
 }
 
 

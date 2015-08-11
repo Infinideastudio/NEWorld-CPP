@@ -18,4 +18,6 @@ std::string GetTimeString();
 
 std::string ReadFile(const std::string &filePath);
 
+std::string GetCurrentDirectory();
+
 #endif  // NEWORLD_TOOLS_HPP

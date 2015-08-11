@@ -105,37 +105,49 @@ private:
 
 template <typename ... Args>
 void LogSystem::Info(const std::string &fmt, const Args ... args) {
+#ifndef LOG_NO_INFO
     _Log(fmt, LogType::Info, args...);
+#endif
 }
 
 
 template <typename ... Args>
 void LogSystem::Warning(const std::string &fmt, const Args ... args) {
+#ifndef LOG_NO_WARNING
     _Log(fmt, LogType::Warning, args...);
+#endif
 }
 
 
 template <typename ... Args>
 void LogSystem::Error(const std::string &fmt, const Args ... args) {
+#ifndef LOG_NO_ERROR
     _Log(fmt, LogType::Error, args...);
+#endif
 }
 
 
 template <typename ... Args>
 void LogSystem::Fatal(const std::string &fmt, const Args ... args) {
+#ifndef LOG_NO_FATAL
     _Log(fmt, LogType::Fatal, args...);
+#endif
 }
 
 
 template <typename ... Args>
 void LogSystem::Debug(const std::string &fmt, const Args ... args) {
+#ifndef LOG_NO_DEBUG
     _Log(fmt, LogType::Debug, args...);
+#endif
 }
 
 
 template <typename ... Args>
 void LogSystem::Trace(const std::string &fmt, const Args ... args) {
+#ifndef LOG_NO_TRACE
     _Log(fmt, LogType::Trace, args...);
+#endif
 }
 
 

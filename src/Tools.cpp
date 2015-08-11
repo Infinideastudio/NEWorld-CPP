@@ -78,3 +78,32 @@ string ReadFile(const string &filePath) {
 
     return buf;
 }
+
+
+namespace {
+#include <stdio.h>
+
+#ifdef __WINDOWS__
+#include <direct.h>
+#define getcwd _getcwd
+#else
+#include <unistd.h>
+#endif
+}  // namespace
+std::string GetCurrentDirectory() {
+    char buf[FILENAME_MAX];
+
+    if (getcwd(buf, sizeof(buf))) {
+        string directory(buf);
+
+#ifdef __WINDOWS__
+        directory += '\\';
+#else
+        directory += '/';
+#endif  // IFDEF __WINDOWS__
+
+        return directory;
+    } else {
+        return string("./");
+    }
+}

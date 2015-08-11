@@ -43,6 +43,8 @@ constexpr int WINDOWPOS_CENTERED       = SDL_WINDOWPOS_CENTERED;
 constexpr int WINDOWPOS_UNDEFINED      = SDL_WINDOWPOS_UNDEFINED;
 constexpr int WINDOWPOS_UNDEFINED_MASK = SDL_WINDOWPOS_UNDEFINED_MASK;
 
+typedef SDL_Event SDLEventType;
+
 enum class WindowFlags {
     Fullscreen        = SDL_WINDOW_FULLSCREEN,
     FullscreenDesktop = SDL_WINDOW_FULLSCREEN_DESKTOP,
@@ -202,6 +204,7 @@ struct GLContext final {
 
     void SwapWindow();
 
+    [[deprecated]]  // 有BUG
     StatusType MakeCurrent();
 
 private:
