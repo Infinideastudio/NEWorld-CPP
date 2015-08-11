@@ -8,7 +8,7 @@ Make NEWorld-CPP easier to build & run on Linux.
 Global progress: (  2%)  
 Version: (No stable) (0.0.1 In progress)  
 Platforms: Linux(Ubuntu)  
-Build Status:
+Build Status:  
 | Linux |  
 |:-----:|  
 |  PASS |  
