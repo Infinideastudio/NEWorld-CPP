@@ -9,9 +9,9 @@ Global progress: (  2%)
 Version: (No stable) (0.0.1 In progress)  
 Platforms: Linux(Ubuntu)  
 Build Status:
-| Linux |
-|:-----:|
-|  PASS |
+| Linux |  
+|:-----:|  
+|  PASS |  
 
 Details:
 ```
