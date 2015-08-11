@@ -13,8 +13,12 @@ namespace Events {
 #define EventType boost::signals2::signal
 
 typedef EventType<void()> ApplicationQuitEvent;
+typedef EventType<void(float)> FPSReportEvent;
+typedef EventType<void(float)> TPSReportEvent;
 
 extern ApplicationQuitEvent ApplicationQuit;
+extern FPSReportEvent FPSReport;
+extern TPSReportEvent TPSReport;
 }  // namespace Events
 
 class EventSystem {
@@ -48,6 +52,9 @@ public:
     template <typename SignalType>
     static void DisconnectAll(SignalType &signal);
 
+    template <typename SignalType, typename ... Args>
+    static void RaiseEvent(SignalType &signal, const Args & ... args);
+
 private:
     static std::atomic<bool> m_flag;
 };  // singleton class EventSystem
@@ -80,6 +87,12 @@ void EventSystem::Disconnect(SignalType &signal, SlotType &slot) {
 template <typename SignalType>
 void EventSystem::DisconnectAll(SignalType &signal) {
     signal.disconnect_all_slots();
+}
+
+
+template <typename SignalType, typename ... Args>
+void EventSystem::RaiseEvent(SignalType &signal, const Args & ... args) {
+    signal(args...);
 }
 
 

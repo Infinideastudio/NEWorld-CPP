@@ -13,6 +13,8 @@ atomic<bool> EventSystem::m_flag;
 
 namespace Events {
 ApplicationQuitEvent ApplicationQuit;
+FPSReportEvent FPSReport;
+TPSReportEvent TPSReport;
 }  // namespace Events
 
 void EventSystem::StartEventSystem() {

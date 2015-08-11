@@ -5,6 +5,7 @@
 #include "../include/LogSystem.hpp"
 #include "../include/NativeSupport.hpp"
 #include "../include/EventSystem.hpp"
+#include "../include/TickCounter.hpp"
 #include "../include/Tools.hpp"
 
 #include <cstdlib>
@@ -19,6 +20,7 @@ using namespace std;
 static atomic<bool> flag(true);
 
 void Quit();
+void GetFPS(float speed);
 
 int main(/*int argc, char *argv[]*/) {
     // 载入日志
@@ -52,11 +54,13 @@ int main(/*int argc, char *argv[]*/) {
     LogSystem::Info("Connecting signals with slots...");
     EventSystem::StartEventSystem();
     EventSystem::Connect(Events::ApplicationQuit, Quit);
+    EventSystem::Connect(Events::FPSReport, GetFPS);
     atexit(EventSystem::StopEventSystem);
 
     // 主循环（临时）
     LogSystem::Info("Start main loop.");
 
+    TickCounter fpsc;
     while (flag) {
         EventSystem::DoEvents();
 
@@ -64,6 +68,7 @@ int main(/*int argc, char *argv[]*/) {
         glClear(GL_COLOR_BUFFER_BIT);
 
         context.SwapWindow();
+        fpsc.Tick();
     }   // while
 
     LogSystem::Info("Exited main loop.");
@@ -73,4 +78,9 @@ int main(/*int argc, char *argv[]*/) {
 
 void Quit() {
     flag = false;
+}
+
+
+void GetFPS(float speed) {
+    LogSystem::Debug("FPS: {}", speed);
 }

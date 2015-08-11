@@ -22,7 +22,7 @@ Details:
 (...) OpenGL math -> GLM
 (N/A) OpenGL render frontend -> (No)
 (...) OpenGL -> OpenGL 3.3
-( X ) Multithreading -> std::thread
+(...) Multithreading -> std::thread
 ( X ) Picture loader -> SDL2-image
 ( X ) TrueType support -> SDL2-TTF
 ( X ) Core algorithms -> By @Null and @qiaozhanrong
