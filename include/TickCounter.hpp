@@ -33,6 +33,10 @@ public:
     void SetInterval(unsigned interval);
     void SetRaiseEvent(bool value);
 
+    CounterType GetCounterTyoe() const;
+    unsigned GetInterval() const;
+    bool IsRaiseEvent() const;
+
     float GetSpeed() const;
 private:
     friend void _ThreadLoop(TickCounter *counter);

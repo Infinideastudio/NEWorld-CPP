@@ -86,6 +86,21 @@ void TickCounter::SetRaiseEvent(bool value) {
 }
 
 
+CounterType TickCounter::GetCounterTyoe() const {
+    return m_counterType;
+}
+
+
+unsigned TickCounter::GetInterval() const {
+    return static_cast<unsigned>(m_interval.count());
+}
+
+
+bool TickCounter::IsRaiseEvent() const {
+    return m_raiseEvent;
+}
+
+
 float TickCounter::GetSpeed() const {
     return m_lastTicked / static_cast<float>(m_interval.count()) * 1000.0f;
 }
