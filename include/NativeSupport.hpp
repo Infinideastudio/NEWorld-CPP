@@ -17,7 +17,7 @@
  * 载入底层支持
  * （载入SDL2）
  */
-void InitNativeSupport();
+bool InitNativeSupport();
 
 /**
  * 销毁底层支持

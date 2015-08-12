@@ -75,14 +75,17 @@ void TickCounter::SetInterval(unsigned interval) {
 }
 
 
-void TickCounter::SetRaiseEvent(bool value) {
+void TickCounter::StartRaiseEvent() {
     // 防止重新启动
-    if (value && !m_raiseEvent) {
+    if (!m_raiseEvent) {
         m_eventThread = thread(_ThreadLoop, this);
         m_eventThread.detach();
     }
+}
 
-    m_raiseEvent = value;
+
+void TickCounter::StopRaiseEvent() {
+    m_raiseEvent = false;
 }
 
 

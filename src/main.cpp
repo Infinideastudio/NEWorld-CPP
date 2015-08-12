@@ -2,10 +2,14 @@
 // Copyright 2015 infinideas
 //
 
+#include "../include/global.hpp"
+
 #include "../include/LogSystem.hpp"
 #include "../include/NativeSupport.hpp"
 #include "../include/EventSystem.hpp"
 #include "../include/TickCounter.hpp"
+#include "../include/Thread.hpp"
+#include "../include/Render.hpp"
 #include "../include/Tools.hpp"
 
 #include <cstdlib>
@@ -17,8 +21,6 @@
 
 using namespace std;
 
-static atomic<bool> flag(true);
-
 void Quit();
 void GetFPS(float speed);
 
@@ -28,50 +30,49 @@ int main(/*int argc, char *argv[]*/) {
     LogSystem::SetRegionName("Client");
     LogSystem::SetThreadName("Main Thread");
     LogSystem::SetOutput(true, true);
-
-    LogSystem::Info("Log system started.");
     atexit(LogSystem::CopyToLatest);
 
-    // 载入SDL2
-    LogSystem::Info("Loading SDL2...");
-    InitNativeSupport();
-    atexit(DestroyNativeSupport);
-
-    // 创建窗口
-    LogSystem::Info("Creating window...");
-    Window wnd("NEWorld 0.0.1",
-               WINDOWPOS_CENTERED, WINDOWPOS_CENTERED,
-               800, 600, WindowFlags::OpenGL
-              );
-
-    // 准备OpenGL上下文
-    LogSystem::Info("Setting up OpenGL context...");
-    GLContext::SetOpenGLVersion(3, 3);
-    GLContext context(wnd);
-    // context.MakeCurrent();
+    LogSystem::Debug("Hello, programmers! What a f**king day for debugging!");
+    LogSystem::Info("Log system started.");
 
     // 绑定事件
     LogSystem::Info("Connecting signals with slots...");
-    EventSystem::StartEventSystem();
     EventSystem::Connect(Events::ApplicationQuit, Quit);
     EventSystem::Connect(Events::FPSReport, GetFPS);
-    atexit(EventSystem::StopEventSystem);
 
-    // 主循环（临时）
+    // 启动线程
+    LogSystem::Info("Creating threads...");
+    Thread renderThread(
+        RenderPrepare,
+        Rendering,
+        RenderCleanup
+    );
+
+    LogSystem::Info("Starting threads...");
+    renderThread.Start();
+    renderThread.WaitForPrepare();
+
+    // 主循环（事件循环）
     LogSystem::Info("Start main loop.");
 
-    TickCounter fpsc;
+    EventSystem::StartEventSystem();
     while (flag) {
         EventSystem::DoEvents();
-
-        glClearColor(1.0, 1.0, 1.0, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        context.SwapWindow();
-        fpsc.Tick();
+        this_thread::sleep_for(chrono::milliseconds(5));  // 不要太激进了！！！
     }   // while
 
     LogSystem::Info("Exited main loop.");
+
+    // 结束
+    // 先结束线程
+    LogSystem::Info("Exiting threads");
+    renderThread.Stop();
+
+    EventSystem::StopEventSystem();
+
+    LogSystem::Info("Program exited.");
+
+    LogSystem::Debug("Have problems been solved?");
 
     return 0;
 }  // function main
@@ -79,7 +80,6 @@ int main(/*int argc, char *argv[]*/) {
 void Quit() {
     flag = false;
 }
-
 
 void GetFPS(float speed) {
     LogSystem::Debug("FPS: {}", speed);

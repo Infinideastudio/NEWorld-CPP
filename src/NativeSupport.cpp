@@ -10,11 +10,10 @@
 
 using namespace std;
 
-void InitNativeSupport() {
-    SDL_Init(SDL_INIT_VIDEO);
+bool InitNativeSupport() {
+    int status = SDL_Init(SDL_INIT_VIDEO);
 
-    glewExperimental = true;
-    glewInit();
+    return status >= SUCCESS ? true : false;
 }
 
 

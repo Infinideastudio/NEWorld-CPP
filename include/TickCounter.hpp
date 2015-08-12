@@ -21,7 +21,7 @@ enum class CounterType {
 };  // enum class CounterType
 
 
-class TickCounter {
+class TickCounter final {
 public:
     TickCounter();
     TickCounter(unsigned interval, CounterType type = CounterType::FPS, bool raiseEvent = true);
@@ -31,7 +31,8 @@ public:
 
     void SetCounterTyoe(CounterType type);
     void SetInterval(unsigned interval);
-    void SetRaiseEvent(bool value);
+    void StartRaiseEvent();
+    void StopRaiseEvent();
 
     CounterType GetCounterTyoe() const;
     unsigned GetInterval() const;

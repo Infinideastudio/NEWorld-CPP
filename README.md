@@ -1,18 +1,42 @@
 # NEWorld-CPP
 At linux braunh  
 
-# Goal
+## Goal
 Make NEWorld-CPP easier to build & run on Linux.  
 
-# Status
-Global progress: (  2%)  
-Version: (No stable) (0.0.1 In progress)  
+## Installion
+So far, there's nothing meaningful in this project.  
+But you can compile and run it.  
+Then you'll see a window with a white triangle.  
+First of all, NEWorld-CPP required these dependencies:  
+1.boost:filesystem, system, signals2  
+2.SDL2, SDL2_image
+3.OpenGL, GLEW  
+4.Only tested on clang 3.6  
+To compile it, run:
+
+```shell
+./build.py [-O3]
+```
+
+run it:
+
+```shell
+./run.sh
+```
+
+I think you can't succeed in doing that...  
+I'll improve that in the future...  
+
+## Status
+Global progress: (  5%)  
+Version: (No stable) (0.0.1 in progress)  
 Platforms: Linux(Ubuntu)  
 Build Status:
 
-| Linux |
-|:-----:|
-|  PASS |
+| LInux(Ubuntu) |
+|:-------------:|
+|      PASS     |
 
 Details:
 ```
@@ -29,8 +53,8 @@ Details:
 (...) OpenGL math -> GLM
 (N/A) OpenGL render frontend -> (No)
 (O K) OpenGL -> OpenGL 3.3
-( X ) Render module
-(...) Multithreading -> std::thread
+(...) Render module
+(O K) Multithreading -> std::thread
 ( X ) Picture loader -> SDL2-image
 ( X ) TrueType support -> SDL2-TTF
 ( X ) Core algorithms -> By @Null and @qiaozhanrong
@@ -51,7 +75,8 @@ Details:
 **: Hmm... Maybe wstring...
 ```
 
-# Known Bugs
+## Known Bugs
 ```
-(#001) (UNKNOWN) GLContext::MakeCurrent causes context deletion failed. -> deprecate it.  
+(#001) (UNKNOWN) GLContext::MakeCurrent causes context deletion failed. -> deprecate it.
+(#002) (UNKNOWN) LogSystem can't write to files.
 ```

@@ -41,7 +41,7 @@ constexpr char const *LogTypeString[] = {
     "UNKNOWN"
 };
 
-class LogSystem {
+class LogSystem final {
 public:
     LogSystem() = delete;
     LogSystem(const LogSystem &) = delete;

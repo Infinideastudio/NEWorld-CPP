@@ -21,7 +21,7 @@ extern FPSReportEvent FPSReport;
 extern TPSReportEvent TPSReport;
 }  // namespace Events
 
-class EventSystem {
+class EventSystem final {
 public:
     //This is a singleton:
     EventSystem() = delete;
