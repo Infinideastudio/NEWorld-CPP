@@ -16,6 +16,14 @@
 // Loitsch, Florian. "Printing floating-point numbers quickly and accurately with
 // integers." ACM Sigplan Notices 45.6 (2010): 233-243.
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wconversion"
+#pragma clang diagnostic ignored "-Wdocumentation"
+#endif
+
 #ifndef RAPIDJSON_DTOA_
 #define RAPIDJSON_DTOA_
 
@@ -215,3 +223,7 @@ RAPIDJSON_DIAG_POP
 RAPIDJSON_NAMESPACE_END
 
 #endif // RAPIDJSON_DTOA_
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif

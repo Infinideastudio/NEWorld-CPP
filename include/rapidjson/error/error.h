@@ -12,8 +12,15 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 
-#ifndef RAPIDJSON_ERROR_ERROR_H__
-#define RAPIDJSON_ERROR_ERROR_H__
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wconversion"
+#endif
+
+#ifndef RAPIDJSON_ERROR_ERROR_H_
+#define RAPIDJSON_ERROR_ERROR_H_
 
 #include "../rapidjson.h"
 
@@ -143,4 +150,8 @@ typedef const RAPIDJSON_ERROR_CHARTYPE* (*GetParseErrorFunc)(ParseErrorCode);
 
 RAPIDJSON_NAMESPACE_END
 
-#endif // RAPIDJSON_ERROR_ERROR_H__
+#endif // RAPIDJSON_ERROR_ERROR_H_
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif

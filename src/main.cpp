@@ -9,6 +9,7 @@
 #include "../include/EventSystem.hpp"
 #include "../include/EventsImpl.hpp"
 #include "../include/TickCounter.hpp"
+#include "../include/Setting.hpp"
 #include "../include/Thread.hpp"
 #include "../include/Render.hpp"
 #include "../include/Update.hpp"
@@ -41,6 +42,10 @@ int main(/*int argc, char *argv[]*/) {
     // 绑定事件
     LogSystem::Info("Connecting events...");
     Connects();
+
+    // 载入配置
+    LogSystem::Info("Loading settings...");
+    LoadResourcesJSON();
 
     // 启动线程
     LogSystem::Info("Creating threads...");
@@ -96,11 +101,15 @@ int main(/*int argc, char *argv[]*/) {
 
     // 结束
     // 先结束线程
-    LogSystem::Info("Exiting threads");
+    LogSystem::Info("Exiting threads...");
     updateThread.Stop();
     renderThread.Stop();
 
+    LogSystem::Info("Stopping event system...");
     EventSystem::StopEventSystem();
+
+    LogSystem::Info("Saving settings...");
+    SaveAllJSON();
 
     LogSystem::Info("Program exited.");
 

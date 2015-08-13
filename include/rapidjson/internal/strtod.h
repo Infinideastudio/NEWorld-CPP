@@ -12,6 +12,13 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wconversion"
+#endif
+
 #ifndef RAPIDJSON_STRTOD_
 #define RAPIDJSON_STRTOD_
 
@@ -268,3 +275,7 @@ inline double StrtodFullPrecision(double d, int p, const char* decimals, size_t 
 RAPIDJSON_NAMESPACE_END
 
 #endif // RAPIDJSON_STRTOD_
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif

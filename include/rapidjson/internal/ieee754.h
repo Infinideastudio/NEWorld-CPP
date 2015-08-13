@@ -11,6 +11,12 @@
 // under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
+#pragma clang diagnostic ignored "-Wold-style-cast"
+#pragma clang diagnostic ignored "-Wconversion"
+#endif
 
 #ifndef RAPIDJSON_IEEE754_
 #define RAPIDJSON_IEEE754_
@@ -75,3 +81,7 @@ private:
 RAPIDJSON_NAMESPACE_END
 
 #endif // RAPIDJSON_IEEE754_
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
