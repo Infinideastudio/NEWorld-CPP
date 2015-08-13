@@ -13,6 +13,7 @@ atomic<bool> EventSystem::m_flag;
 
 namespace Events {
 ApplicationQuitEvent ApplicationQuit;
+WindowResizeEvent WindowResize;
 FPSReportEvent FPSReport;
 TPSReportEvent TPSReport;
 }  // namespace Events
@@ -35,7 +36,7 @@ void EventSystem::EventLoop() {
 
 
 void EventSystem::DoEvents() {
-    SDLEventType event;
+    NativeEventType event;
 
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
@@ -43,6 +44,19 @@ void EventSystem::DoEvents() {
         case SDL_QUIT:
             LogSystem::Debug("Event System: Recevied SDL_QUIT.");
             Events::ApplicationQuit();
+            break;
+
+        case SDL_WINDOWEVENT:
+            // LogSystem::Debug("Event System: Received SDL_WINDOWEVENT.");
+
+            switch (event.window.event) {
+            case SDL_WINDOWEVENT_RESIZED:
+                // LogSystem::Debug("Event System: Received SDL_WINDOW_RESIZED.");
+
+                Events::WindowResize(event.window.data1, event.window.data2);
+                break;
+            }  // switch to event.window.event
+
             break;
 
         }  // switch to event.type

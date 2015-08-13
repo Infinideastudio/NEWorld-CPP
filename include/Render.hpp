@@ -8,9 +8,11 @@
 #include "NativeSupport.hpp"
 #include "TickCounter.hpp"
 
-extern Window gameWindow;
-extern GLContext oglContext;
+extern NativeHandler native;
+extern Window window;
+extern GLContext context;
 extern TickCounter fpsCounter;
+// extern int wndWidth, wndHeight;
 
 bool RenderPrepare();
 void Rendering();

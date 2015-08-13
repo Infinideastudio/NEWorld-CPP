@@ -16,12 +16,16 @@
 /**
  * 载入底层支持
  * （载入SDL2）
+ * （已弃用）
  */
+[[deprecated("Please use NativeHandler for better RAII support.")]]
 bool InitNativeSupport();
 
 /**
  * 销毁底层支持
+ * （已弃用）
  */
+[[deprecated("Please use NativeHandler for better RAII support.")]]
 void DestroyNativeSupport();
 
 /**
@@ -43,9 +47,13 @@ constexpr int WINDOWPOS_CENTERED       = SDL_WINDOWPOS_CENTERED;
 constexpr int WINDOWPOS_UNDEFINED      = SDL_WINDOWPOS_UNDEFINED;
 constexpr int WINDOWPOS_UNDEFINED_MASK = SDL_WINDOWPOS_UNDEFINED_MASK;
 
+[[deprecated("Please use NativeEventType instead of it.")]]
 typedef SDL_Event SDLEventType;
 
-enum class WindowFlags {
+typedef SDL_Event NativeEventType;
+
+namespace WindowFlags {
+enum WindowFlags {
     Fullscreen        = SDL_WINDOW_FULLSCREEN,
     FullscreenDesktop = SDL_WINDOW_FULLSCREEN_DESKTOP,
     OpenGL            = SDL_WINDOW_OPENGL,
@@ -56,7 +64,8 @@ enum class WindowFlags {
     Maximized         = SDL_WINDOW_MAXIMIZED,
     InputGrabbed      = SDL_WINDOW_INPUT_GRABBED,
     AllowHighDP       = SDL_WINDOW_ALLOW_HIGHDPI
-};  // enum class WindowFlags
+};  // enum WindowFlags
+}  // namespace WindowFlags
 
 enum class GLAttribute {
     RedSize                 = SDL_GL_RED_SIZE,
@@ -84,6 +93,27 @@ enum class GLAttribute {
     // context_release_behavior = SDL_GL_CONTEXT_RELEASE_BEHAVIOR  // SDL 2.0.4
 };  // enum class GLAttribute
 
+/**
+ * 底层支持管理器
+ * 与其他的东西一起加入RAII支持
+ * 防止释放顺序错误
+ */
+class NativeHandler final {
+public:
+    NativeHandler();
+    ~NativeHandler();
+
+    NativeHandler(const NativeHandler &other) = delete;
+    NativeHandler(NativeHandler &&other) = delete;
+
+    NativeHandler operator=(const NativeHandler &other) = delete;
+    NativeHandler operator=(NativeHandler &&other) = delete;
+
+    bool IsVaild() const;
+
+private:
+    bool m_isVaild = false;
+};  // class NativeHandler
 
 /**
  * SDL2中的表面
@@ -122,7 +152,7 @@ struct Window final {
         const std::string &windowTitle,
         int windowX, int windowY,
         int windowWitdth, int windowHeight,
-        WindowFlags windowFlags
+        unsigned windowFlags
     );
     Window(const Window &other) = delete; // 禁止窗口复制
     Window(Window &&other);
@@ -138,7 +168,7 @@ struct Window final {
 
     Uint32 GetID() const;
 
-    WindowFlags GetFlags() const;
+    unsigned GetFlags() const;
 
     bool IsInputGrabbed() const;
     void SetInputGrab(bool value);
@@ -166,7 +196,7 @@ struct Window final {
     void Minimize();
     void Restore();
 
-    void Fullscreen(WindowFlags mode);
+    void Fullscreen(unsigned mode);
 
     void SetIcon(Surface icon);
 

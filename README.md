@@ -8,11 +8,14 @@ Make NEWorld-CPP easier to build & run on Linux.
 So far, there's nothing meaningful in this project.  
 But you can compile and run it.  
 Then you'll see a window with a white triangle.  
-First of all, NEWorld-CPP required these dependencies:  
+
+### Reqirements
 1.boost:filesystem, system, signals2  
-2.SDL2, SDL2_image
+2.SDL2, SDL2_image  
 3.OpenGL, GLEW  
 4.Only tested on clang 3.6  
+
+### Compilion
 To compile it, run:
 
 ```shell
@@ -25,11 +28,23 @@ run it:
 ./run.sh
 ```
 
+or
+
+```shell
+cd ./release/
+./neworld.out
+```
+
+```shell
+cd ./release
+./neworld.out
+```
+
 I think you can't succeed in doing that...  
 I'll improve that in the future...  
 
 ## Status
-Global progress: (  5%)  
+Global progress: (  6%)  
 Version: (No stable) (0.0.1 in progress)  
 Platforms: Linux(Ubuntu)  
 Build Status:
@@ -55,6 +70,7 @@ Details:
 (O K) OpenGL -> OpenGL 3.3
 (...) Render module
 (O K) Multithreading -> std::thread
+(...) Settings
 ( X ) Picture loader -> SDL2-image
 ( X ) TrueType support -> SDL2-TTF
 ( X ) Core algorithms -> By @Null and @qiaozhanrong
@@ -75,8 +91,11 @@ Details:
 **: Hmm... Maybe wstring...
 ```
 
+## TODO-List
+Nothing
+
 ## Known Bugs
 ```
 (#001) (UNKNOWN) GLContext::MakeCurrent causes context deletion failed. -> deprecate it.
-(#002) (UNKNOWN) LogSystem can't write to files.
+(#002) (FIXED)(NEED IMPROVE) LogSystem can't write to files. -> Not my falut...
 ```

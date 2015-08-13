@@ -4,6 +4,8 @@
 
 #ifndef NEWORLD_EVENT_SYSTEM_HPP
 
+#include "NativeSupport.hpp"
+
 #include <atomic>
 
 #include <SDL2/SDL.h>
@@ -13,10 +15,12 @@ namespace Events {
 #define EventType boost::signals2::signal
 
 typedef EventType<void()> ApplicationQuitEvent;
+typedef EventType<void(int, int)> WindowResizeEvent;
 typedef EventType<void(float)> FPSReportEvent;
 typedef EventType<void(float)> TPSReportEvent;
 
 extern ApplicationQuitEvent ApplicationQuit;
+extern WindowResizeEvent WindowResize;
 extern FPSReportEvent FPSReport;
 extern TPSReportEvent TPSReport;
 }  // namespace Events

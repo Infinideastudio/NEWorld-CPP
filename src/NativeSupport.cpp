@@ -4,6 +4,8 @@
 
 #include "../include/NativeSupport.hpp"
 
+#include "../include/LogSystem.hpp"
+
 #include <stdexcept>
 
 #include <GL/glew.h>
@@ -32,6 +34,32 @@ string GetError() {
 }
 
 
+// NativeHandler
+NativeHandler::NativeHandler() {
+    if (SDL_Init(SDL_INIT_VIDEO) < SUCCESS) {
+        m_isVaild = false;
+    } else {
+        m_isVaild = true;
+    }
+}
+
+
+NativeHandler::~NativeHandler() {
+    if (m_isVaild) {
+        SDL_Quit();
+        m_isVaild = false;
+
+        LogSystem::Debug("NativeHandler destroyed.");
+    }
+}
+
+
+bool NativeHandler::IsVaild() const {
+    return m_isVaild;
+}
+// END NativeHandler
+
+
 // Surface
 Surface::Surface() {
 
@@ -52,6 +80,8 @@ Surface::~Surface() {
     if (m_pSurface != nullptr) {
         SDL_FreeSurface(m_pSurface);
         m_pSurface = nullptr;
+
+        LogSystem::Debug("Surface destroyed.");
     }
 }
 
@@ -95,7 +125,7 @@ Window::Window(
     const string &windowTitle,
     int windowX, int windowY,
     int windowWitdth, int windowHeight,
-    WindowFlags windowFlags
+    unsigned windowFlags
 ) {
     m_pWindow = SDL_CreateWindow(windowTitle.c_str(),
                                  windowX, windowY,
@@ -120,6 +150,8 @@ Window::~Window() {
     if (m_pWindow != nullptr) {
         SDL_DestroyWindow(m_pWindow);
         m_pWindow = nullptr;
+
+        LogSystem::Debug("Window destroyed.");
     }
 }
 
@@ -155,8 +187,8 @@ Uint32 Window::GetID() const {
 }
 
 
-WindowFlags Window::GetFlags() const {
-    return static_cast<WindowFlags>(SDL_GetWindowFlags(m_pWindow));
+unsigned Window::GetFlags() const {
+    return SDL_GetWindowFlags(m_pWindow);
 }
 
 
@@ -272,7 +304,7 @@ void Window::Restore() {
 }
 
 
-void Window::Fullscreen(WindowFlags mode) {
+void Window::Fullscreen(unsigned mode) {
     SDL_SetWindowFullscreen(m_pWindow, static_cast<Uint32>(mode));
 }
 
@@ -327,6 +359,8 @@ GLContext::~GLContext() {
     if (m_pOpenGL != nullptr) {
         SDL_GL_DeleteContext(m_pOpenGL);
         m_pOpenGL = nullptr;
+
+        LogSystem::Debug("OpenGL context destroyed.");
     }
 }
 
@@ -448,6 +482,8 @@ Cursor::~Cursor() {
     if (m_pCursor != nullptr) {
         SDL_FreeCursor(m_pCursor);
         m_pCursor = nullptr;
+
+        LogSystem::Debug("Cursor destroyed.");
     }
 }
 

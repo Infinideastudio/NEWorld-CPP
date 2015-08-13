@@ -14,17 +14,19 @@
 
 using namespace std;
 
-Window gameWindow;
-GLContext oglContext;
+NativeHandler native;
+Window window;
+GLContext context;
 TickCounter fpsCounter;
+// int wndWidth = 800, wndHeight = 600;
 
 bool RenderPrepare() {
     LogSystem::SetThreadName("Render Thread");
 
-    LogSystem::Info("Preparing to render...");
+    LogSystem::Info("Preparing render thread...");
 
     LogSystem::Info("Initializing native support...");
-    if (!InitNativeSupport()) {
+    if (!native.IsVaild()) {
         LogSystem::Fatal(
             "Cannot init native support!\n"
             "Details: {}",
@@ -37,12 +39,12 @@ bool RenderPrepare() {
 
     LogSystem::Info("Creating game window...");
     try {
-        gameWindow = Window(
-                         "NEWorld",
-                         WINDOWPOS_CENTERED, WINDOWPOS_CENTERED,
-                         800, 600,
-                         WindowFlags::OpenGL
-                     );
+        window = Window(
+                     "NEWorld",
+                     WINDOWPOS_CENTERED, WINDOWPOS_CENTERED,
+                     800, 600,
+                     WindowFlags::OpenGL
+                 );
     } catch (const runtime_error &e) {
         LogSystem::Fatal(
             "Cannot create game window!\n"
@@ -70,7 +72,7 @@ bool RenderPrepare() {
         );
     }
     try {
-        oglContext = GLContext(gameWindow);
+        context = GLContext(window);
     } catch (const runtime_error &e) {
         LogSystem::Fatal(
             "Cannot create OpenGL context!\n"
@@ -88,23 +90,9 @@ bool RenderPrepare() {
     fpsCounter.SetInterval(5000);
     fpsCounter.StartRaiseEvent();
 
+    LogSystem::Info("Render thread done!");
+
     return true;
-}
-
-
-void Rendering() {
-    // 渲染循环（临时）
-    glClearColor(0.0, 0.0, 0.0, 1.0);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glBegin(GL_TRIANGLES);
-    glVertex2f(0.0f, 0.5f);
-    glVertex2f(-0.5f, -0.5f);
-    glVertex2f(0.5f, -0.5f);
-    glEnd();
-
-    oglContext.SwapWindow();
-    fpsCounter.Tick();
 }
 
 
@@ -113,7 +101,10 @@ void RenderCleanup() {
 
     fpsCounter.StopRaiseEvent();
 
-    oglContext.~GLContext();
-    gameWindow.~Window();
-    DestroyNativeSupport();
+    LogSystem::Debug("Resources will be destructed after main().");
+    // context.~GLContext();
+    // window.~Window();
+    // native.~NativeHandler();
+
+    LogSystem::Info("Render thread cleaned up!");
 }
