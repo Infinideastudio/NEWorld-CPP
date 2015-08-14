@@ -4,6 +4,8 @@
 
 #include "../include/Tools.hpp"
 
+#include "../include/LogSystem.hpp"
+
 #include <ctime>
 #include <utility>
 #include <string>
@@ -70,13 +72,15 @@ string ReadFile(const string &filePath) {
         throw runtime_error("Cannot open file: " + filePath);
     }
 
-    string buf;
-    while (fileReader.eof()) {
-        std::getline(fileReader, buf);
-        buf += '\n';
+    string fileBuf;
+    string lineBuf;
+    while (getline(fileReader, lineBuf)) {
+        fileBuf += lineBuf;
+        fileBuf += '\n';
+        fileReader.clear();
     }
 
-    return buf;
+    return fileBuf;
 }
 
 

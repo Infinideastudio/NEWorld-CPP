@@ -6,13 +6,14 @@
 
 #include "../include/LogSystem.hpp"
 #include "../include/Tools.hpp"
+#include "../include/global.hpp"
 
 #include <fstream>
 
 #include <boost/filesystem.hpp>
 
 #include "../include/rapidjson/stringbuffer.h"
-#include "../include/rapidjson/writer.h"
+#include "../include/rapidjson/prettywriter.h"
 
 using namespace std;
 using namespace boost;
@@ -24,8 +25,107 @@ Document Settings;
 Document Infomation;
 }  // namespace json
 
+template <>
+void GetValue(
+    const Document &document,
+    const string &key,
+    string &dest
+) {
+    if (document.HasMember(key.c_str())) {
+
+        if (document[key.c_str()].IsNull()) {
+            LogSystem::Debug("Value not read. Key: {}", key);
+            return;
+        }
+
+        if (document[key.c_str()].IsString()) {
+            dest = document[key.c_str()].GetString();
+        } else {
+            LogSystem::Warning("The value to key {} isn't string.", key);
+        }
+    } else {
+        LogSystem::Warning("Key not found: {}", key);
+    }
+}
+
+
+template <>
+void GetValue(
+    const Document &document,
+    const string &key,
+    int &dest
+) {
+    if (document.HasMember(key.c_str())) {
+
+        if (document[key.c_str()].IsNull()) {
+            LogSystem::Debug("Value not read. Key: {}", key);
+            return;
+        }
+
+        if (document[key.c_str()].IsInt()) {
+            dest = document[key.c_str()].GetInt();
+        } else {
+            LogSystem::Warning("The value to key {} isn't int.", key);
+        }
+    } else {
+        LogSystem::Warning("Key not found: {}", key);
+    }
+}
+
+
+template <>
+void GetValue(
+    const Document &document,
+    const string &key,
+    bool &dest
+) {
+    if (document.HasMember(key.c_str())) {
+
+        if (document[key.c_str()].IsNull()) {
+            LogSystem::Debug("Value not read. Key: {}", key);
+            return;
+        }
+
+        if (document[key.c_str()].IsBool()) {
+            dest = document[key.c_str()].GetBool();
+        } else {
+            LogSystem::Warning("The value to key {} isn't bool.", key);
+        }
+    } else {
+        LogSystem::Warning("Key not found: {}", key);
+    }
+}
+
+
+template <>
+void GetValue(
+    const Document &document,
+    const string &key,
+    double &dest
+) {
+    if (document.HasMember(key.c_str())) {
+
+        if (document[key.c_str()].IsNull()) {
+            LogSystem::Debug("Value not read. Key: {}", key);
+            return;
+        }
+
+        if (document[key.c_str()].IsDouble()) {
+            dest = document[key.c_str()].GetDouble();
+        } else {
+            LogSystem::Warning("The value to key {} isn't double.", key);
+        }
+    } else {
+        LogSystem::Warning("Key not found: {}", key);
+    }
+}
+
+
 void ReadSettings() {
-    // TODO(riteme): Complete this.
+    GetValue(JSON::Infomation, VersionKey, VERSION);
+
+    GetValue(JSON::Settings, WindowWidthKey, WindowWidth);
+    GetValue(JSON::Settings, WindowHeightKey, WindowHeight);
 }
 
 
@@ -39,15 +139,18 @@ bool LoadResourcesJSON(const string &jsonPath) {
     }
 
     // 尝试读取
+    string jsonBuf;
     try {
-        string jsonBuf = ReadFile(jsonPath);
+        jsonBuf = ReadFile(jsonPath);
     } catch (...) {
         LogSystem::Error("Cannot read resources file.");
         return false;
     }
 
+    LogSystem::Debug("./resources.json:\n{}", jsonBuf);
+
     // 解析JSON
-    JSON::Resources.Parse(jsonPath.c_str());
+    JSON::Resources.Parse(jsonBuf.c_str());
 
     // 如果发生错误则推出
     if (JSON::Resources.HasParseError()) {
@@ -58,22 +161,20 @@ bool LoadResourcesJSON(const string &jsonPath) {
     bool status = true;
 
     // 尝试读取信息文件
-    LoadJSONFromKey(JSON::Resources, JSON::Infomation, InformationKey);
+    LoadJSONFromKey(JSON::Resources, JSON::Infomation, InformationFileKey);
 
     // 尝试读取设置
-    LoadJSONFromKey(JSON::Resources, JSON::Settings, SettingsKey);
+    LoadJSONFromKey(JSON::Resources, JSON::Settings, SettingsFileKey);
 
     return status;
 }
 
 
-bool SaveAllJSON() {
+void SaveAllJSON() {
     SaveJSON(JSON::Resources, ResourcesFile);
 
-    SaveJSONFromKey(JSON::Infomation, InformationKey);
-    SaveJSONFromKey(JSON::Settings, SettingsKey);
-
-    return true;
+    SaveJSONFromKey(JSON::Resources, JSON::Infomation, InformationFileKey);
+    SaveJSONFromKey(JSON::Resources, JSON::Settings, SettingsFileKey);
 }
 
 
@@ -111,21 +212,22 @@ bool LoadJSONFromKey(
 
 
 void SaveJSONFromKey(
-    const rapidjson::Document &document,
-    const std::string &key
+    const Document &keySrc,
+    const Document &document,
+    const string &key
 ) {
     // 如果没有则取消写入
-    if (!document.HasMember(key.c_str())) {
+    if (!keySrc.HasMember(key.c_str())) {
         LogSystem::Warning("Key not found: {}", key);
         return;
     }
 
-    if (!document[key.c_str()].IsString()) {
+    if (!keySrc[key.c_str()].IsString()) {
         LogSystem::Warning("Key type error: {}", key);
         return;
     }
 
-    string json = document[key.c_str()].GetString();
+    string json = keySrc[key.c_str()].GetString();
 
     SaveJSON(document, json);
 }
@@ -136,7 +238,7 @@ void SaveJSON(
     const string &destFile
 ) {
     StringBuffer buffer;
-    Writer<StringBuffer> writer(buffer);
+    PrettyWriter<StringBuffer> writer(buffer);
     document.Accept(writer);
 
     ofstream fileWriter(destFile, ios::trunc);

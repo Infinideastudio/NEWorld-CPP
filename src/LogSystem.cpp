@@ -27,6 +27,11 @@ void LogSystem::SetLogDirectory(const string &directory) {
         filesystem::create_directories(directory);
     }
 
+    // 如果有latest.log，则先删除、
+    if (filesystem::exists(directory + "latest.log")) {
+        filesystem::remove(directory + "latest.log");
+    }
+
     unsigned cnt = 1;
     string today = GetDateString();
 

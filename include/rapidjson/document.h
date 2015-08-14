@@ -18,6 +18,8 @@
 #pragma clang diagnostic ignored "-Wold-style-cast"
 #pragma clang diagnostic ignored "-Wconversion"
 #pragma clang diagnostic ignored "-Wdocumentation"
+#pragma clang diagnostic ignored "-Wdeprecated"
+#pragma clang diagnostic ignored "-Wimplicit-fallthrough"
 #endif
 
 #ifndef RAPIDJSON_DOCUMENT_H_

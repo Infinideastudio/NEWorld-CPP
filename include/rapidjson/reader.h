@@ -17,6 +17,7 @@
 #pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
 #pragma clang diagnostic ignored "-Wold-style-cast"
 #pragma clang diagnostic ignored "-Wconversion"
+#pragma clang diagnostic ignored "-Wimplicit-fallthrough"
 #endif
 
 #ifndef RAPIDJSON_READER_H_

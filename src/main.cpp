@@ -9,6 +9,7 @@
 #include "../include/EventSystem.hpp"
 #include "../include/EventsImpl.hpp"
 #include "../include/TickCounter.hpp"
+#include "../include/ExceptionHandler.hpp"
 #include "../include/Setting.hpp"
 #include "../include/Thread.hpp"
 #include "../include/Render.hpp"
@@ -45,7 +46,17 @@ int main(/*int argc, char *argv[]*/) {
 
     // 载入配置
     LogSystem::Info("Loading settings...");
-    LoadResourcesJSON();
+    if (!LoadResourcesJSON()) {
+        LogSystem::Error("Failed to load {}.", ResourcesFile);
+    } else {
+        LogSystem::Info("Reading settings...");
+        ReadSettings();
+        atexit(SaveAllJSON);
+        LogSystem::Info("Settings read!");
+    }
+
+    // 设置定制的terminate_handler
+    SetExcetopnHandler();
 
     // 启动线程
     LogSystem::Info("Creating threads...");
@@ -105,11 +116,9 @@ int main(/*int argc, char *argv[]*/) {
     updateThread.Stop();
     renderThread.Stop();
 
+    // 停止事件系统
     LogSystem::Info("Stopping event system...");
     EventSystem::StopEventSystem();
-
-    LogSystem::Info("Saving settings...");
-    SaveAllJSON();
 
     LogSystem::Info("Program exited.");
 

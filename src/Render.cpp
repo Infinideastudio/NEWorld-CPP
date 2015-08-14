@@ -40,9 +40,9 @@ bool RenderPrepare() {
     LogSystem::Info("Creating game window...");
     try {
         window = Window(
-                     "NEWorld",
+                     (string("NEWorld ") + VERSION).c_str(),
                      WINDOWPOS_CENTERED, WINDOWPOS_CENTERED,
-                     800, 600,
+                     WindowWidth, WindowHeight,
                      WindowFlags::OpenGL
                  );
     } catch (const runtime_error &e) {
@@ -59,7 +59,12 @@ bool RenderPrepare() {
 
     LogSystem::Info("initializing GLEW...");
     glewExperimental = true;
-    glewInit();
+    if (glewInit() != true) {
+        LogSystem::Fatal(
+            "cannot init GLEW!"
+        );
+        return false;
+    }
     glGetError();  // GLEW载入后会设置一个没用的错误，忽略即可
     LogSystem::Info("GLEW inited!");
 

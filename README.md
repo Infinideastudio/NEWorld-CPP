@@ -44,7 +44,7 @@ I think you can't succeed in doing that...
 I'll improve that in the future...  
 
 ## Status
-Global progress: (  6%)  
+Global progress: (  7%)  
 Version: (No stable) (0.0.1 in progress)  
 Platforms: Linux(Ubuntu)  
 Build Status:
@@ -70,7 +70,7 @@ Details:
 (O K) OpenGL -> OpenGL 3.3
 (...) Render module
 (O K) Multithreading -> std::thread
-(...) Settings
+(O K) Settings
 ( X ) Picture loader -> SDL2-image
 ( X ) TrueType support -> SDL2-TTF
 ( X ) Core algorithms -> By @Null and @qiaozhanrong

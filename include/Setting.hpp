@@ -5,14 +5,11 @@
 #ifndef NEWORLD_SETTING_HPP
 #define NEWORLD_SETTING_HPP
 
+#include "JsonKeys.hpp"
+
 #include <string>
 
 #include "rapidjson/document.h"
-
-constexpr char ResourcesFile[] = "./resources.json";
-
-constexpr char InformationKey[] = "information_file";
-constexpr char SettingsKey[] = "setting_file";
 
 namespace JSON {
 extern rapidjson::Document Resources;
@@ -20,10 +17,17 @@ extern rapidjson::Document Settings;
 extern rapidjson::Document Infomation;
 }  // namespace json
 
+template <typename T>
+void GetValue(
+    const rapidjson::Document &document,
+    const std::string &key,
+    T &dest
+);
+
 void ReadSettings();
 
 bool LoadResourcesJSON(const std::string &jsonPath = ResourcesFile);
-bool SaveAllJSON();
+void SaveAllJSON();
 
 bool LoadJSONFromKey(
     const rapidjson::Document &keySrc,
@@ -31,6 +35,7 @@ bool LoadJSONFromKey(
     const std::string &key
 );
 void SaveJSONFromKey(
+    const rapidjson::Document &keySrc,
     const rapidjson::Document &document,
     const std::string &key
 );

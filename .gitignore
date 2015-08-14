@@ -14,10 +14,11 @@
 
 *.plist
 
-release/*
+# release/*
 temp/*
 __pycache__/*
 logs/*
+*.log
 
 *.pyc
 *.pyo
