@@ -5,8 +5,6 @@
 #ifndef NEWORLD_GLOBAL_HPP
 #define NEWORLD_GLOBAL_HPP
 
-#include "../include/Thread.hpp"
-
 #include <string>
 #include <atomic>
 

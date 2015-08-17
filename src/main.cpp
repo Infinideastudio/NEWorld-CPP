@@ -4,14 +4,17 @@
 
 #include "../include/global.hpp"
 
-#include "../include/LogSystem.hpp"
+#include "../include/logging/LogSystem.hpp"
+
+#include "../include/events/EventSystem.hpp"
+
+#include "../include/threading/Thread.hpp"
+
 #include "../include/NativeSupport.hpp"
-#include "../include/EventSystem.hpp"
 #include "../include/EventsImpl.hpp"
 #include "../include/TickCounter.hpp"
 #include "../include/ExceptionHandler.hpp"
 #include "../include/Setting.hpp"
-#include "../include/Thread.hpp"
 #include "../include/Render.hpp"
 #include "../include/Update.hpp"
 #include "../include/Tools.hpp"

@@ -3,9 +3,9 @@
 //
 
 #include "../include/EventsImpl.hpp"
-#include "../include/LogSystem.hpp"
+#include "../include/logging/LogSystem.hpp"
+#include "../include/events/EventSystem.hpp"
 #include "../include/Render.hpp"
-#include "../include/EventSystem.hpp"
 #include "../include/global.hpp"
 
 #include <GL/glew.h>

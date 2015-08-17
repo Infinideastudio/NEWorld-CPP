@@ -5,7 +5,7 @@
 #include "../include/Update.hpp"
 
 #include "../include/global.hpp"
-#include "../include/LogSystem.hpp"
+#include "../include/logging/LogSystem.hpp"
 
 #include <thread>
 
@@ -29,7 +29,6 @@ bool UpdatePrepare() {
     return true;
 }
 
-
 void UpdateCleanup() {
     LogSystem::Info("Update thread clean up...");
 
@@ -38,9 +37,4 @@ void UpdateCleanup() {
     LogSystem::Info("Update thread cleaned up!");
 }
 
-
-void UpdateTime() {
-    passedTime = chrono::duration_cast <
-                 chrono::duration<float>
-                 > (Clock::now() - startTime).count();
-}
+void UpdateTime() { passedTime = chrono::duration_cast<chrono::duration<float>>(Clock::now() - startTime).count(); }

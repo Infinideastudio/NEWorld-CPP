@@ -4,7 +4,7 @@
 
 #include "../include/TickCounter.hpp"
 
-#include "../include/EventSystem.hpp"
+#include "../include/events/EventSystem.hpp"
 
 using namespace std;
 using namespace std::chrono;

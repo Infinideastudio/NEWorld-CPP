@@ -6,7 +6,7 @@
 
 #include "../include/Render.hpp"
 
-#include "../include/LogSystem.hpp"
+#include "../include/logging/LogSystem.hpp"
 
 #include <stdexcept>
 
@@ -93,10 +93,10 @@ void RenderCleanup() {
 
     fpsCounter.StopRaiseEvent();
 
-    LogSystem::Debug("Resources will be destructed after main().");
-    // context.~GLContext();
-    // window.~Window();
-    // native.~NativeHandler();
+    // LogSystem::Debug("Resources will be destructed after main().");
+    context.~GLContext();
+    window.~Window();
+    native.~NativeHandler();
 
     LogSystem::Info("Render thread cleaned up!");
 }

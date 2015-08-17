@@ -4,7 +4,7 @@
 
 #include "../include/ExceptionHandler.hpp"
 
-#include "../include/LogSystem.hpp"
+#include "../include/logging/LogSystem.hpp"
 
 #include <exception>
 

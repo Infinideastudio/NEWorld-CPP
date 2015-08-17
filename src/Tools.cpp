@@ -4,7 +4,7 @@
 
 #include "../include/Tools.hpp"
 
-#include "../include/LogSystem.hpp"
+#include "../include/logging/LogSystem.hpp"
 
 #include <ctime>
 #include <utility>
@@ -34,7 +34,6 @@ std::string CorrectPath(const std::string &originPath, const PathType &destType)
     return buf;
 }
 
-
 std::string GetDateString() {
     constexpr unsigned TimeStringLength = 11;
     constexpr char TimeFormat[] = "%Y-%m-%d";
@@ -46,7 +45,6 @@ std::string GetDateString() {
 
     return string(buf);
 }
-
 
 std::string GetTimeString() {
     constexpr unsigned TimeStringLength = 9;
@@ -60,17 +58,12 @@ std::string GetTimeString() {
     return string(buf);
 }
 
-
 string ReadFile(const string &filePath) {
     // 检查文件是否存在
-    if (!filesystem::exists(filePath)) {
-        throw invalid_argument("filePath");
-    }
+    if (!filesystem::exists(filePath)) { throw invalid_argument("filePath"); }
 
     ifstream fileReader(filePath);
-    if (!fileReader.is_open()) {
-        throw runtime_error("Cannot open file: " + filePath);
-    }
+    if (!fileReader.is_open()) { throw runtime_error("Cannot open file: " + filePath); }
 
     string fileBuf;
     string lineBuf;
@@ -82,7 +75,6 @@ string ReadFile(const string &filePath) {
 
     return fileBuf;
 }
-
 
 namespace {
 #include <stdio.h>
@@ -107,7 +99,5 @@ std::string GetCurrentDirectory() {
 #endif  // IFDEF __WINDOWS__
 
         return directory;
-    } else {
-        return string("./");
-    }
+    } else { return string("./"); }
 }

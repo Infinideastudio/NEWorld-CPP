@@ -4,7 +4,7 @@
 
 #include "../include/Setting.hpp"
 
-#include "../include/LogSystem.hpp"
+#include "../include/logging/LogSystem.hpp"
 #include "../include/Tools.hpp"
 #include "../include/global.hpp"
 
@@ -26,100 +26,60 @@ Document Infomation;
 }  // namespace json
 
 template <>
-void GetValue(
-    const Document &document,
-    const string &key,
-    string &dest
-) {
+void GetValue(const Document &document, const string &key, string &dest) {
     if (document.HasMember(key.c_str())) {
-
         if (document[key.c_str()].IsNull()) {
             LogSystem::Debug("Value not read. Key: {}", key);
             return;
         }
 
-        if (document[key.c_str()].IsString()) {
-            dest = document[key.c_str()].GetString();
-        } else {
+        if (document[key.c_str()].IsString()) { dest = document[key.c_str()].GetString(); } else {
             LogSystem::Warning("The value to key {} isn't string.", key);
         }
-    } else {
-        LogSystem::Warning("Key not found: {}", key);
-    }
+    } else { LogSystem::Warning("Key not found: {}", key); }
 }
 
-
 template <>
-void GetValue(
-    const Document &document,
-    const string &key,
-    int &dest
-) {
+void GetValue(const Document &document, const string &key, int &dest) {
     if (document.HasMember(key.c_str())) {
-
         if (document[key.c_str()].IsNull()) {
             LogSystem::Debug("Value not read. Key: {}", key);
             return;
         }
 
-        if (document[key.c_str()].IsInt()) {
-            dest = document[key.c_str()].GetInt();
-        } else {
+        if (document[key.c_str()].IsInt()) { dest = document[key.c_str()].GetInt(); } else {
             LogSystem::Warning("The value to key {} isn't int.", key);
         }
-    } else {
-        LogSystem::Warning("Key not found: {}", key);
-    }
+    } else { LogSystem::Warning("Key not found: {}", key); }
 }
 
-
 template <>
-void GetValue(
-    const Document &document,
-    const string &key,
-    bool &dest
-) {
+void GetValue(const Document &document, const string &key, bool &dest) {
     if (document.HasMember(key.c_str())) {
-
         if (document[key.c_str()].IsNull()) {
             LogSystem::Debug("Value not read. Key: {}", key);
             return;
         }
 
-        if (document[key.c_str()].IsBool()) {
-            dest = document[key.c_str()].GetBool();
-        } else {
+        if (document[key.c_str()].IsBool()) { dest = document[key.c_str()].GetBool(); } else {
             LogSystem::Warning("The value to key {} isn't bool.", key);
         }
-    } else {
-        LogSystem::Warning("Key not found: {}", key);
-    }
+    } else { LogSystem::Warning("Key not found: {}", key); }
 }
 
-
 template <>
-void GetValue(
-    const Document &document,
-    const string &key,
-    double &dest
-) {
+void GetValue(const Document &document, const string &key, double &dest) {
     if (document.HasMember(key.c_str())) {
-
         if (document[key.c_str()].IsNull()) {
             LogSystem::Debug("Value not read. Key: {}", key);
             return;
         }
 
-        if (document[key.c_str()].IsDouble()) {
-            dest = document[key.c_str()].GetDouble();
-        } else {
+        if (document[key.c_str()].IsDouble()) { dest = document[key.c_str()].GetDouble(); } else {
             LogSystem::Warning("The value to key {} isn't double.", key);
         }
-    } else {
-        LogSystem::Warning("Key not found: {}", key);
-    }
+    } else { LogSystem::Warning("Key not found: {}", key); }
 }
-
 
 void ReadSettings() {
     GetValue(JSON::Infomation, VersionKey, VERSION);
@@ -127,7 +87,6 @@ void ReadSettings() {
     GetValue(JSON::Settings, WindowWidthKey, WindowWidth);
     GetValue(JSON::Settings, WindowHeightKey, WindowHeight);
 }
-
 
 bool LoadResourcesJSON(const string &jsonPath) {
     // bool status = true;
@@ -169,7 +128,6 @@ bool LoadResourcesJSON(const string &jsonPath) {
     return status;
 }
 
-
 void SaveAllJSON() {
     SaveJSON(JSON::Resources, ResourcesFile);
 
@@ -177,16 +135,8 @@ void SaveAllJSON() {
     SaveJSONFromKey(JSON::Resources, JSON::Settings, SettingsFileKey);
 }
 
-
-bool LoadJSONFromKey(
-    const Document &keySrc,
-    Document &dest,
-    const string &key
-) {
-    if (
-        keySrc.HasMember(key.c_str()) &&
-        keySrc[key.c_str()].IsString()
-    ) {
+bool LoadJSONFromKey(const Document &keySrc, Document &dest, const string &key) {
+    if (keySrc.HasMember(key.c_str()) && keySrc[key.c_str()].IsString()) {
         string json = keySrc[key.c_str()].GetString();
 
         if (filesystem::exists(json)) {
@@ -210,12 +160,7 @@ bool LoadJSONFromKey(
     return true;
 }
 
-
-void SaveJSONFromKey(
-    const Document &keySrc,
-    const Document &document,
-    const string &key
-) {
+void SaveJSONFromKey(const Document &keySrc, const Document &document, const string &key) {
     // 如果没有则取消写入
     if (!keySrc.HasMember(key.c_str())) {
         LogSystem::Warning("Key not found: {}", key);
@@ -232,11 +177,7 @@ void SaveJSONFromKey(
     SaveJSON(document, json);
 }
 
-
-void SaveJSON(
-    const Document &document,
-    const string &destFile
-) {
+void SaveJSON(const Document &document, const string &destFile) {
     StringBuffer buffer;
     PrettyWriter<StringBuffer> writer(buffer);
     document.Accept(writer);

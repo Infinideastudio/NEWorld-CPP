@@ -4,8 +4,8 @@
 
 #ifndef NEWORLD_EVENT_SYSTEM_HPP
 
-#include "NativeSupport.hpp"
-#include "LogSystem.hpp"
+#include "../NativeSupport.hpp"
+#include "../logging/LogSystem.hpp"
 
 #include <atomic>
 
@@ -77,34 +77,6 @@ template <typename SignalType>
 void DisconnectAllEvent(SignalType &signal);
 
 // 实现部分
-
-void DoEvents() {
-    NativeEventType event;
-
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-            case SDL_QUIT:
-                LogSystem::Debug("Event System: Recevied SDL_QUIT.");
-                ApplicationQuitEvent();
-                break;
-
-            case SDL_WINDOWEVENT:
-                // LogSystem::Debug("Event System: Received SDL_WINDOWEVENT.");
-
-                switch (event.window.event) {
-                    case SDL_WINDOWEVENT_RESIZED:
-                        // LogSystem::Debug("Event System: Received SDL_WINDOW_RESIZED.");
-
-                        WindowResizeEvent(event.window.data1, event.window.data2);
-                        break;
-                }  // switch to event.window.event
-
-                break;
-
-        }  // switch to event.type
-
-    }  // while
-}
 
 template <typename SignalType, typename SlotType>
 void ConnectEvent(SignalType &signal, SlotType &slot) {

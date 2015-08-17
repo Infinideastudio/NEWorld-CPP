@@ -1,7 +1,8 @@
 #  ==========设置部分==========
 # 源代码和版本
 SOURCES = [
-    './src/*.cpp'
+    './src/*.cpp',
+    './src/*/*.cpp'
 ]
 
 VERSION = '0.0.1-linux'
