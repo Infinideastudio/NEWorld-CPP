@@ -22,7 +22,6 @@
 
 #include <GL/glew.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_opengl.h>
 
 using namespace std;
 
@@ -46,9 +45,7 @@ int main(/*int argc, char *argv[]*/) {
 
     // 载入配置
     LogSystem::Info("Loading settings...");
-    if (!LoadResourcesJSON()) {
-        LogSystem::Error("Failed to load {}.", ResourcesFile);
-    } else {
+    if (!LoadResourcesJSON()) { LogSystem::Error("Failed to load {}.", ResourcesFile); } else {
         LogSystem::Info("Reading settings...");
         ReadSettings();
         atexit(SaveAllJSON);
@@ -59,19 +56,10 @@ int main(/*int argc, char *argv[]*/) {
     SetExcetopnHandler();
 
     // 启动线程
-    LogSystem::Info("Creating threads...");
-    Thread renderThread(
-        RenderPrepare,
-        Rendering,
-        RenderCleanup
-    );
-    Thread updateThread(
-        UpdatePrepare,
-        Updating,
-        UpdateCleanup
-    );
-
     LogSystem::Info("Starting threads...");
+    Thread renderThread(RenderPrepare, Rendering, RenderCleanup);
+    Thread updateThread(UpdatePrepare, Updating, UpdateCleanup);
+
     renderThread.Start();
     updateThread.Start();
 
@@ -80,21 +68,10 @@ int main(/*int argc, char *argv[]*/) {
     updateThread.WaitForPrepare();
 
     LogSystem::Debug("Checking threads' status...");
-    LogSystem::Debug(
-        "Render thread: {}",
-        renderThread.GetStatus() == ThreadStatus::ExitedWithException ?
-        "ERROR" : "NORMAL"
-    );
-    LogSystem::Debug(
-        "Update thread: {}",
-        renderThread.GetStatus() == ThreadStatus::ExitedWithException ?
-        "ERROR" : "NORMAL"
-    );
+    LogSystem::Debug("Render thread: {}", renderThread.GetStatus() == ThreadStatus::ExitedWithException ? "ERROR" : "NORMAL");
+    LogSystem::Debug("Update thread: {}", renderThread.GetStatus() == ThreadStatus::ExitedWithException ? "ERROR" : "NORMAL");
 
-    if (
-        renderThread.GetStatus() == ThreadStatus::ExitedWithException ||
-        updateThread.GetStatus() == ThreadStatus::ExitedWithException
-    ) {
+    if (renderThread.GetStatus() == ThreadStatus::ExitedWithException || updateThread.GetStatus() == ThreadStatus::ExitedWithException) {
         LogSystem::Error("Cannot start threads! Program will exit.");
         flag = false;
     }
@@ -106,7 +83,7 @@ int main(/*int argc, char *argv[]*/) {
     while (flag) {
         EventSystem::DoEvents();
         this_thread::sleep_for(chrono::milliseconds(EVENT_THREAD_SLEEP_FOR));  // 不要太激进了！！！
-    }   // while
+    }                                                                          // while
 
     LogSystem::Info("Exited main loop.");
 

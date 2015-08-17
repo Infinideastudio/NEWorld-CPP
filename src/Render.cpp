@@ -30,29 +30,21 @@ bool RenderPrepare() {
         LogSystem::Fatal(
             "Cannot init native support!\n"
             "Details: {}",
-            GetError()
-        );
+            GetError());
         return false;
-    } else {
-        LogSystem::Info("Native support initialization is OK!");
-    }
+    } else { LogSystem::Info("Native support initialization is OK!"); }
 
     LogSystem::Info("Creating game window...");
     try {
-        window = Window(
-                     (string("NEWorld ") + VERSION).c_str(),
-                     WINDOWPOS_CENTERED, WINDOWPOS_CENTERED,
-                     WindowWidth, WindowHeight,
-                     WindowFlags::OpenGL
-                 );
+        window = Window((string("NEWorld ") + VERSION).c_str(), WINDOWPOS_CENTERED, WINDOWPOS_CENTERED, WindowWidth, WindowHeight,
+                        WindowFlags::OpenGL);
     } catch (const runtime_error &e) {
         LogSystem::Fatal(
             "Cannot create game window!\n"
             "Catched exception: {}\n"
             "Details: {}",
             e.what(),
-            GetError()
-        );
+            GetError());
         return false;
     }
     LogSystem::Info("Game window created successfully!");
@@ -60,9 +52,7 @@ bool RenderPrepare() {
     LogSystem::Info("initializing GLEW...");
     glewExperimental = true;
     if (glewInit() != true) {
-        LogSystem::Fatal(
-            "cannot init GLEW!"
-        );
+        LogSystem::Fatal("cannot init GLEW!");
         return false;
     }
     glGetError();  // GLEW载入后会设置一个没用的错误，忽略即可
@@ -73,8 +63,7 @@ bool RenderPrepare() {
         LogSystem::Error(
             "Cannot set OpenGL version to 3.3.\n"
             "Details: {}",
-            GetError()
-        );
+            GetError());
     }
     try {
         context = GLContext(window);
@@ -84,8 +73,7 @@ bool RenderPrepare() {
             "Catched exception: {}\n"
             "Details: {}",
             e.what(),
-            GetError()
-        );
+            GetError());
         return false;
     }
     LogSystem::Info("OpenGL context created successfully!");
@@ -99,7 +87,6 @@ bool RenderPrepare() {
 
     return true;
 }
-
 
 void RenderCleanup() {
     LogSystem::Info("Render thread cleaning up...");

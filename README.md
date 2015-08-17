@@ -12,7 +12,7 @@ Then you'll see a window with a white triangle.
 ### Reqirements
 1.boost:filesystem, system, signals2  
 2.SDL2, SDL2_image  
-3.OpenGL, GLEW  
+3.OpenGL, GLEW, GLM  
 4.Only tested on clang 3.6  
 
 ### Compilion
@@ -65,7 +65,7 @@ Details:
 (O K) Windows/context manager -> SDL2
 (O K) Event system -> Boost.Signal2
 (O K) Graphics API -> OpenGL
-(...) OpenGL math -> GLM
+(O K) OpenGL math -> GLM
 (N/A) OpenGL render frontend -> (No)
 (O K) OpenGL -> OpenGL 3.3
 (...) Render module

@@ -18,75 +18,135 @@
 #define FMT_HEADER_ONLY
 #include "cppformat/format.h"
 
+#include <boost/filesystem.hpp>
+
 constexpr int NUMBER_OF_LOGTYPE = 7;
 
-enum class LogType {
-    Info = 0,
-    Warning = 1,
-    Error = 2,
-    Fatal = 3,
-    Debug = 4,
-    Trace = 5,
-    Unknown = 6
-};  // enum class LogType
+enum class LogType { Info = 0, Warning = 1, Error = 2, Fatal = 3, Debug = 4, Trace = 5, Unknown = 6 };  // enum class LogType
 
 // 可以直接根据LogType索引到日志类型名称
-constexpr char const *LogTypeString[] = {
-    "INFO",
-    "WARN",
-    "ERROR",
-    "FATAL",
-    "DEBUG",
-    "TRACE",
-    "UNKNOWN"
-};
+constexpr char const *LogTypeString[] = { "INFO", "WARN", "ERROR", "FATAL", "DEBUG", "TRACE", "UNKNOWN" };
 
 class LogSystem final {
-public:
+ public:
     LogSystem() = delete;
     LogSystem(const LogSystem &) = delete;
     LogSystem(LogSystem &&) = delete;
     ~LogSystem() = delete;
-    LogSystem &operator=(const LogSystem&) = delete;
-    LogSystem &operator=(LogSystem&&) = delete;
+    LogSystem &operator=(const LogSystem &) = delete;
+    LogSystem &operator=(LogSystem &&) = delete;
 
+    /**
+     * 设置日志文件的存放目录
+     * @param directory 目录
+     * @remark:
+     * 会立即生成日志文件
+     */
     static void SetLogDirectory(const std::string &directory);
 
-    template <typename ... Args>
-    static void Info(const std::string &fmt, const Args ... args);
+    /**
+     * 写入日志
+     * @param fmt  格式化的日志内容
+     * @param args 格式化参数
+     */
+    template <typename... Args>
+    static void Info(const std::string &fmt, const Args... args);
 
-    template <typename ... Args>
-    static void Warning(const std::string &fmt, const Args ... args);
+    /**
+     * 写入日志
+     * @param fmt  格式化的日志内容
+     * @param args 格式化参数
+     */
+    template <typename... Args>
+    static void Warning(const std::string &fmt, const Args... args);
 
-    template <typename ... Args>
-    static void Error(const std::string &fmt, const Args ... args);
+    /**
+     * 写入日志
+     * @param fmt  格式化的日志内容
+     * @param args 格式化参数
+     */
+    template <typename... Args>
+    static void Error(const std::string &fmt, const Args... args);
 
-    template <typename ... Args>
-    static void Fatal(const std::string &fmt, const Args ... args);
+    /**
+     * 写入日志
+     * @param fmt  格式化的日志内容
+     * @param args 格式化参数
+     */
+    template <typename... Args>
+    static void Fatal(const std::string &fmt, const Args... args);
 
-    template <typename ... Args>
-    static void Debug(const std::string &fmt, const Args ... args);
+    /**
+     * 写入日志
+     * @param fmt  格式化的日志内容
+     * @param args 格式化参数
+     */
+    template <typename... Args>
+    static void Debug(const std::string &fmt, const Args... args);
 
-    template <typename ... Args>
-    static void Trace(const std::string &fmt, const Args ... args);
+    /**
+     * 写入日志
+     * @param fmt  格式化的日志内容
+     * @param args 格式化参数
+     */
+    template <typename... Args>
+    static void Trace(const std::string &fmt, const Args... args);
 
+    /**
+     * 给当前的线程(调用者)设置一个名字
+     * @param name [description]
+     */
     static void SetThreadName(const std::string &name);
+
+    /**
+     * 设置当前领域名称,如Client, Server...
+     * @param name 名称
+     */
     static void SetRegionName(const std::string &name);
 
+    /**
+     * 设置日志输出
+     * @param logToFile   指示是否向文件输出
+     * @param logToStdout 指示是否向控制台输出
+     */
     static void SetOutput(bool logToFile = true, bool logToStdout = true);
 
+    /**
+     * 禁止某一类别的日志输出
+     * @param logType 日志类别
+     */
     static void DisableLog(const LogType &logType);
+
+    /**
+     * 开启某一类别的日志输出
+     * @param logType 日志类别
+     */
     static void EnableLog(const LogType &logType);
+
+    /**
+     * 关闭所有日志输出
+     */
     static void DisableAll();
+
+    /**
+     * 打开所有日志输出
+     */
     static void EnableAll();
 
+    /**
+     * 确认日志系统是否有效
+     * @return 返回一个布尔值
+     */
     static bool IsVaild();
 
+    /**
+     * 将当前日志复制到latest.log
+     */
     static void CopyToLatest();
 
-private:
-    template <typename ... Args>
-    static void _Log(const std::string &fmt, const LogType &logType, const Args ... args);
+ private:
+    template <typename... Args>
+    static void _Log(const std::string &fmt, const LogType &logType, const Args... args);
 
     static void AddSelectionInMessage(std::string &buf, const std::string &value);
     static std::string FindThreadName();
@@ -102,85 +162,161 @@ private:
     static std::unordered_map<std::thread::id, std::string> m_threadMap;
 };  // class LogSystem
 
+// 模板大法好!!!!
 
-template <typename ... Args>
-void LogSystem::Info(const std::string &fmt, const Args ... args) {
+template <typename... Args>
+void LogSystem::Info(const std::string &fmt, const Args... args) {
 #ifndef LOG_NO_INFO
     _Log(fmt, LogType::Info, args...);
 #endif
 }
 
-
-template <typename ... Args>
-void LogSystem::Warning(const std::string &fmt, const Args ... args) {
+template <typename... Args>
+void LogSystem::Warning(const std::string &fmt, const Args... args) {
 #ifndef LOG_NO_WARNING
     _Log(fmt, LogType::Warning, args...);
 #endif
 }
 
-
-template <typename ... Args>
-void LogSystem::Error(const std::string &fmt, const Args ... args) {
+template <typename... Args>
+void LogSystem::Error(const std::string &fmt, const Args... args) {
 #ifndef LOG_NO_ERROR
     _Log(fmt, LogType::Error, args...);
 #endif
 }
 
-
-template <typename ... Args>
-void LogSystem::Fatal(const std::string &fmt, const Args ... args) {
+template <typename... Args>
+void LogSystem::Fatal(const std::string &fmt, const Args... args) {
 #ifndef LOG_NO_FATAL
     _Log(fmt, LogType::Fatal, args...);
 #endif
 }
 
-
-template <typename ... Args>
-void LogSystem::Debug(const std::string &fmt, const Args ... args) {
+template <typename... Args>
+void LogSystem::Debug(const std::string &fmt, const Args... args) {
 #ifndef LOG_NO_DEBUG
     _Log(fmt, LogType::Debug, args...);
 #endif
 }
 
-
-template <typename ... Args>
-void LogSystem::Trace(const std::string &fmt, const Args ... args) {
+template <typename... Args>
+void LogSystem::Trace(const std::string &fmt, const Args... args) {
 #ifndef LOG_NO_TRACE
     _Log(fmt, LogType::Trace, args...);
 #endif
 }
 
+void LogSystem::SetLogDirectory(const std::string &directory) {
+    using namespace std;
+    using namespace boost;
+
+    // 确保目录存在
+    if (!filesystem::exists(directory)) { filesystem::create_directories(directory); }
+
+    // 如果有latest.log，则先删除、
+    if (filesystem::exists(directory + "latest.log")) { filesystem::remove(directory + "latest.log"); }
+
+    unsigned cnt = 1;
+    string today = GetDateString();
+
+    while (filesystem::exists(directory + today + '-' + to_string(cnt) + ".log")) { ++cnt; }  // while
+
+    m_llogFileName = directory + today + '-' + to_string(cnt) + ".log";
+    m_logFile.open(m_llogFileName);
+
+    // 可能权限不够导致文件打开失败
+    if (!m_logFile.is_open()) { throw runtime_error("Failed to open log file. Unknown reason..."); }
+}
+
+void LogSystem::AddSelectionInMessage(std::string &buf, const std::string &value) {
+    // 如果value为空则不加入
+    if (value.empty()) { return; }
+
+    buf += '[';
+    buf += value;
+    buf += ']';
+}
+
+std::string LogSystem::FindThreadName() {
+    auto iter = m_threadMap.find(std::this_thread::get_id());
+
+    if (iter == m_threadMap.end()) {
+        return std::string();  // 返回空字符串
+    }
+
+    return iter->second;
+}
+
+void LogSystem::SetThreadName(const std::string &name) {
+    auto iter = m_threadMap.find(std::this_thread::get_id());
+
+    if (iter != m_threadMap.end()) { iter->second = std::move(name); } else {
+        std::lock_guard<std::mutex> guard(m_threadNameMtx);
+
+        m_threadMap.insert({ std::this_thread::get_id(), std::move(name) });
+    }
+}
+
+void LogSystem::SetRegionName(const std::string &name) { m_regionName = name; }
+
+void LogSystem::SetOutput(bool logToFile, bool logToStdout) {
+    m_logToFile = logToFile;
+    m_logToStdout = logToStdout;
+}
+
+void LogSystem::DisableLog(const LogType &logType) { m_logFiliter.set(static_cast<unsigned>(logType)); }
+
+void LogSystem::EnableLog(const LogType &logType) { m_logFiliter.reset(static_cast<unsigned>(logType)); }
+
+void LogSystem::DisableAll() { m_logFiliter.set(); }
+
+void LogSystem::EnableAll() { m_logFiliter.reset(); }
+
+bool LogSystem::IsVaild() { return m_logFile.is_open(); }
+
+void LogSystem::CopyToLatest() {
+    using namespace std;
+    using namespace boost;
+
+    if (m_llogFileName.empty()) { throw runtime_error("No log file."); }
+
+    if (!filesystem::exists(m_llogFileName)) { throw runtime_error("Log file does not exist."); }
+
+    filesystem::path latest = filesystem::path(m_llogFileName).parent_path();
+    latest /= "latest.log";
+
+    if (filesystem::exists(latest)) { filesystem::remove(latest); }
+
+    filesystem::copy(m_llogFileName, latest);
+}
 
 // 日志记录的真正实现
-template <typename ... Args>
-void LogSystem::_Log(const std::string &fmt, const LogType &logType, const Args ... args) {
+template <typename... Args>
+void LogSystem::_Log(const std::string &fmt, const LogType &logType, const Args... args) {
     // 过滤信息
-    if (m_logFiliter.test(static_cast<unsigned>(logType))) {
-        return;
-    }
+    if (m_logFiliter.test(static_cast<unsigned>(logType))) { return; }
 
     // 日志信息的通常大小
     constexpr int MessageNormalSize = 80;
 
-    std::string buf;
-    buf.reserve(MessageNormalSize);
+    std::string msgBuffer;
+    msgBuffer.reserve(MessageNormalSize);
 
     // 格式：[TIME][REGION NAME][THREAD NAME][MESSAGE TYPE] MESSAGE\n\t ...
     // 每个空行后默认带一个缩进
 
-    AddSelectionInMessage(buf, GetTimeString());
-    AddSelectionInMessage(buf, m_regionName);
-    AddSelectionInMessage(buf, FindThreadName());
-    AddSelectionInMessage(buf, LogTypeString[static_cast<unsigned>(logType)]);
+    AddSelectionInMessage(msgBuffer, GetTimeString());
+    AddSelectionInMessage(msgBuffer, m_regionName);
+    AddSelectionInMessage(msgBuffer, FindThreadName());
+    AddSelectionInMessage(msgBuffer, LogTypeString[static_cast<unsigned>(logType)]);
 
-    buf += ' ';
-    buf += fmt::format(fmt, args...);  // 使用cppformat
+    msgBuffer += ' ';
+    msgBuffer += fmt::format(fmt, args...);  // 使用cppformat
 
-    for (std::string::size_type i = 0;
-            i != buf.size() - 1;
-            ++i) {
-        if (buf[i] == '\n') {
-            buf.insert(i + 1, "\t");  // 插入缩进
+    // 每个换行后添加一个缩进
+    for (std::string::size_type i = 0; i != msgBuffer.size() - 1; ++i) {
+        if (msgBuffer[i] == '\n') {
+            msgBuffer.insert(i + 1, "\t");  // 插入缩进
         }
     }  // for
 
@@ -189,19 +325,16 @@ void LogSystem::_Log(const std::string &fmt, const LogType &logType, const Args 
 
     if (m_logToStdout) {
         std::cout.clear();
-        std::cout << buf << std::endl;
+        std::cout << msgBuffer << std::endl;
     }
 
     if (m_logToFile) {
-        if (!m_logFile.is_open()) {
-            throw std::runtime_error("Log file invaild! Have you ever set log file directory?");
-        } else {
+        if (!m_logFile.is_open()) { throw std::runtime_error("Log file invaild! Have you ever set log file directory?"); } else {
             m_logFile.clear();
-            m_logFile << buf << std::endl;
+            m_logFile << msgBuffer << std::endl;
             m_logFile.flush();  // 自动刷新
         }
     }
 }
-
 
 #endif  // NEWORLD_LOG_SYSTEM_HPP
