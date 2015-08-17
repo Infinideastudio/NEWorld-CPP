@@ -9,90 +9,83 @@
 
 #include <atomic>
 
-#include <SDL2/SDL.h>
 #include <boost/signals2.hpp>
 
 #define EventType boost::signals2::signal
 
-namespace Events {
-[[deprecated]] extern EventType<void()> ApplicationQuit;
-[[deprecated]] extern EventType<void(int, int)> WindowResize;
-[[deprecated]] extern EventType<void(float)> FPSReport;
-[[deprecated]] extern EventType<void(float)> TPSReport;
-}  // namespace Events
-
+/**
+ * 程序退出事件
+ */
 extern EventType<void()> ApplicationQuitEvent;
+
+/**
+ * 窗口改变大小事件
+ */
 extern EventType<void(int, int)> WindowResizeEvent;
+
+/**
+ * FPS数据更新事件
+ */
 extern EventType<void(float)> FPSReportEvent;
+
+/**
+ * TPS数据更新事件
+ */
 extern EventType<void(float)> TPSReportEvent;
 
+/**
+ * 处理SDL2中的事件
+ */
 void DoEvents();
 
+/**
+ * 链接事件
+ * @param signal 事件信号
+ * @param slot   接口
+ */
 template <typename SignalType, typename SlotType>
 void ConnectEvent(SignalType &signal, SlotType &slot);
 
+/**
+ * 链接事件到链表尾部
+ * @param signal 事件信号
+ * @param slot   接口
+ */
 template <typename SignalType, typename SlotType>
 void ConnectEventAtBack(SignalType &signal, SlotType &slot);
 
+/**
+ * 链接事件到链表前部
+ * @param signal 事件信号
+ * @param slot   接口
+ */
 template <typename SignalType, typename SlotType>
 void ConnectEventAtFront(SignalType &signal, SlotType &slot);
 
+/**
+ * 断开与事件的链接
+ * @param signal 事件信号
+ * @param slot   要断开的接口
+ */
 template <typename SignalType, typename SlotType>
 void DisconnectEvent(SignalType &signal, SlotType &slot);
 
+/**
+ * 断开某一事件所有的接口
+ */
 template <typename SignalType>
 void DisconnectAllEvent(SignalType &signal);
 
-template <typename SignalType, typename... Args>
-void RaiseEvent(SignalType &signal, const Args &... args);
+// 实现部分
 
-class EventSystem final {
- public:
-    // This is a singleton:
-    EventSystem() = delete;
-    ~EventSystem() = delete;
-    EventSystem(const EventSystem &) = delete;
-    EventSystem(EventSystem &&) = delete;
-    EventSystem &operator=(const EventSystem &) = delete;
-    EventSystem &operator=(EventSystem &&) = delete;
-
-    [[deprecated]] static void StartEventSystem();
-    [[deprecated]] static void StopEventSystem();
-
-    [[deprecated]] static void EventLoop();
-
-    [[deprecated]] static void DoEvents();
-
-    template <typename SignalType, typename SlotType>
-    [[deprecated]] static void Connect(SignalType &signal, SlotType &slot);
-
-    template <typename SignalType, typename SlotType>
-    [[deprecated]] static void ConnectAtBack(SignalType &signal, SlotType &slot);
-
-    template <typename SignalType, typename SlotType>
-    [[deprecated]] static void ConnectAtFront(SignalType &signal, SlotType &slot);
-
-    template <typename SignalType, typename SlotType>
-    [[deprecated]] static void Disconnect(SignalType &signal, SlotType &slot);
-
-    template <typename SignalType>
-    [[deprecated]] static void DisconnectAll(SignalType &signal);
-
-    template <typename SignalType, typename... Args>
-    [[deprecated]] static void RaiseEvent(SignalType &signal, const Args &... args);
-
- private:
-    [[deprecated]] static std::atomic<bool> m_flag;
-};  // singleton class EventSystem
-
-void EventSystem::DoEvents() {
+void DoEvents() {
     NativeEventType event;
 
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_QUIT:
                 LogSystem::Debug("Event System: Recevied SDL_QUIT.");
-                Events::ApplicationQuit();
+                ApplicationQuitEvent();
                 break;
 
             case SDL_WINDOWEVENT:
@@ -102,7 +95,7 @@ void EventSystem::DoEvents() {
                     case SDL_WINDOWEVENT_RESIZED:
                         // LogSystem::Debug("Event System: Received SDL_WINDOW_RESIZED.");
 
-                        Events::WindowResize(event.window.data1, event.window.data2);
+                        WindowResizeEvent(event.window.data1, event.window.data2);
                         break;
                 }  // switch to event.window.event
 
