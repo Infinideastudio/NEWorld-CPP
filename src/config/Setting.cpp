@@ -2,18 +2,18 @@
 // Copyright 2015 infinideas
 //
 
-#include "../include/Setting.hpp"
+#include "../../include/config/Setting.hpp"
 
-#include "../include/logging/LogSystem.hpp"
-#include "../include/Tools.hpp"
-#include "../include/global.hpp"
+#include "../../include/logging/LogSystem.hpp"
+#include "../../include/utility/Tools.hpp"
+#include "../../include/global.hpp"
 
 #include <fstream>
 
 #include <boost/filesystem.hpp>
 
-#include "../include/rapidjson/stringbuffer.h"
-#include "../include/rapidjson/prettywriter.h"
+#include "../../include/rapidjson/stringbuffer.h"
+#include "../../include/rapidjson/prettywriter.h"
 
 using namespace std;
 using namespace boost;

@@ -6,7 +6,7 @@
 #define NEWORLD_RENDER_HPP
 
 #include "NativeSupport.hpp"
-#include "TickCounter.hpp"
+#include "./utility/TickCounter.hpp"
 
 extern NativeHandler native;
 extern Window window;

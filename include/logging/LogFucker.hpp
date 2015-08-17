@@ -5,7 +5,7 @@
 #ifndef ABCDEFGHIJKLMNOPQRSTUVWXYZ
 #define ABCDEFGHIJKLMNOPQRSTUVWXYZ
 
-#include "./logging/LogSystem.hpp"
+#include "./LogSystem.hpp"
 
 #include <ctime>
 #include <cstdlib>

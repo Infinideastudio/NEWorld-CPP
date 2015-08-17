@@ -2,9 +2,9 @@
 // Copyright 2015 infinideas
 //
 
-#include "../include/TickCounter.hpp"
+#include "../../include/utility/TickCounter.hpp"
 
-#include "../include/events/EventSystem.hpp"
+#include "../../include/events/EventSystem.hpp"
 
 using namespace std;
 using namespace std::chrono;

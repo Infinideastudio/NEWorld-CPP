@@ -5,20 +5,22 @@
 #include "../include/global.hpp"
 
 #include "../include/logging/LogSystem.hpp"
+#include "../include/logging/LogFucker.hpp"
 
 #include "../include/events/EventSystem.hpp"
+#include "../include/events/EventsImpl.hpp"
 
 #include "../include/threading/Thread.hpp"
 
+#include "../include/config/Setting.hpp"
+
+#include "../include/utility/TickCounter.hpp"
+#include "../include/utility/ExceptionHandler.hpp"
+#include "../include/utility/Tools.hpp"
+
 #include "../include/NativeSupport.hpp"
-#include "../include/EventsImpl.hpp"
-#include "../include/TickCounter.hpp"
-#include "../include/ExceptionHandler.hpp"
-#include "../include/Setting.hpp"
 #include "../include/Render.hpp"
 #include "../include/Update.hpp"
-#include "../include/Tools.hpp"
-#include "../include/LogFucker.hpp"
 
 #include <cstdlib>
 #include <atomic>
@@ -83,9 +85,9 @@ int main(/*int argc, char *argv[]*/) {
     LogSystem::Info("Start main loop.");
 
     while (flag) {
-        DoEvents();
         this_thread::sleep_for(chrono::milliseconds(EVENT_THREAD_SLEEP_FOR));  // 不要太激进了！！！
-    }                                                                          // while
+        DoEvents();
+    }  // while
 
     LogSystem::Info("Exited main loop.");
 

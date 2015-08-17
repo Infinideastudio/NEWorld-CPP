@@ -5,7 +5,7 @@
 #ifndef NEWORLD_LOG_SYSTEM_HPP
 #define NEWORLD_LOG_SYSTEM_HPP
 
-#include "../Tools.hpp"
+#include "../utility/Tools.hpp"
 
 #include <mutex>
 #include <bitset>

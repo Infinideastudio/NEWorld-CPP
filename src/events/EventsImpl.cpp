@@ -2,11 +2,13 @@
 // Copyright 2015 infinideas
 //
 
-#include "../include/EventsImpl.hpp"
-#include "../include/logging/LogSystem.hpp"
-#include "../include/events/EventSystem.hpp"
-#include "../include/Render.hpp"
-#include "../include/global.hpp"
+#include "../../include/events/EventsImpl.hpp"
+#include "../../include/events/EventSystem.hpp"
+
+#include "../../include/logging/LogSystem.hpp"
+
+#include "../../include/Render.hpp"
+#include "../../include/global.hpp"
 
 #include <GL/glew.h>
 

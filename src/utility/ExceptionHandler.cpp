@@ -2,9 +2,9 @@
 // Copyright 2015 infinideas
 //
 
-#include "../include/ExceptionHandler.hpp"
+#include "../../include/utility/ExceptionHandler.hpp"
 
-#include "../include/logging/LogSystem.hpp"
+#include "../../include/logging/LogSystem.hpp"
 
 #include <exception>
 

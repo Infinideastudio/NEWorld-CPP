@@ -2,9 +2,9 @@
 // Copyright 2015 infinideas
 //
 
-#include "../include/Tools.hpp"
+#include "../../include/utility/Tools.hpp"
 
-#include "../include/logging/LogSystem.hpp"
+#include "../../include/logging/LogSystem.hpp"
 
 #include <ctime>
 #include <utility>

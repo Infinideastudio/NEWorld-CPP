@@ -5,7 +5,7 @@
 #ifndef NEWORLD_UPDATE_HPP
 #define NEWORLD_UPDATE_HPP
 
-#include "TickCounter.hpp"
+#include "./utility/TickCounter.hpp"
 
 #include <chrono>
 
