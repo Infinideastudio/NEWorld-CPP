@@ -16,13 +16,10 @@ typedef std::chrono::time_point<ClockType> TimePointType;
 // 默认为5000毫秒
 constexpr MillisecondType DefaultInterval = MillisecondType(5000);
 
-enum class CounterType {
-    FPS, TPS
-};  // enum class CounterType
-
+enum class CounterType { FPS, TPS };  // enum class CounterType
 
 class TickCounter final {
-public:
+ public:
     TickCounter();
     TickCounter(unsigned interval, CounterType type = CounterType::FPS, bool raiseEvent = true);
     ~TickCounter() = default;
@@ -39,7 +36,8 @@ public:
     bool IsRaiseEvent() const;
 
     float GetSpeed() const;
-private:
+
+ private:
     friend void _ThreadLoop(TickCounter *counter);
     CounterType m_counterType;
     bool m_raiseEvent;

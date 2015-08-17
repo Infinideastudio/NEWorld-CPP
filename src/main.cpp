@@ -41,7 +41,7 @@ int main(/*int argc, char *argv[]*/) {
 
     // 绑定事件
     LogSystem::Info("Connecting events...");
-    Connects();
+    ConnectEvents();
 
     // 载入配置
     LogSystem::Info("Loading settings...");
@@ -79,9 +79,8 @@ int main(/*int argc, char *argv[]*/) {
     // 主循环（事件循环）
     LogSystem::Info("Start main loop.");
 
-    EventSystem::StartEventSystem();
     while (flag) {
-        EventSystem::DoEvents();
+        DoEvents();
         this_thread::sleep_for(chrono::milliseconds(EVENT_THREAD_SLEEP_FOR));  // 不要太激进了！！！
     }                                                                          // while
 
@@ -92,10 +91,6 @@ int main(/*int argc, char *argv[]*/) {
     LogSystem::Info("Exiting threads...");
     updateThread.Stop();
     renderThread.Stop();
-
-    // 停止事件系统
-    LogSystem::Info("Stopping event system...");
-    EventSystem::StopEventSystem();
 
     LogSystem::Info("Program exited.");
 

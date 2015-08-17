@@ -10,28 +10,18 @@
 
 #include <GL/glew.h>
 
-void Connects() {
-    EventSystem::Connect(Events::ApplicationQuit, Quit);
-    EventSystem::Connect(Events::WindowResize, ResizeWindow);
-    EventSystem::Connect(Events::FPSReport, GetFPS);
-    EventSystem::Connect(Events::TPSReport, GetTPS);
+void ConnectEvents() {
+    ConnectEvent(ApplicationQuitEvent, Quit);
+    ConnectEvent(WindowResizeEvent, ResizeWindow);
+    ConnectEvent(FPSReportEvent, GetFPS);
+    ConnectEvent(TPSReportEvent, GetTPS);
 }
 
+void Quit() { flag = false; }
 
-void Quit() {
-    flag = false;
-}
+void GetFPS(float speed) { LogSystem::Debug("FPS: {}", speed); }
 
-
-void GetFPS(float speed) {
-    LogSystem::Debug("FPS: {}", speed);
-}
-
-
-void GetTPS(float speed) {
-    LogSystem::Debug("TPS: {}", speed);
-}
-
+void GetTPS(float speed) { LogSystem::Debug("TPS: {}", speed); }
 
 void ResizeWindow(int /*width*/, int /*height*/) {
     // LogSystem::Debug("Resize window: {}, {}", width, height);

@@ -10,10 +10,7 @@
 
 using namespace std;
 
-void SetExcetopnHandler() {
-    set_terminate(Terminatehandler);
-}
-
+void SetExcetopnHandler() { set_terminate(Terminatehandler); }
 
 void Terminatehandler() {
     LogSystem::Warning("std::terminate() called!");
@@ -23,9 +20,7 @@ void Terminatehandler() {
     } catch (const exception &e) {
         LogSystem::Fatal(
             "Exception details:\n"
-            "e.what() == {}", e.what()
-        );
-    } catch (...) {
-        LogSystem::Fatal("unknown exception catch in terminate.");
-    }
+            "e.what() == {}",
+            e.what());
+    } catch (...) { LogSystem::Fatal("unknown exception catch in terminate."); }
 }

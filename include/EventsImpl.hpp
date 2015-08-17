@@ -5,7 +5,8 @@
 #ifndef NEWORLD_EVENTS_IMPL_HPP
 #define NEWORLD_EVENTS_IMPL_HPP
 
-void Connects();
+[[deprecated]] void Connects();
+void ConnectEvents();
 
 void Quit();
 void GetFPS(float speed);

@@ -50,46 +50,9 @@ void Fuck();
 
 void LogFucker::Fuck() {
 #ifndef NO_FUCK_ABILITY
-    time_t t =
-        time
-        (
-            nullptr
-        )
-        ;
-    srand
-    (
-        static_cast
-        <
-        unsigned
-        >
-        (
-            localtime
-            (
-                &t
-            )
-            ->tm_sec
-        )
-    )
-    ;
-    unsigned index =
-        static_cast
-        <
-        unsigned
-        >
-        (
-            static_cast
-            <
-            unsigned
-            >
-            (
-                rand
-                (
-                )
-            )
-            %
-            xxxx
-        )
-        ;
+    time_t t = time(nullptr);
+    srand(static_cast<unsigned>(localtime(&t)->tm_sec));
+    unsigned index = static_cast<unsigned>(static_cast<unsigned>(rand()) % xxxx);
     ::LogSystem::Debug(saying[index]);
 #endif
 }
