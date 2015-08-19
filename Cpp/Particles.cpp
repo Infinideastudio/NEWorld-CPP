@@ -68,7 +68,7 @@ namespace particles{
 	}
 
 	void render(particle &ptc){
-		//if (!Frustum::aabbInFrustum(ptc.hb)) return;
+		//if (!Frustum::aabbInFrustum(ptc.hb)) return
 		ptcsrendered++;
 		float size = BLOCKTEXTURE_UNITSIZE / BLOCKTEXTURE_SIZE*ptc.psize;
 		float col = world::getbrightness((int)ptc.xpos, (int)ptc.ypos, (int)ptc.zpos) / (float)world::BRIGHTNESSMAX;

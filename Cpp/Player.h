@@ -2,8 +2,8 @@
 #include "Def.h"
 #include "Hitbox.h"
 
-extern bool FLY;      //·ÉÐÐ;
-extern bool CROSS;    //´©Ç½ ¡û_¡û (Superman!);
+extern bool FLY;      //·ÉÐÐ
+extern bool CROSS;    //´©Ç½ ¡û_¡û (Superman!)
 
 namespace player{
 

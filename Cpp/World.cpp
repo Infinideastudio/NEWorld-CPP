@@ -8,10 +8,10 @@ extern int viewdistance;
 namespace world{
 
 	string worldname = "DefaultWorld";
-	brightness skylight = 15;         //Sky light level;
-	brightness BRIGHTNESSMAX = 15;    //Maximum brightness;
-	brightness BRIGHTNESSMIN = 2;     //Mimimum brightness;
-	brightness BRIGHTNESSDEC = 1;    //Brightness decree;
+	brightness skylight = 15;         //Sky light level
+	brightness BRIGHTNESSMAX = 15;    //Maximum brightness
+	brightness BRIGHTNESSMIN = 2;     //Mimimum brightness
+	brightness BRIGHTNESSDEC = 1;    //Brightness decree
 	uint EmptyList;
 	chunk* chunks;
 	int loadedChunks, allocChunks;
@@ -19,15 +19,16 @@ namespace world{
 	uint64 ciCacheID = 0;
 	chunkIndexArray ciArray;
 	bool ciArrayAval;
+	vector<chunkBuildManage> CBM;
 	sbyte cloud[256][256];
 	int rebuiltChunks, rebuiltChunksCount;
 	int updatedChunks, updatedChunksCount;
 	int unloadedChunks, unloadedChunksCount;
-	//int chunkRenderList[65536][4];
+	//int chunkRenderList[65536][4]
 	pair<int, chunk*> chunkRenderList[65536];
 	int chunkLoadList[65536][4];
 	int chunkUnloadList[65536][4];
-	//pair<int,chunk*> chunkUnloadList[65536];
+	//pair<int,chunk*> chunkUnloadList[65536]
 	vector<int> displayListUnloadList;
 	int chunkRenders, chunkLoads, chunkUnloads;
 
@@ -75,8 +76,8 @@ namespace world{
 
 		int first, last, middle, i;
 		uint64 cid;
-		cid = getChunkID(x, y, z);                                                   //Chunk ID;
-		//二分查找,GO!;
+		cid = getChunkID(x, y, z);                                                   //Chunk ID
+		//二分查找,GO!
 		first = 0;
 		last = loadedChunks - 1;
 		middle = int((first + last) / 2);
@@ -127,9 +128,9 @@ namespace world{
 
 	uint64 getChunkID(int x, int y, int z){
 		
-		//x = -134217728 ~ 134217727      (28 bits);
-		//y = -128       ~ 127            (8 bits);
-		//z = -134217728 ~ 134217727      (28 bits);
+		//x = -134217728 ~ 134217727      (28 bits)
+		//y = -128       ~ 127            (8 bits)
+		//z = -134217728 ~ 134217727      (28 bits)
 		uint64 cid;
 		bool yNeg=false, xNeg=false, zNeg=false;
 		if (y < 0){
@@ -141,9 +142,9 @@ namespace world{
 		if (z < 0){
 			zNeg = true; z = abs(z);
 		}
-		if (y == 128) y = 0;                //y = -128;
-		if (x == 134217728) x = 0;          //x = -134217728;
-		if (z == 134217728) z = 0;          //z = -134217738;
+		if (y == 128) y = 0;                //y = -128
+		if (x == 134217728) x = 0;          //x = -134217728
+		if (z == 134217728) z = 0;          //z = -134217738
 		cid = (uint64(y) << 56) + (uint64(x) << 28) + (uint64(z));
 		if (yNeg) cid += uint64(2) << 62;
 		if (xNeg) cid += uint64(2) << 54;
@@ -183,9 +184,9 @@ namespace world{
 			else{
 				int first, last, middle;
 				uint64 cid;
-				cid = cID;                                           //Chunk ID;
+				cid = cID;                                           //Chunk ID
 				ret = -1;
-				//二分查找,GO!;
+				//二分查找,GO!
 				first = 0;
 				last = loadedChunks - 1;
 				middle = (first + last) / 2;
@@ -238,7 +239,7 @@ namespace world{
 			else allocChunks *= 2;
 			while (allocChunks < loadedChunks) allocChunks *= 2;
 			chunks = (chunk*)realloc(chunks, allocChunks * sizeof(chunk));
-			//memset(chunks + loadedChunks - cc, 0, sizeof(chunk*)*cc);
+			//memset(chunks + loadedChunks - cc, 0, sizeof(chunk*)*cc)
 			if (chunks == nullptr && loadedChunks != 0) {
 				printf("[Console][Error]");
 				printf("Chunk Array expanding error.\n");
@@ -310,7 +311,7 @@ namespace world{
 		else
 			tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
 
-		// Front Face;
+		// Front Face
 		if (!(BlockInfo(blk[1]).isOpaque() || (blk[1] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[1] / (double)BRIGHTNESSMAX;
@@ -350,7 +351,7 @@ namespace world{
 		else
 			tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
 
-		// Back Face;
+		// Back Face
 		if (!(BlockInfo(blk[2]).isOpaque() || (blk[2] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[2] / (double)BRIGHTNESSMAX;
@@ -392,7 +393,7 @@ namespace world{
 		if (b1n10 == blocks::GRASS && blk[0] == blocks::GRASS) tcx = textures::getTexcoordX(blk[0], 1) + 0.001; else tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
 		if (b1n10 == blocks::GRASS && blk[0] == blocks::GRASS) tcy = textures::getTexcoordY(blk[0], 1) + 0.001; else tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
 
-		// Right face;
+		// Right face
 		if (!(BlockInfo(blk[3]).isOpaque() || (blk[3] == blk[0] && !BlockInfo(blk[0]).isOpaque())) || blk[0] == blocks::LEAF) {
 
 			colors = brt[3] / (double)BRIGHTNESSMAX;
@@ -435,7 +436,7 @@ namespace world{
 		if (bn1n10 == blocks::GRASS && blk[0] == blocks::GRASS) tcx = textures::getTexcoordX(blk[0], 1) + 0.001; else tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
 		if (bn1n10 == blocks::GRASS && blk[0] == blocks::GRASS) tcy = textures::getTexcoordY(blk[0], 1) + 0.001; else tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
 
-		// Left Face;
+		// Left Face
 		if (!(BlockInfo(blk[4]).isOpaque() || (blk[4] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[4] / (double)BRIGHTNESSMAX;
@@ -478,7 +479,7 @@ namespace world{
 		tcx = textures::getTexcoordX(blk[0], 1);
 		tcy = textures::getTexcoordY(blk[0], 1);
 
-		// Top Face;
+		// Top Face
 		if (!(BlockInfo(blk[5]).isOpaque() || (blk[5] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[5] / (double)BRIGHTNESSMAX;
@@ -521,7 +522,7 @@ namespace world{
 		tcx = textures::getTexcoordX(blk[0], 3);
 		tcy = textures::getTexcoordY(blk[0], 3);
 
-		// Bottom Face;
+		// Bottom Face
 		if (!(BlockInfo(blk[6]).isOpaque() || (blk[6] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[6] / (double)BRIGHTNESSMAX;
@@ -597,7 +598,7 @@ namespace world{
 		else
 			tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
 
-		// Front Face;
+		// Front Face
 		if (!(BlockInfo(blk[1]).isOpaque() || (blk[1] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[1];
@@ -641,7 +642,7 @@ namespace world{
 		else
 			tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
 
-		// Back Face;
+		// Back Face
 		if (!(BlockInfo(blk[2]).isOpaque() || (blk[2] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[2];
@@ -679,7 +680,7 @@ namespace world{
 		if (getblock(gx - 1, gy - 1, gz) == blocks::GRASS && blk[0] == blocks::GRASS) tcx = textures::getTexcoordX(blk[0], 1) + 0.001; else tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
 		if (getblock(gx - 1, gy - 1, gz) == blocks::GRASS && blk[0] == blocks::GRASS) tcy = textures::getTexcoordY(blk[0], 1) + 0.001; else tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
 
-		// Right face;
+		// Right face
 		if (!(BlockInfo(blk[3]).isOpaque() || (blk[3] == blk[0] && !BlockInfo(blk[0]).isOpaque())) || blk[0] == blocks::LEAF) {
 
 			colors = brt[3];
@@ -717,7 +718,7 @@ namespace world{
 		if (getblock(gx - 1, gy - 1, gz) == blocks::GRASS && blk[0] == blocks::GRASS) tcx = textures::getTexcoordX(blk[0], 1) + 0.001; else tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
 		if (getblock(gx - 1, gy - 1, gz) == blocks::GRASS && blk[0] == blocks::GRASS) tcy = textures::getTexcoordY(blk[0], 1) + 0.001; else tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
 
-		// Left Face;
+		// Left Face
 		if (!(BlockInfo(blk[4]).isOpaque() || (blk[4] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[4];
@@ -755,7 +756,7 @@ namespace world{
 		tcx = textures::getTexcoordX(blk[0], 1);
 		tcy = textures::getTexcoordY(blk[0], 1);
 
-		// Top Face;
+		// Top Face
 		if (!(BlockInfo(blk[5]).isOpaque() || (blk[5] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[5];
@@ -789,7 +790,7 @@ namespace world{
 		tcx = textures::getTexcoordX(blk[0], 3);
 		tcy = textures::getTexcoordY(blk[0], 3);
 
-		// Bottom Face;
+		// Bottom Face
 		if (!(BlockInfo(blk[6]).isOpaque() || (blk[6] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
 			colors = brt[6];
@@ -823,7 +824,7 @@ namespace world{
 
 	int getchunkpos(int n){
 
-		//给出N对应的chunk坐标，XYZ通用;
+		//给出N对应的chunk坐标，XYZ通用
 		int ret = 0;
 		if (n >= 0){
 			ret = n >> 4;
@@ -836,7 +837,7 @@ namespace world{
 	}
 
 	int getblockpos(int n){
-		//给出N对应的chunk内的方块坐标，XYZ通用;
+		//给出N对应的chunk内的方块坐标，XYZ通用
 		return n & 0xf;
 	}
 
@@ -888,7 +889,7 @@ namespace world{
 	}
 
 	void updateblock(int x, int y, int z, bool blockchanged){
-		//Blockupdate;
+		//Blockupdate
 
 		int cx, cy, cz, bx, by, bz;
 		bool updated = blockchanged;
@@ -925,19 +926,19 @@ namespace world{
 					brightness br;
 					int maxbrightness;
 					block blks[7] = { 0,
-						getblock(x, y, z + 1),    //Front face;
-						getblock(x, y, z - 1),    //Back face;
-						getblock(x + 1, y, z),    //Right face;
-						getblock(x - 1, y, z),    //Left face;
-						getblock(x, y + 1, z),    //Top face;
-						getblock(x, y - 1, z) };     //Bottom face;
+						getblock(x, y, z + 1),    //Front face
+						getblock(x, y, z - 1),    //Back face
+						getblock(x + 1, y, z),    //Right face
+						getblock(x - 1, y, z),    //Left face
+						getblock(x, y + 1, z),    //Top face
+						getblock(x, y - 1, z) };     //Bottom face
 					brightness brts[7] = { 0,
-						getbrightness(x, y, z + 1),    //Front face;
-						getbrightness(x, y, z - 1),    //Back face;
-						getbrightness(x + 1, y, z),    //Right face;
-						getbrightness(x - 1, y, z),    //Left face;
-						getbrightness(x, y + 1, z),    //Top face;
-						getbrightness(x, y - 1, z) };     //Bottom face;
+						getbrightness(x, y, z + 1),    //Front face
+						getbrightness(x, y, z - 1),    //Back face
+						getbrightness(x + 1, y, z),    //Right face
+						getbrightness(x - 1, y, z),    //Left face
+						getbrightness(x, y + 1, z),    //Top face
+						getbrightness(x, y - 1, z) };     //Bottom face
 					maxbrightness = 1;
 					for (int i = 2; i != 6; i++){
 						if (brts[maxbrightness] < brts[i]) maxbrightness = i;
@@ -954,13 +955,13 @@ namespace world{
 						if (br < skylight) br = skylight;
 					}
 					if (br < BRIGHTNESSMIN) br = BRIGHTNESSMIN;
-					//Set brightness;
+					//Set brightness
 					cptr->setbrightness(bx, by, bz, br);
 
 				}
 				else{
 
-					//Opaque block;
+					//Opaque block
 					getChunkPtr(cx, cy, cz)->setbrightness(bx, by, bz, 0);
 					if (getblock(x, y, z) == blocks::GLOWSTONE || getblock(x, y, z) == blocks::LAVA){
 						cptr->setbrightness(bx, by, bz, BRIGHTNESSMAX);
@@ -994,7 +995,7 @@ namespace world{
 
 	block getblock(int x, int y, int z, block defaultRet){
 
-		//获取XYZ的方块;
+		//获取XYZ的方块
 		block ret = defaultRet;
 		int cx, cy, cz, bx, by, bz;
 
@@ -1015,7 +1016,7 @@ namespace world{
 
 	brightness getbrightness(int x, int y, int z){
 
-		//获取XYZ的亮度;
+		//获取XYZ的亮度
 		brightness ret = skylight;
 		int cx, cy, cz, bx, by, bz;
 
@@ -1038,7 +1039,7 @@ namespace world{
 
 	void setblock(int x, int y, int z, block Blockname){
 
-		//设置方块;
+		//设置方块
 		int cx, cy, cz, bx, by, bz;
 
 		cx = getchunkpos(x);
@@ -1058,7 +1059,7 @@ namespace world{
 
 	void setbrightness(int x, int y, int z, brightness tbrightness){
 
-		//设置XYZ的亮度;
+		//设置XYZ的亮度
 		int cx, cy, cz, bx, by, bz;
 
 		cx = getchunkpos(x);
@@ -1077,26 +1078,26 @@ namespace world{
 
 	void putblock(int x, int y, int z, block Blockname){
 
-		//这个void和上面那个是一样的，只是本人的完美主义（说白了就是强迫症）驱使我再写一遍= =;
-		//是不是感觉这句话有些眼熟。。。;
+		//这个void和上面那个是一样的，只是本人的完美主义（说白了就是强迫症）驱使我再写一遍= =
+		//是不是感觉这句话有些眼熟。。。
 		setblock(x, y, z, Blockname);
 
 	}
 
 	void pickblock(int x, int y, int z){
 
-		//这个void根本没有存在的必要，其功能等于setblock(x,y,z,0)或putblock(x,y,z,0),但是本人的完...;
-		//是不是感觉这句话还是有些眼熟。。。;
+		//这个void根本没有存在的必要，其功能等于setblock(x,y,z,0)或putblock(x,y,z,0),但是本人的完...
+		//是不是感觉这句话还是有些眼熟。。。
 		setblock(x, y, z, blocks::AIR);
 
 	}
 
-	//为什么之前那些话都有些眼熟呢？？？;
-	//原来是因为这里的set/put/pickblock三个Sub是世界范围的，而之前的是区块范围的。。。;
+	//为什么之前那些话都有些眼熟呢？？？
+	//原来是因为这里的set/put/pickblock三个Sub是世界范围的，而之前的是区块范围的。。。
 
 	bool chunkOutOfBound(int x, int y, int z){
 
-		//检测给出的chunk坐标是否越界;
+		//检测给出的chunk坐标是否越界
 		bool ret = false;
 		if (x<-worldsize || x>worldsize - 1) ret = true;
 		if (y<-worldheight || y>worldheight - 1) ret = true;
@@ -1107,7 +1108,7 @@ namespace world{
 
 	bool chunkInRange(int x, int y, int z, int px, int py, int pz, int dist){
 
-		//检测给出的chunk坐标是否在渲染范围内;
+		//检测给出的chunk坐标是否在渲染范围内
 		bool ret = true;
 		if (x<px - dist || x>px + dist - 1 || y<py - dist || y>py + dist - 1 || z<pz - dist || z>pz + dist - 1){
 			ret = false;
@@ -1131,7 +1132,7 @@ namespace world{
 
 	void sortChunkRenderList(int xpos, int ypos, int zpos){
 
-		//根据chunk与一个点的距离对chunk的渲染顺序进行排序，离玩家越近的chunk先渲染;
+		//根据chunk与一个点的距离对chunk的渲染顺序进行排序，离玩家越近的chunk先渲染
 		int cxp, cyp, czp, p=0, i;
 		int xd, yd, zd;
 

@@ -65,8 +65,8 @@ namespace renderer{
 
 	void Flush(){
 
-		//上次才知道原来Flush还有冲厕所的意思QAQ;
-		//OpenGL有个函数glFlush()，翻译过来就是GL冲厕所() ←_←;
+		//上次才知道原来Flush还有冲厕所的意思QAQ
+		//OpenGL有个函数glFlush()，翻译过来就是GL冲厕所() ←_←
 
 		if (Vertexes > 0){
 			if (EnableShaders) {
@@ -94,13 +94,13 @@ namespace renderer{
 			glBufferData/*ARB*/(GL_ARRAY_BUFFER/*_ARB*/, Vertexes * 3 * sizeof(double), &VertexArray[0], GL_STATIC_DRAW);
 			glVertexPointer(3, GL_DOUBLE, 0, 0);
 
-			//================================//;
+			//================================//
 			glDrawArrays(GL_QUADS, 0, Vertexes);
-			//================================//;
+			//================================//
 
 			glDeleteBuffers/*ARB*/(3, Buffers);
 
-			//重置;
+			//重置
 			Init();
 
 			if (EnableShaders) glUseProgramObjectARB(0);
@@ -108,7 +108,7 @@ namespace renderer{
 	}
 	//GLhandleARB  loadShader(string filename  ,uint mode ){
  //       
-	//	GLhandleARB shader;
+	//	GLhandleARB shader
  //       dim as zstring ptr ptr 
  //       dim as integer ptr shaderSourceLen
  //       dim as integer shaderLineNums

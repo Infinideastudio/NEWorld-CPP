@@ -3,6 +3,7 @@
 int windowwidth;
 int windowheight;
 int handleLimit = 2;
+bool retina = false;			//retina
 bool useLoading = true;         //加载界面
 bool SmoothLighting = true;		//平滑光照
 bool versync = false;			//垂直同步

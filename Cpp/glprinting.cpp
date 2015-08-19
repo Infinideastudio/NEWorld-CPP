@@ -83,8 +83,9 @@ int getStrWidth(string s){
 }
 
 void glprint(int x, int y, string glstring){
+
 	glBindTexture(GL_TEXTURE_2D, glprt::Font);
-	//glDisable GL_DEPTH_TEST;
+	//glDisable GL_DEPTH_TEST
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
@@ -110,12 +111,12 @@ void glprint(int x, int y, string glstring){
 	glPopMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	
-	//glEnable GL_DEPTH_TEST;
+	//glEnable GL_DEPTH_TEST
 	glColor4f(1.0, 1.0, 1.0, 1.0);
 }
 
 void renderChar(int x, int y, string glstring){
-	
+
 	int i = 0, k, uc;
 	double tx, ty, span = 0;
 	textures::TEXTURE_RGBA Tex;
@@ -156,7 +157,7 @@ void renderChar(int x, int y, string glstring){
 
 			tx = ((uc % 256) % 16) / 16.0;
 			ty = 1 - ((uc % 256) / 16) / 16.0;
-			//glScaled(2, 2, 2);
+			//glScaled(2, 2, 2)
 			glBindTexture(GL_TEXTURE_2D, ftex);
 			glBegin(GL_QUADS);
 			glColor4f(0.5, 0.5, 0.5, glprt::a);
@@ -180,13 +181,13 @@ void renderChar(int x, int y, string glstring){
 			glEnd();
 		}
 		if (glstring[i] >= 0 && glstring[i] <= 127){
-			//k += 1;
+			//k += 1
 			i += 1;
-			span += 10;//*2;
+			span += 10;//*2
 		}
 		else{
 			i += 2;
-			span += 16;//*2; //10
+			span += 16;//*2 //10
 		}
 	}
 

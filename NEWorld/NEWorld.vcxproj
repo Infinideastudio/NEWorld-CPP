@@ -14,6 +14,7 @@
     <ClInclude Include="..\Cpp\Blocks.h" />
     <ClInclude Include="..\Cpp\Cat.h" />
     <ClInclude Include="..\Cpp\Chunk.h" />
+    <ClInclude Include="..\Cpp\ChunkBuildManager.h" />
     <ClInclude Include="..\Cpp\ChunkIndexArray.h" />
     <ClInclude Include="..\Cpp\client.h" />
     <ClInclude Include="..\Cpp\Control.h" />
@@ -25,8 +26,10 @@
     <ClInclude Include="..\Cpp\Hitbox.h" />
     <ClInclude Include="..\Cpp\menus.h" />
     <ClInclude Include="..\Cpp\Mo.h" />
+    <ClInclude Include="..\Cpp\OpenGL.h" />
     <ClInclude Include="..\Cpp\Particles.h" />
     <ClInclude Include="..\Cpp\Player.h" />
+    <ClInclude Include="..\Cpp\Render.h" />
     <ClInclude Include="..\Cpp\Renderer.h" />
     <ClInclude Include="..\Cpp\server.h" />
     <ClInclude Include="..\Cpp\Setting.h" />
@@ -38,6 +41,7 @@
   <ItemGroup>
     <ClCompile Include="..\Cpp\Cat.cpp" />
     <ClCompile Include="..\Cpp\Chunk.cpp" />
+    <ClCompile Include="..\Cpp\ChunkBuildManager.cpp" />
     <ClCompile Include="..\Cpp\ChunkIndexArray.cpp" />
     <ClCompile Include="..\Cpp\client.cpp" />
     <ClCompile Include="..\Cpp\Control.cpp" />
@@ -48,8 +52,10 @@
     <ClCompile Include="..\Cpp\Hitbox.cpp" />
     <ClCompile Include="..\Cpp\menus.cpp" />
     <ClCompile Include="..\Cpp\NEWorld.cpp" />
+    <ClCompile Include="..\Cpp\OpenGL.cpp" />
     <ClCompile Include="..\Cpp\Particles.cpp" />
     <ClCompile Include="..\Cpp\Player.cpp" />
+    <ClCompile Include="..\Cpp\Render.cpp" />
     <ClCompile Include="..\Cpp\Renderer.cpp" />
     <ClCompile Include="..\Cpp\server.cpp" />
     <ClCompile Include="..\Cpp\Setting.cpp" />

@@ -1,6 +1,7 @@
 #pragma once
 #include "Def.h"
 #include "ChunkIndexArray.h"
+#include "ChunkBuildManager.h"
 #include "Chunk.h"
 #include "Mo.h"
 
@@ -21,6 +22,7 @@ namespace world{
 	extern uint64 ciCacheID;
 	extern chunkIndexArray ciArray;
 	extern bool ciArrayAval;
+	extern vector<chunkBuildManage> CBM;
 
 	extern sbyte cloud[256][256];
 	extern int rebuiltChunks, rebuiltChunksCount;
@@ -29,7 +31,7 @@ namespace world{
 	extern pair<int, chunk*> chunkRenderList[65536];
 	extern int chunkLoadList[65536][4];
 	extern int chunkUnloadList[65536][4];
-	//extern pair<int, chunk*> chunkUnloadList[65536];
+	//extern pair<int, chunk*> chunkUnloadList[65536]
 	extern vector<int> displayListUnloadList;
 	extern int chunkRenders, chunkLoads, chunkUnloads;
 
@@ -53,7 +55,7 @@ namespace world{
 	vector<Hitbox::AABB> getHitboxes(Hitbox::AABB box);
 	bool inWater(Hitbox::AABB box);
 
-	//void renderblock(int x, int y, int z);
+	//void renderblock(int x, int y, int z)
 	void renderblock(int x, int y, int z, int cx, int cy, int cz);
 	void renderblock(int x, int y, int z, chunk* chunkptr);
 	void updateblock(int x, int y, int z, bool blockchanged);

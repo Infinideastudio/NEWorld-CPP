@@ -27,9 +27,9 @@ namespace gui{
 
 	class label:public controls{
 	public:
-		//标签;
-		//int id;
-		//Form* parent;
+		//标签
+		//int id
+		//Form* parent
 		string  text;
 		int xmin, xmax, ymin, ymax;
 		bool mouseon = false;
@@ -37,29 +37,29 @@ namespace gui{
 
 		void update();
 		void render();
-		//void settext(string s);
+		//void settext(string s)
 		void resize(int xi, int xa, int yi, int ya);
 	};
 
 	class button :public controls{
 	public:
-		//按钮;
-		//int id;
-		//Form* parent;
+		//按钮
+		//int id
+		//Form* parent
 		string text;
 		int xmin, xmax, ymin, ymax;
 		bool mouseon = false, focused = false, pressed = false, clicked = false, enabled = false;
 		void update();
 		void render();
-		//void settext(string s);
+		//void settext(string s)
 		void resize(int xi, int xa, int yi, int ya);
 	};
 
 	class trackbar :public controls{
 	public:
-		//该控件的中文名我不造;
-		//int id;
-		//Form* parent;
+		//该控件的中文名我不造
+		//int id
+		//Form* parent
 		string text;
 		int xmin, xmax, ymin, ymax;
 		int barwidth;
@@ -76,8 +76,8 @@ namespace gui{
 	class textbox :public controls{
 	public:
 		//文本框
-		//int id;
-		//Form* parent;
+		//int id
+		//Form* parent
 		string text;
 		int xmin, xmax, ymin, ymax;
 		bool mouseon = false, focused = false, pressed = false, enabled = false;
@@ -89,8 +89,8 @@ namespace gui{
 	class vscroll :public controls{
 	public:
 		//垂直滚动条
-		//int id;
-		//Form* parent;
+		//int id
+		//Form* parent
 		int xmin, xmax, ymin, ymax;
 		int barheight, barpos;
 		bool mouseon = false, focused = false, pressed = false, enabled = false;

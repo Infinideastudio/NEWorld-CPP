@@ -1,6 +1,6 @@
 #pragma once
 
-//Perlin Noise 2D;
+//Perlin Noise 2D
 namespace WorldGen{
 
 	enum{

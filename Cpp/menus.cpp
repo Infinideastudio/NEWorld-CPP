@@ -15,7 +15,7 @@ string strWithVar(string str, T var){
 }
 
 void mainmenu(){
-	//主菜单;
+	//主菜单
 	gui::Form MainForm;
 	int leftp = windowwidth / 2 - 200;
 	int midp = windowwidth / 2;
@@ -40,7 +40,6 @@ void mainmenu(){
 		quitbtn->resize(midp + 3, rightp, upp + 38, upp + 72);
 		label1->resize(0, windowwidth, windowheight - 32, windowheight - 16);
 		label2->resize(0, windowwidth, windowheight - 16, windowheight);
-		glfwGetCursorPos(win, &mx, &my);
 		mb = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ? 1 : 0;
 		MainForm.mousedata((int)mx, (int)my, mw, mb);
 		MainForm.update();
@@ -82,7 +81,7 @@ void mainmenu(){
 }
 
 void options(){
-	//设置菜单;
+	//设置菜单
 	gui::Form MainForm;
 	int leftp = windowwidth / 2 - 250;
 	int rightp = windowwidth / 2 + 250;
@@ -96,14 +95,14 @@ void options(){
 	gui::trackbar*  FOVyBar = MainForm.createtrackbar(strWithVar("视野角度：", FOVyNormal), 120, (int)FOVyNormal - 1);
 	gui::trackbar*  mmsBar = MainForm.createtrackbar(strWithVar("鼠标灵敏度,", mousemove), 120, (int)mousemove * 40 * 2 - 1);
 	gui::trackbar*  viewdistBar = MainForm.createtrackbar(strWithVar("渲染距离,", viewdistance), 120, (viewdistance - 1) * 8 - 1);
-	//gui::button*	ciArrayBtn = MainForm.createbutton("使用区块索引数组：" + boolstr(UseCIArray));
+	//gui::button*	ciArrayBtn = MainForm.createbutton("使用区块索引数组：" + boolstr(UseCIArray))
 	gui::button*	LoadingBtn = MainForm.createbutton("使用加载界面：" + boolstr(useLoading));
 	gui::button*	rdstbtn = MainForm.createbutton(">> 渲染选项...");
 	gui::button*	gistbtn = MainForm.createbutton(">> 图形界面选项...");
 	gui::button*	backbtn = MainForm.createbutton("<< 返回主菜单");
-	//gui::button*	savebtn = MainForm.createbutton("保存设置");
-	//ciArrayBtn->enabled = false;
-	//savebtn->enabled = false;
+	//gui::button*	savebtn = MainForm.createbutton("保存设置")
+	//ciArrayBtn->enabled = false
+	//savebtn->enabled = false
 	do{
 		leftp = windowwidth / 2 - 250;
 		rightp = windowwidth / 2 + 250;
@@ -113,15 +112,14 @@ void options(){
 		FOVyBar->resize(leftp, midp - 10, upp + lspc * 0, upp + lspc * 0 + 24);
 		mmsBar->resize(midp + 10, rightp, upp + lspc * 0, upp + lspc * 0 + 24);
 		viewdistBar->resize(leftp, midp - 10, upp + lspc * 1, upp + lspc * 1 + 24);
-		//ciArrayBtn->resize(midp + 10, rightp, upp + lspc * 1, upp + lspc * 1 + 24);
+		//ciArrayBtn->resize(midp + 10, rightp, upp + lspc * 1, upp + lspc * 1 + 24)
 		LoadingBtn->resize(midp + 10, rightp, upp + lspc * 1, upp + lspc * 1 + 24);
 		rdstbtn->resize(leftp, midp - 10, upp + lspc * 4, upp + lspc * 4 + 24);
 		gistbtn->resize(midp + 10, rightp, upp + lspc * 4, upp + lspc * 4 + 24);
 		backbtn->resize(leftp, midp - 10, downp - 24, downp);
-		//savebtn->resize(midp + 10, rightp, downp - 24, downp);
-		glfwGetCursorPos(win, &mx, &my);
+		//savebtn->resize(midp + 10, rightp, downp - 24, downp)
 		mb = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ? 1 : 0;
-		//更新GUI;
+		//更新GUI
 		MainForm.mousedata((int)mx, (int)my, mw, mb);
 		MainForm.update();
 		FOVyNormal = static_cast<float>(FOVyBar->barpos + 1);
@@ -130,9 +128,9 @@ void options(){
 		FOVyBar->text = strWithVar("视野角度：", FOVyNormal);
 		mmsBar->text = strWithVar("鼠标灵敏度：", mousemove);
 		viewdistBar->text = strWithVar("渲染距离：", viewdistance);
-		//ciArrayBtn->text = strWithVar("使用区块索引数组, ", boolstr(UseCIArray));
+		//ciArrayBtn->text = strWithVar("使用区块索引数组, ", boolstr(UseCIArray))
 		LoadingBtn->text = "使用加载界面：" + boolstr(useLoading);
-		//if (ciArrayBtn->clicked) UseCIArray = !UseCIArray;
+		//if (ciArrayBtn->clicked) UseCIArray = !UseCIArray
 		if (LoadingBtn->clicked) useLoading = !useLoading;
 		if (rdstbtn->clicked) Renderoptions();
 		if (gistbtn->clicked) GUIoptions();
@@ -154,7 +152,7 @@ void options(){
 		glTexCoord2f(1.0f, 0.45f), glVertex2i(windowwidth, windowheight);
 		glTexCoord2f(0.0f, 0.45f), glVertex2i(0, windowheight);
 		glEnd();
-		//渲染控件;
+		//渲染控件
 		glDisable(GL_TEXTURE_2D);
 		MainForm.render();
 		glfwSwapBuffers(win);
@@ -165,7 +163,7 @@ void options(){
 }
 
 void Renderoptions(){
-    //渲染设置菜单;
+    //渲染设置菜单
 	gui::Form MainForm;
 	int leftp = windowwidth / 2 - 250;
 	int rightp = windowwidth / 2 + 250;
@@ -182,8 +180,7 @@ void Renderoptions(){
 		downp = windowheight - 20;
 		title->resize(midp - 225, midp + 225, 20, 36);
 		backbtn->resize(leftp, rightp, downp - 24, downp);
-		glfwGetCursorPos(win, &mx, &my);
-		//更新GUI;
+		//更新GUI
 		mb = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ? 1 : 0;
 		MainForm.mousedata((int)mx, (int)my, mw, mb);
 		MainForm.update();
@@ -205,7 +202,7 @@ void Renderoptions(){
 		glTexCoord2f(1.0f, 0.45f), glVertex2i(windowwidth, windowheight);
 		glTexCoord2f(0.0f, 0.45f), glVertex2i(0, windowheight);
 		glEnd();
-		//渲染控件;
+		//渲染控件
 		glDisable(GL_TEXTURE_2D);
 		MainForm.render();
 		glfwSwapBuffers(win);
@@ -216,7 +213,7 @@ void Renderoptions(){
 }
 
 void GUIoptions(){
-    //GUI设置菜单;
+    //GUI设置菜单
 	gui::Form MainForm;
 	int leftp = windowwidth / 2 - 250;
 	int rightp = windowwidth / 2 + 250;
@@ -237,8 +234,7 @@ void GUIoptions(){
         title->resize(midp-225,midp+225,20,36);
         fontbtn->resize(leftp,midp-10,upp+lspc*0,upp+lspc*0+24);
         backbtn->resize(leftp,rightp,downp-24,downp);
-        glfwGetCursorPos(win,&mx,&my);
-        //更新GUI;
+        //更新GUI
 		mb = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ? 1 : 0;
 		MainForm.mousedata((int)mx, (int)my, mw, mb);
         MainForm.update();
@@ -262,7 +258,7 @@ void GUIoptions(){
 		glTexCoord2f(1.0f, 0.45f), glVertex2i(windowwidth, windowheight);
 		glTexCoord2f(0.0f, 0.45f), glVertex2i(0, windowheight);
 		glEnd();
-		//渲染控件;
+		//渲染控件
 		glDisable(GL_TEXTURE_2D);
 		MainForm.render();
 		glfwSwapBuffers(win);
@@ -273,7 +269,7 @@ void GUIoptions(){
 }
 
 void worldmenu(){
-	//世界选择菜单;
+	//世界选择菜单
 	gui::Form MainForm;
 	int leftp = windowwidth / 2 - 200;
 	int midp = windowwidth / 2;
@@ -313,7 +309,6 @@ void worldmenu(){
 		backbtn->resize(leftp, rightp, downp - 24, downp);
 		vscroll->barheight = (downp - 72 - 48) / (64 * worldcount + 64)*(downp - 36 - 40);
 		if (vscroll->barheight > downp - 36 - 40) vscroll->barheight = downp - 36 - 40;
-		glfwGetCursorPos(win, &mx, &my);
 		mb = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ? 1 : 0;
 		MainForm.mousedata((int)mx, (int)my, mw, mb);
 		MainForm.update();
@@ -343,7 +338,7 @@ void worldmenu(){
 			break;
 		}
 		if (deletebtn->clicked){
-			//删除世界文件;
+			//删除世界文件
 			system((string("rd /s/q Worlds\\") + chosenWorldName + "\\").c_str());
 			deletebtn->clicked = false;
 			refresh = true;
@@ -358,7 +353,7 @@ void worldmenu(){
 			mouseon = -1;
 			vscroll->barpos = 0;
 			chosenWorldName = "";
-			//查找所有世界存档;
+			//查找所有世界存档
 			textures::TEXTURE_RGB tmb;
 			long hFile = 0;
 			_finddata_t fileinfo;
@@ -440,7 +435,7 @@ void worldmenu(){
 			else{
 				bool marginOnSides;
 				double w, h;
-				//计算材质坐标，保持高宽比（按钮大小为500x60），有小学数学基础的人仔细想一想应该能懂QAQ;
+				//计算材质坐标，保持高宽比（按钮大小为500x60），有小学数学基础的人仔细想一想应该能懂QAQ
 				if (texSizeX[i] * 60 / 500 < texSizeY[i]){
 					marginOnSides = true;
 					w = 1.0, h = texSizeX[i] * 60 / 500.0 / texSizeY[i];
@@ -541,9 +536,8 @@ void createworldmenu(){
 		worldnametb->resize(midp - 250, midp + 250, 48, 72);
 		okbtn->resize(midp - 250, midp + 250, 84, 120);
 		backbtn->resize(leftp, rightp, downp - 24, downp);
-		glfwGetCursorPos(win, &mx, &my);
 		mb = glfwGetMouseButton(win, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS ? 1 : 0;
-		//更新GUI;
+		//更新GUI
 		MainForm.mousedata((int)mx, (int)my, mw, mb);
 		MainForm.update();
 		if (worldnametb->pressed && !worldnametbChanged){
@@ -570,7 +564,7 @@ void createworldmenu(){
 		glTexCoord2f(1.0f, 0.45f), glVertex2i(windowwidth, windowheight);
 		glTexCoord2f(0.0f, 0.45f), glVertex2i(0, windowheight);
 		glEnd();
-		//渲染控件;
+		//渲染控件
 		glDisable(GL_TEXTURE_2D);
 		MainForm.render();
 		glfwSwapBuffers(win);

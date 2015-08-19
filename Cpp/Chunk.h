@@ -32,13 +32,13 @@ namespace world{
 		void destroylists();
 
 		inline block getblock(ubyte x, ubyte y, ubyte z) {
-			//获取区块内的方块;
+			//获取区块内的方块
 			if (isEmptyChunk) return blocks::AIR;
 			return pblocks[x][y][z];
 		}
 		brightness getbrightness(ubyte x, ubyte y, ubyte z);
 		inline void setblock(ubyte x, ubyte y, ubyte z, block iblock) {
-			//设置方块;
+			//设置方块
 			if (this == nullptr) return;
 			pblocks[x][y][z] = iblock;
 			Modified = true;

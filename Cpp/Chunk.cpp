@@ -2,6 +2,7 @@
 #include "WorldGen.h"
 #include "World.h"
 #include "Renderer.h"
+#include "ChunkBuildManager.h"
 #include <fstream>
 
 namespace world{
@@ -54,7 +55,6 @@ namespace world{
 	void chunk::build(){
 
 		//生成地形
-
 		int x, y, z, height, h, sh;
 		if (cy < 0) {
 			memset(pbrightness, sizeof(pbrightness), BRIGHTNESSMIN);
@@ -153,7 +153,7 @@ namespace world{
 	}
 
 	void chunk::SaveToFile(){
-		//if (this == nullptr) return;
+		//if (this == nullptr) return
 		if (!isEmptyChunk&&Modified){
 			std::ofstream file(getFileName(), std::ios::binary | std::ios::out);
 			file.write((char*)pblocks, sizeof(pblocks));
@@ -163,7 +163,7 @@ namespace world{
 	}
 
 	void chunk::buildlists(){
-		//if (emptyChunk) return;
+		if (isEmptyChunk) return;
 		//建立chunk显示列表
 		int x, y, z;
 		if (rebuiltChunks >= 2) return;
@@ -234,8 +234,8 @@ namespace world{
 
 	brightness chunk::getbrightness(ubyte x, ubyte y, ubyte z){
 
-		//获取区块内的亮度;
-		//if (isEmptyChunk) return cy < 0 ? BRIGHTNESSMIN : skylight;
+		//获取区块内的亮度
+		//if (isEmptyChunk) return cy < 0 ? BRIGHTNESSMIN : skylight
 
 		brightness ret = skylight;
 		if (pbrightness == nullptr){
@@ -248,7 +248,7 @@ namespace world{
 	}
 
 	void chunk::setbrightness(ubyte x, ubyte y, ubyte z, brightness tbrightness){
-		//设置亮度;
+		//设置亮度
 		if (this == nullptr) return;
 		pbrightness[x][y][z] = tbrightness;
 		Modified = true;
@@ -257,14 +257,14 @@ namespace world{
 
 	void chunk::putblock(ubyte x, ubyte y, ubyte z, block iblock){
 
-		//这个sub和上面那个是一样的，只是本人的完美主义（说白了就是强迫症）驱使我再写一遍= =;
+		//这个sub和上面那个是一样的，只是本人的完美主义（说白了就是强迫症）驱使我再写一遍= =
 		setblock(x, y, z, iblock);
 
 	}
 
 	void chunk::pickblock(ubyte x, ubyte y, ubyte z){
 
-		//这个sub根本没有存在的必要，其功能等于setblock(x,y,z,0)或putblock(x,y,z,0),但是本人的完...;
+		//这个sub根本没有存在的必要，其功能等于setblock(x,y,z,0)或putblock(x,y,z,0),但是本人的完...
 		setblock(x, y, z, blocks::AIR);
 
 	}

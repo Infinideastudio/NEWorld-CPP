@@ -1,6 +1,6 @@
 #pragma once
 #include "Def.h"
-//可恶的顶点数组~我来了！;
+//可恶的顶点数组~我来了！
 
 namespace renderer{
 	const int ArrayUNITSIZE = 65536;

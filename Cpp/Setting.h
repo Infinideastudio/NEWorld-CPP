@@ -1,12 +1,13 @@
 #pragma once
 
-const int defaultwindowwidth = 850 * 2;
-const int defaultwindowheight = 480 * 2;
+const int defaultwindowwidth = 850;
+const int defaultwindowheight = 480;
 const int cloudwidth = 32;		//云的宽度
 
 extern int windowwidth;
 extern int windowheight;
 extern int handleLimit;
+extern bool retina;				//retina
 extern bool useLoading;         //加载界面
 extern bool SmoothLighting;     //平滑光照
 extern bool versync;			//垂直同步

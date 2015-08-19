@@ -1,7 +1,7 @@
 #pragma once
 #include "Def.h"
 typedef unsigned short block;
-namespace blocks{  //方块ID;
+namespace blocks{  //方块ID
 	enum{
 		AIR, ROCK, GRASS, DIRT, STONE, PLANK, WOOD, BEDROCK, LEAF,
 		GLASS, WATER, LAVA, GLOWSTONE, SAND, CEMENT, ICE, COAL, IRON,
@@ -33,27 +33,27 @@ namespace blocks{  //方块ID;
 
 	//class BlockInfo{
 	//private:
-	//	static const SingleBlock blockData[EOE];
-	//	int blockID;
+	//	static const SingleBlock blockData[EOE]
+	//	int blockID
 	//public:
 	//	BlockInfo(block blockid){
-	//		blockID = blockid;
+	//		blockID = blockid
 	//		if (blockid >= EOE){
-	//			printf("Wrong block ID (%d)!\n", blockid);
-	//			blockID = blocks::AIR;
+	//			printf("Wrong block ID (%d)!\n", blockid)
+	//			blockID = blocks::AIR
 	//		}
-	//	};
+	//	}
 	//	//获得方块名称
-	//	inline const string getBlockName()const{ return blockData[blockID].getBlockName(); }
+	//	inline const string getBlockName()const{ return blockData[blockID].getBlockName() }
 	//	//是否是固体
-	//	inline const bool isSolid()const{ return blockData[blockID].isSolid(); }
+	//	inline const bool isSolid()const{ return blockData[blockID].isSolid() }
 	//	//是否不透明
-	//	inline const bool isOpaque()const{ return blockData[blockID].isOpaque(); }
+	//	inline const bool isOpaque()const{ return blockData[blockID].isOpaque() }
 	//	//是否半透明
-	//	inline const bool isTranslucent()const{ return blockData[blockID].isTranslucent(); }
+	//	inline const bool isTranslucent()const{ return blockData[blockID].isTranslucent() }
 	//	//是否需要平滑光照
-	//	inline const bool isDark()const{ return blockData[blockID].isDark(); }
-	//};
+	//	inline const bool isDark()const{ return blockData[blockID].isDark() }
+	//}
 	const SingleBlock blockData[EOE] = {
 			//		    方块名称		  固体	 不透明	  半透明	 暗(dark)
 			SingleBlock("Air"		, false	, false	, false	, false	),
@@ -76,9 +76,9 @@ namespace blocks{  //方块ID;
 			SingleBlock("Iron Block", true	, true	, false	, true	)
 		};
 	//inline const SingleBlock& BlockInfo(block blockID){
-	//	return blockData[blockID];
+	//	return blockData[blockID]
 	//}
 }
 
-//using blocks::BlockInfo;
+//using blocks::BlockInfo
 #define BlockInfo(blockID) blocks::blockData[blockID]

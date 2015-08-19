@@ -30,7 +30,7 @@ using std::endl;
 #include "Setting.h"
 #include "Control.h"
 #include "blocks.h"
-//Types/constants define;
+//Types/constants define
 typedef signed char sbyte;
 typedef unsigned char ubyte;
 typedef signed char int8;
@@ -45,7 +45,7 @@ typedef unsigned long long uint64;
 typedef unsigned char blockinfo;
 typedef unsigned char brightness;
 typedef GLuint TextureID;
-//const double PI = 3.1415926535898;
+//const double PI = 3.1415926535898
 
 extern uint BlockTexture[20];
 extern uint BlockTextures;
@@ -53,6 +53,12 @@ extern uint guiImage[6];
 extern uint DestroyImage[11];
 
 extern GLFWwindow* win;
+
+extern double lastupdate, updateTimer;
+extern bool updateThreadRun, updateThreadPaused;
+extern mutex Mutex;
+extern HANDLE hMutex;
+extern thread updateThread;
 
 #ifndef _DEF_FUNC_VAR_
 #define _DEF_FUNC_VAR_
@@ -75,12 +81,14 @@ inline int sgn(int n){
 	else return n == 0 ? 0 : -1;
 }
 inline void MutexLock(mutex &mt){
-	mt.lock();
+	//mt.lock();
+	WaitForSingleObject(hMutex, INFINITE);
 }
 inline void MutexUnlock(mutex &mt){
-	mt.unlock();
+	//mt.unlock();
+	ReleaseMutex(hMutex);
 }
-inline int GoInt(float d) {
+inline int GoInt(double d) {
 	if (d >= 0) return int(d);
 	else return -(int(-d));
 }

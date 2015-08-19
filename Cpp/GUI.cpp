@@ -30,7 +30,7 @@ namespace gui{
 	}
 
 	void label::render(){
-		//渲染标签;
+		//渲染标签
 		float fcR, fcG, fcB, fcA;
 		fcR = FgR; fcG = FgG; fcB = FgB; fcA = FgA;
 		if (mouseon){
@@ -40,9 +40,9 @@ namespace gui{
 			glDisable(GL_TEXTURE_2D);
 			glColor4f(FgR*0.6f, FgG*0.6f, FgB*0.6f, linealpha);
 			glLineWidth(linewidth);
-			//glBegin(GL_POINTS);
-			//glVertex2i(xmin - 1, ymin);
-			//glEnd();
+			//glBegin(GL_POINTS)
+			//glVertex2i(xmin - 1, ymin)
+			//glEnd()
 			glBegin(GL_LINE_LOOP);
 			glVertex2i(xmin, ymin);
 			glVertex2i(xmin, ymax);
@@ -64,30 +64,30 @@ namespace gui{
 
 	void button::update(){
 
-		//更新按钮状态;
+		//更新按钮状态
 		if (enabled){
-			if (parent->mx >= xmin && parent->mx <= xmax && parent->my >= ymin && parent->my <= ymax)                 //鼠标悬停;
+			if (parent->mx >= xmin && parent->mx <= xmax && parent->my >= ymin && parent->my <= ymax)                 //鼠标悬停
 				mouseon = true;
 			else
 				mouseon = false;
 		}
 
-		if ((parent->mb == 1 && mouseon || parent->enterp) && focused)           //鼠标按住;
+		if ((parent->mb == 1 && mouseon || parent->enterp) && focused)           //鼠标按住
 			pressed = true;
 		else
 			pressed = false;
 
-		if (parent->mb == 1 && parent->mbl == 0 && mouseon) parent->focusid = id;                      //焦点在此;
-		if (parent->focusid == id) focused = true; else focused = false;                      //焦点;
+		if (parent->mb == 1 && parent->mbl == 0 && mouseon) parent->focusid = id;                      //焦点在此
+		if (parent->focusid == id) focused = true; else focused = false;                      //焦点
 
-		clicked = (parent->mb == 0 && parent->mbl == 1 && mouseon || parent->enterpl && parent->enterp == false) && focused;//点击;
-		//clicked = lp&&!pressed;
+		clicked = (parent->mb == 0 && parent->mbl == 1 && mouseon || parent->enterpl && parent->enterp == false) && focused;//点击
+		//clicked = lp&&!pressed
 
 	}
 
 	void button::render(){
 
-		//渲染按钮;
+		//渲染按钮
 		float fcR, fcG, fcB, fcA;
 		fcR = FgR; fcG = FgG; fcB = FgB; fcA = FgA;
 		if (mouseon){
@@ -162,15 +162,15 @@ namespace gui{
 	
 	void trackbar::update(){
 
-		//更新TrackBar（到底该怎么翻译呢？）状态;
+		//更新TrackBar（到底该怎么翻译呢？）状态
 		if (parent->mx >= xmin && parent->mx <= xmax && parent->my >= ymin && parent->my <= ymax && parent->mb == 1)
 			parent->focusid = id;
-		if (parent->mx >= xmin + barpos && parent->mx <= xmin + barpos + barwidth && parent->my >= ymin && parent->my <= ymax)          //鼠标悬停;
+		if (parent->mx >= xmin + barpos && parent->mx <= xmin + barpos + barwidth && parent->my >= ymin && parent->my <= ymax)          //鼠标悬停
 			mouseon = true;
 		else
 			mouseon = false;
 
-		if (parent->mb == 1 && mouseon && focused){                       //鼠标按住;
+		if (parent->mb == 1 && mouseon && focused){                       //鼠标按住
 			pressed = true;
 		}
 		else{
@@ -178,10 +178,10 @@ namespace gui{
 		}
 
 		if (parent->mb == 1 && parent->mbl == 0 && mouseon)
-			parent->focusid = id;              //焦点在此;
+			parent->focusid = id;              //焦点在此
 
-		focused = parent->focusid == id;                               //焦点;
-		if (pressed)                                                    //拖动;
+		focused = parent->focusid == id;                               //焦点
+		if (pressed)                                                    //拖动
 			barpos += parent->mx - parent->mxl;
 
 		if (focused){
@@ -190,14 +190,14 @@ namespace gui{
 			if (parent->leftkp) barpos -= 1;
 			if (parent->rightkp) barpos += 1;
 		}
-		if (barpos <= 0) barpos = 0;                                             //让拖动条不越界;
+		if (barpos <= 0) barpos = 0;                                             //让拖动条不越界
 		if (barpos >= xmax - xmin - barwidth) barpos = xmax - xmin - barwidth - 1;
 
 	}
 
 	void trackbar::render(){
 
-		//渲染TrackBar（How can I translate it?）;
+		//渲染TrackBar（How can I translate it?）
 		float fcR, fcG, fcB, fcA;
 		float bcR, bcG, bcB, bcA;
 		fcR = FgR; fcG = FgG; fcB = FgB; fcA = FgA;
@@ -212,7 +212,7 @@ namespace gui{
 			fcR = FgR*0.5f; fcG = FgG*0.5f; fcB = FgB*0.5f; fcA = FgA*0.3f;
 		}
 
-		glColor4f(bcR, bcG, bcB, bcA);                                              //Track;
+		glColor4f(bcR, bcG, bcB, bcA);                                              //Track
 		glDisable(GL_TEXTURE_2D);
 		glBegin(GL_QUADS);
 		glVertex2i(xmin, ymin);
@@ -220,7 +220,7 @@ namespace gui{
 		glVertex2i(xmax, ymax);
 		glVertex2i(xmin, ymax);
 		glEnd();
-		glDisable(GL_TEXTURE_2D);                                                //Bar;
+		glDisable(GL_TEXTURE_2D);                                                //Bar
 		glColor4f(fcR, fcG, fcB, fcA);
 		glBegin(GL_QUADS);
 		glVertex2i(xmin + barpos, ymin);
@@ -231,7 +231,7 @@ namespace gui{
 		glColor4f(FgR*0.9f, FgG*0.9f, FgB*0.9f, linealpha);
 
 		if (!enabled) glColor4f(0.5f, 0.5f, 0.5f, linealpha);
-		//glLineWidth(linewidth);                                                  //Focus;
+		//glLineWidth(linewidth)                                                  //Focus
 		glBegin(GL_LINE_LOOP);
 
 		if (focused)
@@ -285,12 +285,12 @@ namespace gui{
         //更新文本框状态
 		if (enabled){
 			
-			if (parent->mx >= xmin && parent->mx <= xmax && parent->my >= ymin && parent->my <= ymax)                 //鼠标悬停;
+			if (parent->mx >= xmin && parent->mx <= xmax && parent->my >= ymin && parent->my <= ymax)                 //鼠标悬停
 				mouseon = true;
 			else
 				mouseon = false;
 
-			if ((parent->mb == 1 && mouseon || parent->enterp) && focused)           //鼠标按住;
+			if ((parent->mb == 1 && mouseon || parent->enterp) && focused)           //鼠标按住
 				pressed = true;
 			else
 				pressed = false;
@@ -450,7 +450,7 @@ namespace gui{
 			fcR = FgR*0.5f; fcG = FgG*0.5f; fcB = FgB*0.5f; fcA = FgA*0.3f;
 		}
 
-		glColor4f(bcR, bcG, bcB, bcA);                                              //Track;
+		glColor4f(bcR, bcG, bcB, bcA);                                              //Track
 		glDisable(GL_TEXTURE_2D);
 		glBegin(GL_QUADS);
 		glVertex2i(xmin, ymin);
@@ -458,7 +458,7 @@ namespace gui{
 		glVertex2i(xmax, ymax);
 		glVertex2i(xmin, ymax);
 		glEnd();
-		glDisable(GL_TEXTURE_2D);                                                //Bar;
+		glDisable(GL_TEXTURE_2D);                                                //Bar
 		glColor4f(fcR, fcG, fcB, fcA);
 		glBegin(GL_QUADS);
 		glVertex2i(xmin, ymin + barpos + 20);
@@ -562,16 +562,16 @@ namespace gui{
 		int i;
 		updated = false;
 
-		if (glfwGetKey(win, GLFW_KEY_TAB) == GLFW_PRESS){                             //TAB键切换焦点;
+		if (glfwGetKey(win, GLFW_KEY_TAB) == GLFW_PRESS){                             //TAB键切换焦点
 			if (glfwGetKey(win, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS || glfwGetKey(win, GLFW_KEY_RIGHT_SHIFT) == GLFW_PRESS){   //Shift+Tab
 				updated = true;
 				if (!tabp) focusid--;
-				if (focusid == -2) focusid = maxid - 1;                                //到了最前一个ID;
+				if (focusid == -2) focusid = maxid - 1;                                //到了最前一个ID
 			}
 			else{
 				updated = true;
 				if (!tabp) focusid++;
-				if (focusid == maxid + 1) focusid = -1;                              //到了最后一个ID;
+				if (focusid == maxid + 1) focusid = -1;                              //到了最后一个ID
 			}
 			tabp = true;
 		}
@@ -585,25 +585,25 @@ namespace gui{
 		}
 		if (!(glfwGetKey(win, GLFW_KEY_ENTER) == GLFW_PRESS)) enterp = false;
 
-		upkpl = upkp;                                                              //方向键上;
+		upkpl = upkp;                                                              //方向键上
 		if (glfwGetKey(win, GLFW_KEY_UP) == GLFW_PRESS){
 			updated = true;
 			upkp = true;
 		}
 		if (!(glfwGetKey(win, GLFW_KEY_UP) == GLFW_PRESS)) upkp = false;
 
-		downkpl = downkp;                                                          //方向键下;
+		downkpl = downkp;                                                          //方向键下
 		if (glfwGetKey(win, GLFW_KEY_DOWN) == GLFW_PRESS){
 			downkp = true;
 		}
 		if (!(glfwGetKey(win, GLFW_KEY_DOWN) == GLFW_PRESS)) downkp = false;
 
-		leftkpl = leftkp;                                                          //方向键左;
+		leftkpl = leftkp;                                                          //方向键左
 		if (glfwGetKey(win, GLFW_KEY_LEFT) == GLFW_PRESS){
 			leftkp = true;
 		}
 		if (!(glfwGetKey(win, GLFW_KEY_LEFT) == GLFW_PRESS)) leftkp = false;
-		rightkpl = rightkp;                                                        //方向键右;
+		rightkpl = rightkp;                                                        //方向键右
 		if (glfwGetKey(win, GLFW_KEY_RIGHT) == GLFW_PRESS){
 			rightkp = true;
 		}
@@ -615,7 +615,7 @@ namespace gui{
 		else
 			backspacep = false;
 
-		if (mb == 1 && mbl == 0) focusid = -1;                                   //空点击时使焦点清空;
+		if (mb == 1 && mbl == 0) focusid = -1;                                   //空点击时使焦点清空
 
 		for (i = 0; i != childrenCount; i++){
 			children[i]->update();                                               //更新子控件
@@ -624,8 +624,8 @@ namespace gui{
 	}
 
 	void Form::mousedata(int x, int y, int w, int b){
-		mxl = mx; myl = my; mwl = mw; mbl = mb;                                             //旧鼠标数据;
-		mx = x; my = y; mw = w; mb = b;                                                     //鼠标数据;
+		mxl = mx; myl = my; mwl = mw; mbl = mb;                                             //旧鼠标数据
+		mx = x; my = y; mw = w; mb = b;                                                     //鼠标数据
 	}
 
 	void Form::render(){
@@ -636,11 +636,11 @@ namespace gui{
 	}
 
 	label* Form::createlabel(string t){
-		label* ret = new label;                                                          //创建标签;
+		label* ret = new label;                                                          //创建标签
 		
-		//初始化标签;
-		ret->id = currentid;                                                       //当前ID;
-		ret->text = t;                                                             //文本;
+		//初始化标签
+		ret->id = currentid;                                                       //当前ID
+		ret->text = t;                                                             //文本
 		ret->parent = this;
 
 		children.push_back(ret);

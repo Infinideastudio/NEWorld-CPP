@@ -2,8 +2,8 @@
 #include "World.h"
 #include <fstream>
 #include <sstream>
-bool FLY;      //飞行;
-bool CROSS;    //穿墙 ←_← (Superman!);
+bool FLY;      //飞行
+bool CROSS;    //穿墙 ←_← (Superman!)
 namespace player{
 	Hitbox::AABB playerbox;
 	float height = 1.2f;     //玩家的高度
@@ -91,9 +91,9 @@ namespace player{
 			za *= 0.8;
 			if (OnGround){
 
-				//半蹲特效;
+				//半蹲特效
 				if (player::jump < -0.005){
-					//player::jump /= 2;
+					//player::jump /= 2
 					if (player::jump <= -(height - 0.5f))
 						heightExt = -(height - 0.5f);
 					else

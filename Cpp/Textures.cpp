@@ -128,13 +128,14 @@ namespace textures{
 		bitmap.sizeX = bih.biWidth;
 		bitmap.sizeY = bih.biHeight;
 		bitmap.buffer = shared_ptr<ubyte>(new unsigned char[bitmap.sizeX * bitmap.sizeY * 4]);
+		bool noMaskFile = MkFilename == "";
 		for (unsigned int i = 0; i < bitmap.sizeX * bitmap.sizeY; i++){
 			//把BGR格式转换为RGB格式
 			bmpfile.read((char*)col, 3);
 			bitmap.buffer.get()[ind++] = col[2]; //R
 			bitmap.buffer.get()[ind++] = col[1]; //G
 			bitmap.buffer.get()[ind++] = col[0]; //B
-			if (MkFilename == ""){
+			if (noMaskFile){
 				bitmap.buffer.get()[ind++] = 255;
 			}
 			else{

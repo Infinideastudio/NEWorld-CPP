@@ -1,6 +1,6 @@
 #include "WorldGen.h"
 #include "Def.h"
-//Perlin Noise 2D;
+//Perlin Noise 2D
 namespace WorldGen{
 	double	perm[256];
 	int		seed;
