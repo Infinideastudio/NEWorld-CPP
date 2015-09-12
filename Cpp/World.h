@@ -1,11 +1,12 @@
 #pragma once
 #include "Def.h"
 #include "ChunkIndexArray.h"
-#include "ChunkBuildManager.h"
+#include "ChunkHeightMap.h"
 #include "Chunk.h"
 #include "Mo.h"
 
 namespace world{
+	class chunkHeightMap;
 	extern string worldname;
 	const int worldsize = 134217728;
 	const int worldheight = 128;
@@ -22,7 +23,7 @@ namespace world{
 	extern uint64 ciCacheID;
 	extern chunkIndexArray ciArray;
 	extern bool ciArrayAval;
-	extern vector<chunkBuildManage> CBM;
+	extern set<chunkHeightMap> CHMs;
 
 	extern sbyte cloud[256][256];
 	extern int rebuiltChunks, rebuiltChunksCount;
@@ -49,8 +50,15 @@ namespace world{
 	void ExpandChunkArray(int cc);
 	void ReduceChunkArray(int cc);
 
-	int getchunkpos(int n);
-	int getblockpos(int n);
+	//给出N对应的chunk坐标，XYZ通用
+	inline int getchunkpos(int n) {
+		return n >> 4;
+	}
+
+	//给出N对应的chunk内的方块坐标，XYZ通用
+	inline int getblockpos(int n) {
+		return n & 0xf;
+	}
 
 	vector<Hitbox::AABB> getHitboxes(Hitbox::AABB box);
 	bool inWater(Hitbox::AABB box);

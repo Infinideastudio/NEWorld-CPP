@@ -19,7 +19,7 @@ namespace world{
 	uint64 ciCacheID = 0;
 	chunkIndexArray ciArray;
 	bool ciArrayAval;
-	vector<chunkBuildManage> CBM;
+	set<chunkHeightMap> CHMs;
 	sbyte cloud[256][256];
 	int rebuiltChunks, rebuiltChunksCount;
 	int updatedChunks, updatedChunksCount;
@@ -822,24 +822,6 @@ namespace world{
 		}
 	}
 
-	int getchunkpos(int n){
-
-		//给出N对应的chunk坐标，XYZ通用
-		int ret = 0;
-		if (n >= 0){
-			ret = n >> 4;
-		}
-		else if (n<0){
-			ret = int((n - 15) / 16);
-		}
-		return ret;
-
-	}
-
-	int getblockpos(int n){
-		//给出N对应的chunk内的方块坐标，XYZ通用
-		return n & 0xf;
-	}
 
 	vector<Hitbox::AABB> getHitboxes(Hitbox::AABB box){
 		//返回与box相交的所有方块AABB

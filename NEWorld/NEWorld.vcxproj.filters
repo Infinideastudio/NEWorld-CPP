@@ -108,7 +108,7 @@
     <ClInclude Include="..\Cpp\glprinting.h">
       <Filter>Render</Filter>
     </ClInclude>
-    <ClInclude Include="..\Cpp\ChunkBuildManager.h">
+    <ClInclude Include="..\Cpp\ChunkHeightMap.h">
       <Filter>World</Filter>
     </ClInclude>
   </ItemGroup>
@@ -182,7 +182,7 @@
     <ClCompile Include="..\Cpp\glprinting.cpp">
       <Filter>Render</Filter>
     </ClCompile>
-    <ClCompile Include="..\Cpp\ChunkBuildManager.cpp">
+    <ClCompile Include="..\Cpp\ChunkHeightMap.cpp">
       <Filter>World</Filter>
     </ClCompile>
   </ItemGroup>

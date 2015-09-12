@@ -2,7 +2,6 @@
 #include "WorldGen.h"
 #include "World.h"
 #include "Renderer.h"
-#include "ChunkBuildManager.h"
 #include <fstream>
 
 namespace world{
@@ -61,11 +60,20 @@ namespace world{
 			isEmptyChunk = true;
 			return;
 		}
+
+		auto iter = CHMs.find(getChunkID(cx, 0, cz)); //Height Map
+		if (iter == CHMs.end()) {
+			//没找到可用的HeightMap
+			chunkHeightMap CHM(cx, cz); //新建一个
+			CHM.build();
+			iter = CHMs.insert(CHM).first; //指向新加入的Height Map
+		}
+
 		bool EmptyChunk = true;
 		for (x = 0; x != 16; x++){
 			for (z = 0; z != 16; z++){
-				h = WorldGen::getHeight(cx * 16 + x, cz * 16 + z);
-				sh = WorldGen::getSandHeight(cx * 16 + x, cz * 16 + z);
+				h = iter->terrain[x][z];
+				sh = iter->sandTerrain[x][z];
 				for (y = 0; y != 16; y++){
 					height = cy * 16 + y;
 					pbrightness[x][y][z] = 0;

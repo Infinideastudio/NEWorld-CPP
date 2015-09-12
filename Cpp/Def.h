@@ -65,7 +65,7 @@ extern thread updateThread;
 const uint32 VERSION = 35;
 const string MAJOR_VERSION = "Alpha_0.";
 const string MINOR_VERSION = "4.9 ";
-const string EXT_VERSION = " [Preview Not Release(C++ Edition)] v4 without bone upgrade";
+const string EXT_VERSION = " [Preview Not Release(C++ Edition)] v5";
 
 inline string boolstr(bool b){
 	return b ? "True" : "False";
@@ -80,11 +80,11 @@ inline int sgn(int n){
 	if (n > 0) return 1;
 	else return n == 0 ? 0 : -1;
 }
-inline void MutexLock(mutex &mt){
+inline void MutexLock(){
 	//mt.lock();
 	WaitForSingleObject(hMutex, INFINITE);
 }
-inline void MutexUnlock(mutex &mt){
+inline void MutexUnlock(){
 	//mt.unlock();
 	ReleaseMutex(hMutex);
 }

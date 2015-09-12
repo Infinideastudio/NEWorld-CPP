@@ -14,7 +14,7 @@
     <ClInclude Include="..\Cpp\Blocks.h" />
     <ClInclude Include="..\Cpp\Cat.h" />
     <ClInclude Include="..\Cpp\Chunk.h" />
-    <ClInclude Include="..\Cpp\ChunkBuildManager.h" />
+    <ClInclude Include="..\Cpp\ChunkHeightMap.h" />
     <ClInclude Include="..\Cpp\ChunkIndexArray.h" />
     <ClInclude Include="..\Cpp\client.h" />
     <ClInclude Include="..\Cpp\Control.h" />
@@ -41,7 +41,7 @@
   <ItemGroup>
     <ClCompile Include="..\Cpp\Cat.cpp" />
     <ClCompile Include="..\Cpp\Chunk.cpp" />
-    <ClCompile Include="..\Cpp\ChunkBuildManager.cpp" />
+    <ClCompile Include="..\Cpp\ChunkHeightMap.cpp" />
     <ClCompile Include="..\Cpp\ChunkIndexArray.cpp" />
     <ClCompile Include="..\Cpp\client.cpp" />
     <ClCompile Include="..\Cpp\Control.cpp" />
@@ -98,6 +98,7 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)..\Project\lib;$(LibraryPath)</LibraryPath>
+    <CodeAnalysisRuleSet>NativeRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

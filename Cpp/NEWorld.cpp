@@ -178,7 +178,7 @@ main_menu:
 	printf("Starting game...\n");
 	//游戏开始(还没呢QAQ)
 	//各种初始化ing...
-	MutexLock(Mutex);
+	MutexLock();
 	updateThread = thread(updateThreadFunc);
 
 
@@ -207,7 +207,7 @@ main_menu:
 	//这才是游戏开始!
 	updateThreadRun = true;
 	loading = true;
-	MutexUnlock(Mutex);
+	MutexUnlock();
 	do{
 		//主循环，被简化成这样，惨不忍睹啊！
 //		Time_overall_ = timer();
@@ -229,12 +229,12 @@ main_menu:
 			glprint(0, 0, "Saving world...");
 			glfwSwapBuffers(win);
 			glfwPollEvents();
-			MutexUnlock(Mutex);
-			MutexLock(Mutex);
+			MutexUnlock();
+			MutexLock();
 			updateThreadRun = false;
 			saveGame();
 			world::destroyAllChunks();
-			MutexUnlock(Mutex);
+			MutexUnlock();
 			updateThread.join();
 			printf("[Console][Game]");
 			printf("Returned to main menu\n");
@@ -247,9 +247,9 @@ main_menu:
 	} while (!glfwWindowShouldClose(win));
 	saveGame();
 	updateThreadRun = false;
-	MutexUnlock(Mutex);
+	MutexUnlock();
 	updateThread.join();
-	//MutexDestroy(Mutex)
+	//MutexDestroy()
 	//结束程序，删了也没关系 ←_←（吐槽FB和glfw中）
 	glfwTerminate();
 	return 0;
@@ -259,21 +259,21 @@ void updateThreadFunc(){
 	//游戏更新线程函数
 	static bool FirstUpdateThisFrame = false;
 	//Wait until start...
-	MutexLock(Mutex);
+	MutexLock();
 	while (!updateThreadRun){
 		//Sleep(50)
-		MutexUnlock(Mutex);
-		MutexLock(Mutex);
+		MutexUnlock();
+		MutexLock();
 	}
-	MutexUnlock(Mutex);
+	MutexUnlock();
 
 	//Thread starts
-	MutexLock(Mutex);
+	MutexLock();
 	while (updateThreadRun){
 
 		while (updateThreadPaused){
-			MutexUnlock(Mutex);
-			MutexLock(Mutex);
+			MutexUnlock();
+			MutexLock();
 		}
 
 //		Time_updategame = 0;
@@ -292,11 +292,11 @@ void updateThreadFunc(){
 			ups = upsc;
 			upsc = 0;
 		}
-		MutexUnlock(Mutex);
-		MutexLock(Mutex);
+		MutexUnlock();
+		MutexLock();
 
 	}
-	MutexUnlock(Mutex);
+	MutexUnlock();
 }
 
 void outputGameInfo() {
@@ -387,8 +387,7 @@ void updategame(bool FirstUpdateThisFrame){
 	player::BlockInHand = player::inventorybox[3][player::itemInHand];
 
 
-	if (!bagOpened && !loading)
-		glfwSetCursorPos(win, windowwidth / 2 * (retina ? 2 : 1), windowheight / 2 * (retina ? 2 : 1));
+
 
 	//获得鼠标按下情况
 	mb = 0;
@@ -440,8 +439,8 @@ void updategame(bool FirstUpdateThisFrame){
 			world::AddChunk(cx, cy, cz);
 			world::getChunkPtr(cx, cy, cz)->Load();
 			if (loading) {
-				MutexUnlock(Mutex);
-				MutexLock(Mutex);
+				MutexUnlock();
+				MutexLock();
 			}
 		}
 		//if (rnd() < 0.1) world::MOs.push_back(shared_ptr<Mo>(new Cat(player::xa + rand() % 40 - 20, player::ya, player::za + rand() % 40 - 20)))
@@ -705,42 +704,7 @@ void updategame(bool FirstUpdateThisFrame){
 
 		mwl = mw;
 
-		//转头！你治好了我多年的颈椎病！
 
-		if (mx > int(windowwidth / 2))
-			player::heading -= (mx - int(windowwidth / 2))*mousemove;
-
-		if (mx < int(windowwidth / 2))
-			player::heading += (int(windowwidth / 2) - mx)*mousemove;
-
-		if (my < int(windowheight / 2))
-			player::lookupdown -= (int(windowheight / 2) - my)*mousemove;
-
-		if (my > windowheight / 2)
-			player::lookupdown += (my - int(windowheight / 2))*mousemove;
-
-
-		if (glfwGetKey(win, GLFW_KEY_RIGHT) == 1) {
-			player::xlookspeed -= mousemove * 4;
-		}
-		if (glfwGetKey(win, GLFW_KEY_LEFT) == 1) {
-			player::xlookspeed += mousemove * 4;
-		}
-		if (glfwGetKey(win, GLFW_KEY_UP) == 1) {
-			player::ylookspeed -= mousemove * 4;
-		}
-		if (glfwGetKey(win, GLFW_KEY_DOWN) == 1) {
-			player::ylookspeed += mousemove * 4;
-		}
-
-		player::heading += player::xlookspeed;
-		player::lookupdown += player::ylookspeed;
-		player::xlookspeed *= 0.8f;
-		player::ylookspeed *= 0.8f;
-
-		//限制角度，别把头转掉下来了 ←_←
-		if (player::lookupdown < -90) player::lookupdown = -90;
-		if (player::lookupdown > 90) player::lookupdown = 90;
 
 		//起跳！
 		if (isPressed(GLFW_KEY_SPACE)){

@@ -57,6 +57,46 @@ void drawMain() {
 	double xpos = player::xpos;
 	double ypos = player::ypos + player::height + player::heightExt;
 	double zpos = player::zpos;
+	if (!bagOpened && !loading) {
+		//转头！你治好了我多年的颈椎病！
+
+		if (mx > int(windowwidth / 2))
+			player::heading -= (mx - int(windowwidth / 2))*mousemove;
+
+		if (mx < int(windowwidth / 2))
+			player::heading += (int(windowwidth / 2) - mx)*mousemove;
+
+		if (my < int(windowheight / 2))
+			player::lookupdown -= (int(windowheight / 2) - my)*mousemove;
+
+		if (my > windowheight / 2)
+			player::lookupdown += (my - int(windowheight / 2))*mousemove;
+
+
+		if (glfwGetKey(win, GLFW_KEY_RIGHT) == 1) {
+			player::xlookspeed -= mousemove * 4;
+		}
+		if (glfwGetKey(win, GLFW_KEY_LEFT) == 1) {
+			player::xlookspeed += mousemove * 4;
+		}
+		if (glfwGetKey(win, GLFW_KEY_UP) == 1) {
+			player::ylookspeed -= mousemove * 4;
+		}
+		if (glfwGetKey(win, GLFW_KEY_DOWN) == 1) {
+			player::ylookspeed += mousemove * 4;
+		}
+		player::heading += player::xlookspeed;
+		player::lookupdown += player::ylookspeed;
+		player::xlookspeed *= 0.8f;
+		player::ylookspeed *= 0.8f;
+
+		//限制角度，别把头转掉下来了 ←_←
+		if (player::lookupdown < -90) player::lookupdown = -90;
+		if (player::lookupdown > 90) player::lookupdown = 90;
+
+		glfwSetCursorPos(win, windowwidth / 2 * (retina ? 2 : 1), windowheight / 2 * (retina ? 2 : 1));
+	}
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -78,6 +118,8 @@ void drawMain() {
 	player::cxt = world::getchunkpos((int)player::xpos);
 	player::cyt = world::getchunkpos((int)player::ypos);
 	player::czt = world::getchunkpos((int)player::zpos);
+
+	if (world::CHMs.size() > 1000) world::CHMs.clear();
 
 	//更新区块显示列表
 	world::sortChunkRenderList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
@@ -109,7 +151,7 @@ void drawMain() {
 			if (Frustum::aabbInFrustum(world::chunks[i].getRelativeAABB(xpos, ypos, zpos))) displayChunks.push_back(&world::chunks[i]);
 		}
 	}
-	MutexUnlock(Mutex);
+	MutexUnlock();
 	renderedChunk = displayChunks.size();
 	glBindTexture(GL_TEXTURE_2D, BlockTextures);
 	for (int i = 0; i != renderedChunk; i++) {
@@ -123,10 +165,10 @@ void drawMain() {
 		renderDestroy(seldes, 0, 0, 0);
 		glTranslated(-selx + xpos, -sely + ypos, -selz + zpos);
 	}
-	MutexLock(Mutex);
+	MutexLock();
 	glBindTexture(GL_TEXTURE_2D, BlockTextures);
 	particles::renderall();
-	MutexUnlock(Mutex);
+	MutexUnlock();
 	glDisable(GL_TEXTURE_2D);
 	glTranslated(selx - xpos, sely - ypos, selz - zpos);
 	if (GUIrenderswitch) drawborder(0, 0, 0);
@@ -160,12 +202,12 @@ void drawMain() {
 	glRotated(player::lookupdown, 1, 0, 0);
 	glRotated(360.0 - player::heading, 0, 1, 0);
 	glTranslated(-xpos, -ypos, -zpos);
-	MutexLock(Mutex);
+	MutexLock();
 	glDisable(GL_TEXTURE_2D);
 	drawcloud(player::xpos, player::zpos);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_CULL_FACE);
-	//MutexLock(Mutex)
+	//MutexLock()
 
 	//Time_renderscene = timer() - Time_renderscene;
 	//Time_renderGUI_ = timer();
@@ -212,10 +254,10 @@ void drawMain() {
 
 	//屏幕刷新，千万别删，后果自负！！！
 	//====refresh====//
-	MutexUnlock(Mutex);
+	MutexUnlock();
 	glfwSwapBuffers(win);
 	glfwPollEvents();
-	MutexLock(Mutex);
+	MutexLock();
 	//==refresh end==//
 
 	//Time_screensync = timer() - Time_screensync;
@@ -548,6 +590,8 @@ void drawGUI() {
 
 		ss << "ChunkIndexCache Index = " << world::ciCacheIndex;
 		debugText(ss.str()); ss.str("");
+		ss << "ChunkHeightMap Size = " << world::CHMs.size();
+		debugText(ss.str()); ss.str("");
 
 		//ss << "MO count: " << world::MOs.size()
 		//debugText(ss.str()) ss.str("")
@@ -649,14 +693,14 @@ void drawGUI() {
 }
 
 void drawLoading() {
-	MutexLock(Mutex);
+	MutexLock();
 	int loadedChunks = world::loadedChunks;
 	world::sortChunkRenderList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
 	for (int i = 1; i <= world::chunkRenders; i++) {
 		auto cptr = world::chunkRenderList[i].second;
 		cptr->buildlists();
 	}
-	MutexUnlock(Mutex);
+	MutexUnlock();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -670,7 +714,7 @@ void drawLoading() {
 		glClearColor(skycolorR, skycolorG, skycolorB, 1.0);
 		glfwSetInputMode(win, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 		loading = false;
-		MutexLock(Mutex);
+		MutexLock();
 		return;
 	}
 	float col = loadedChunks / 1728.0f;
