@@ -71,10 +71,11 @@ void setupscreen() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	glShadeModel(GL_SMOOTH);
+	glDisable(GL_DITHER);
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClearDepth(1.0);
 	glEnable(GL_CULL_FACE);
-	glEnable(GL_COLOR_MATERIAL);
+	//glEnable(GL_COLOR_MATERIAL);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_ALPHA_TEST);
@@ -86,12 +87,13 @@ void setupscreen() {
 
 	//这顶点数组真TM的坑爹= =
 
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
+	//glEnableClientState(GL_VERTEX_ARRAY);
+	//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	//glEnableClientState(GL_COLOR_ARRAY);
 
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	glHint(GL_FOG_HINT, GL_NICEST);
+	glHint(GL_LINE_SMOOTH_HINT, GL_FASTEST);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glColor4f(0.0, 0.0, 0.0, 1.0);

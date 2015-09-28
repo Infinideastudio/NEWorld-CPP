@@ -1,6 +1,6 @@
 #pragma once
 
-const int defaultwindowwidth = 850;
+const int defaultwindowwidth = 852;
 const int defaultwindowheight = 480;
 const int cloudwidth = 32;		//ÔÆµÄ¿í¶È
 

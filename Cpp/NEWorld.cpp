@@ -83,7 +83,10 @@ NEWorld-CPP第一版作者（翻译作者）：Null (abc612008)
 4. 去掉了注释后的分号（上一次是【注释行】后的分号）
 5. 支持retina屏幕（需手动编译）
 
-(未翻译：shader，VBO开关，渲染器更新，骨骼，皮肤)
+0.4.9_Preview_1.0
+1. 更新到0.4.9版本
+2. 加入了HeightMap，以及一大堆优化
+
 */
 
 #include "DeveloperOptions.h"
@@ -102,7 +105,6 @@ NEWorld-CPP第一版作者（翻译作者）：Null (abc612008)
 #include "glprinting.h"
 #include "Particles.h"
 
-
 void outputGameInfo();
 void LoadTextures();
 void loadGame();
@@ -111,7 +113,6 @@ void updateThreadFunc();
 void updategame(bool FirstUpdateThisFrame);
 void saveScreenshot(int x, int y, int w, int h, string filename);
 void createThumbnail();
-
 //==============================  Main Program  ================================//
 //==============================     主程序     ================================//
 
@@ -274,15 +275,19 @@ void updateThreadFunc(){
 		while (updateThreadPaused){
 			MutexUnlock();
 			MutexLock();
+			lastupdate = updateTimer;
 		}
 
 //		Time_updategame = 0;
 		FirstUpdateThisFrame = true;
 
 		updateTimer = timer();
+		if (updateTimer - lastupdate >= 5) lastupdate = updateTimer;
+
 		while ((updateTimer - lastupdate) >= 1 / (double)30 && upsc < 60){
 			lastupdate += 1 / (double)30;
 			upsc += 1;
+			glfwPollEvents();
 			updategame(FirstUpdateThisFrame);
 			FirstUpdateThisFrame = false;
 		}
@@ -317,27 +322,7 @@ void outputGameInfo() {
 void LoadTextures(){
 	//载入纹理
 	textures::Init();
-
-	BlockTexture[textures::ROCK] = textures::LoadRGBATexture("textures\\blocks\\stone.bmp", "");
-	BlockTexture[textures::GRASS_TOP] = textures::LoadRGBATexture("textures\\blocks\\grass_top.bmp", "");
-	BlockTexture[textures::GRASS_SIDE] = textures::LoadRGBATexture("textures\\blocks\\grass_side.bmp", "");
-	BlockTexture[textures::DIRT] = textures::LoadRGBATexture("textures\\blocks\\dirt.bmp", "");
-	BlockTexture[textures::STONE] = textures::LoadRGBATexture("textures\\blocks\\cobblestone.bmp", "");
-	BlockTexture[textures::PLANK] = textures::LoadRGBATexture("textures\\blocks\\plank.bmp", "");
-	BlockTexture[textures::WOOD_TOP] = textures::LoadRGBATexture("textures\\blocks\\wood_top.bmp", "");
-	BlockTexture[textures::WOOD_SIDE] = textures::LoadRGBATexture("textures\\blocks\\wood_side.bmp", "");
-	BlockTexture[textures::BEDROCK] = textures::LoadRGBATexture("textures\\blocks\\bedrock.bmp", "");
-	BlockTexture[textures::LEAF] = textures::LoadRGBATexture("textures\\blocks\\leaf.bmp", "textures\\blocks\\leafmask.bmp");
-	BlockTexture[textures::GLASS] = textures::LoadRGBATexture("textures\\blocks\\glass.bmp", "textures\\blocks\\glassmask.bmp");
-	BlockTexture[textures::WATER] = textures::LoadRGBATexture("textures\\blocks\\water.bmp", "textures\\blocks\\watermask.bmp");
-	BlockTexture[textures::LAVA] = textures::LoadRGBATexture("textures\\blocks\\lava.bmp", "textures\\blocks\\lavamask.bmp");
-	BlockTexture[textures::GLOWSTONE] = textures::LoadRGBATexture("textures\\blocks\\glowstone.bmp", "");
-	BlockTexture[textures::SAND] = textures::LoadRGBATexture("textures\\blocks\\sand.bmp", "");
-	BlockTexture[textures::CEMENT] = textures::LoadRGBATexture("textures\\blocks\\cement.bmp", "");
-	BlockTexture[textures::ICE] = textures::LoadRGBATexture("textures\\blocks\\ice.bmp", "textures\\blocks\\icemask.bmp");
-	BlockTexture[textures::COAL] = textures::LoadRGBATexture("textures\\blocks\\coal.bmp", "");
-	BlockTexture[textures::IRON] = textures::LoadRGBATexture("textures\\blocks\\iron.bmp", "");
-
+	
 	guiImage[1] = textures::LoadRGBATexture("textures\\gui\\MainMenu.bmp", "");
 	guiImage[2] = textures::LoadRGBATexture("textures\\gui\\select.bmp", "");
 	guiImage[3] = textures::LoadRGBATexture("textures\\gui\\unselect.bmp", "");
@@ -378,16 +363,12 @@ bool isPressed(int key, bool setFalse = false) {
 }
 
 void updategame(bool FirstUpdateThisFrame){
-
-//	Time_updategame_ = timer();
+	//Time_updategame_ = timer();
 
 	static double Wprstm;
 	static bool WP;
 
 	player::BlockInHand = player::inventorybox[3][player::itemInHand];
-
-
-
 
 	//获得鼠标按下情况
 	mb = 0;
@@ -408,36 +389,31 @@ void updategame(bool FirstUpdateThisFrame){
 	if (FirstUpdateThisFrame||loading){
 
 		//卸载区块(Unload chunks)
-		world::sortChunkUnloadList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
+		world::sortChunkLoadUnloadList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
 		int sumUnload;
-		if (handleLimit > 0)
-			sumUnload = world::chunkUnloads > handleLimit ? handleLimit : world::chunkUnloads;
-		else
-			sumUnload = world::chunkUnloads;
 
-		for (int i = 1; i <= sumUnload; i++) {
+		sumUnload = world::chunkUnloads > 4 ? 3 : world::chunkUnloads - 1;
+
+		for (int i = 0; i <= sumUnload; i++) {
 			int cx = world::chunkUnloadList[i][1];
 			int cy = world::chunkUnloadList[i][2];
 			int cz = world::chunkUnloadList[i][3];
-			world::getChunkPtr(cx, cy, cz)->Unload();
-			world::DeleteChunk(cx, cy, cz);
+			int ci = world::getChunkIndex(cx, cy, cz);
+			world::chunks[ci].Unload();
+			world::DeleteChunk(ci);
 		}
 
 		//加载区块(Load chunks)
-		world::sortChunkLoadList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
+		//world::sortChunkLoadList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
 		int sumLoad;
-		if (handleLimit > 0)
-			sumLoad = world::chunkLoads > handleLimit ? handleLimit : world::chunkLoads;
-		else
-			sumLoad = world::chunkLoads;
+		sumLoad = world::chunkLoads > 4 ? 3 : world::chunkLoads - 1;
 
-		for (int i = 1; i <= sumLoad; i++){
+		for (int i = 0; i <= sumLoad; i++){
 			int cx = world::chunkLoadList[i][1];
 			int cy = world::chunkLoadList[i][2];
 			int cz = world::chunkLoadList[i][3];
 
-			world::AddChunk(cx, cy, cz);
-			world::getChunkPtr(cx, cy, cz)->Load();
+			world::AddChunk(cx, cy, cz)->Load();
 			if (loading) {
 				MutexUnlock();
 				MutexLock();

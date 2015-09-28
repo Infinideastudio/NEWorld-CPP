@@ -9,7 +9,7 @@ namespace world{
 	class chunkHeightMap;
 	extern string worldname;
 	const int worldsize = 134217728;
-	const int worldheight = 128;
+	const int worldheight = 8;
 	extern brightness skylight;         //Sky light level
 	extern brightness BRIGHTNESSMAX;     //Maximum brightness
 	extern brightness BRIGHTNESSMIN;    //Mimimum brightness
@@ -25,23 +25,25 @@ namespace world{
 	extern bool ciArrayAval;
 	extern set<chunkHeightMap> CHMs;
 
-	extern sbyte cloud[256][256];
+	extern bool cloud[128][128];
 	extern int rebuiltChunks, rebuiltChunksCount;
 	extern int updatedChunks, updatedChunksCount;
 	extern int unloadedChunks, unloadedChunksCount;
-	extern pair<int, chunk*> chunkRenderList[65536];
-	extern int chunkLoadList[65536][4];
-	extern int chunkUnloadList[65536][4];
-	//extern pair<int, chunk*> chunkUnloadList[65536]
-	extern vector<int> displayListUnloadList;
-	extern int chunkRenders, chunkLoads, chunkUnloads;
+	//extern pair<int, chunk*> chunkRenderList[65536];
+	//extern int chunkLoadList[65536][4];
+	//extern int chunkUnloadList[65536][4];
+	extern int chunkBuildRenderList[256][2];
+	extern int chunkLoadList[256][4];
+	extern int chunkUnloadList[256][4];
+	extern vector<uint*> displayListUnloadList;
+	extern int chunkBuildRenders, chunkLoads, chunkUnloads;
 
 	extern vector<shared_ptr<Mo>> MOs;
 
 	void Init();
 
-	void AddChunk(int x, int y, int z);
-	void DeleteChunk(int x, int y, int z);
+	chunk* AddChunk(int x, int y, int z);
+	void DeleteChunk(int ci);
 	uint64 getChunkID(int x, int y, int z);
 	bool chunkLoaded(int x, int y, int z);
 	bool chunkMatched(chunk c, int x, int y, int z);
@@ -63,11 +65,9 @@ namespace world{
 	vector<Hitbox::AABB> getHitboxes(Hitbox::AABB box);
 	bool inWater(Hitbox::AABB box);
 
-	//void renderblock(int x, int y, int z)
-	void renderblock(int x, int y, int z, int cx, int cy, int cz);
 	void renderblock(int x, int y, int z, chunk* chunkptr);
 	void updateblock(int x, int y, int z, bool blockchanged);
-	block getblock(int x, int y, int z, block defaultRet = blocks::AIR);
+	block getblock(int x, int y, int z, block defaultRet = blocks::AIR, chunk* defaultchunkptr = nullptr);
 	brightness getbrightness(int x, int y, int z);
 	void setblock(int x, int y, int z, block Blockname);
 	void setbrightness(int x, int y, int z, brightness ibrightness);
@@ -78,11 +78,13 @@ namespace world{
 	bool chunkInRange(int x, int y, int z, int px, int py, int pz, int dist);
 	bool chunkUpdated(int x, int y, int z);
 	void setChunkUpdated(int x, int y, int z, bool value);
-	void sortChunkRenderList(int xpos, int ypos, int zpos);
-	void sortChunkLoadList(int xpos, int ypos, int zpos);
-	void sortChunkUnloadList(int xpos, int ypos, int zpos);
-	void qsortList(int List[][4], int first, int last, bool unloadsort);
-	void qsortListPtr(pair<int, chunk*> List[], int first, int last, bool unloadsort);
+	//void sortChunkRenderList(int xpos, int ypos, int zpos);
+	//void sortChunkLoadList(int xpos, int ypos, int zpos);
+	//void sortChunkUnloadList(int xpos, int ypos, int zpos);
+	//void qsortList(int List[][4], int first, int last, bool unloadsort);
+	//void qsortListPtr(pair<int, chunk*> List[], int first, int last, bool unloadsort);
+	void sortChunkBuildRenderList(int xpos, int ypos, int zpos);
+	void sortChunkLoadUnloadList(int xpos, int ypos, int zpos);
 
 	void saveAllChunks();
 	void destroyAllChunks();

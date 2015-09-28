@@ -1,16 +1,14 @@
 #include "Textures.h"
 #include <fstream>
 
-int BLOCKTEXTURE_SIZE, BLOCKTEXTURE_UNITSIZE, filter;
+int BLOCKTEXTURE_SIZE, BLOCKTEXTURE_UNITSIZE, BLOCKTEXTURE_UNITS;
 
 namespace textures{
 
 	void Init(){
-		std::ifstream options("textures\\Blocks\\options.txt", std::ios::in); //打开文件
-		options >> BLOCKTEXTURE_SIZE;
-		options >> BLOCKTEXTURE_UNITSIZE;
-		options >> filter;
-		options.close();
+		BLOCKTEXTURE_SIZE = 256;
+		BLOCKTEXTURE_UNITSIZE = 32;
+		BLOCKTEXTURE_UNITS = 8;
 	}
 
 	ubyte getTextureIndex(block blockname, ubyte side){
@@ -71,11 +69,13 @@ namespace textures{
 	}
 
 	double getTexcoordX(block iblock, ubyte side){
-		return ((getTextureIndex(iblock, side) - 1) % (BLOCKTEXTURE_SIZE / BLOCKTEXTURE_UNITSIZE))*(BLOCKTEXTURE_UNITSIZE / (double)BLOCKTEXTURE_SIZE);
+		//return ((getTextureIndex(iblock, side) - 1) % (BLOCKTEXTURE_SIZE / BLOCKTEXTURE_UNITSIZE))*(BLOCKTEXTURE_UNITSIZE / (double)BLOCKTEXTURE_SIZE);
+		return ((getTextureIndex(iblock, side) - 1) & 7) / 8.0;
 	}
 
 	double getTexcoordY(block iblock, ubyte side){
-		return (int((getTextureIndex(iblock, side) - 1) / (BLOCKTEXTURE_SIZE / (double)BLOCKTEXTURE_UNITSIZE)))*(BLOCKTEXTURE_UNITSIZE / (double)BLOCKTEXTURE_SIZE);
+		//return (int((getTextureIndex(iblock, side) - 1) / (BLOCKTEXTURE_SIZE / (double)BLOCKTEXTURE_UNITSIZE)))*(BLOCKTEXTURE_UNITSIZE / (double)BLOCKTEXTURE_SIZE);
+		return ((getTextureIndex(iblock, side) - 1) >> 3) / 8.0;
 	}
 
 	TEXTURE_RGB LoadRGBImage(string Filename){
@@ -95,7 +95,7 @@ namespace textures{
 		bmpfile.read((char*)&bih, sizeof(BITMAPINFOHEADER));
 		bitmap.sizeX = bih.biWidth;
 		bitmap.sizeY = bih.biHeight;
-		bitmap.buffer = shared_ptr<ubyte>(new unsigned char[bitmap.sizeX * bitmap.sizeY * 3]);
+		bitmap.buffer = shared_ptr<ubyte>(new unsigned char[bitmap.sizeX * bitmap.sizeY * 3], [](unsigned char *p) { delete[] p; });
 		for (unsigned int i = 0; i < bitmap.sizeX * bitmap.sizeY; i++){
 			//把BGR格式转换为RGB格式
 			bmpfile.read((char*)col, 3);
@@ -127,7 +127,7 @@ namespace textures{
 		bmpfile.read((char*)&bih, sizeof(BITMAPINFOHEADER)); //它将覆盖之前从mask文件读出来的info数据
 		bitmap.sizeX = bih.biWidth;
 		bitmap.sizeY = bih.biHeight;
-		bitmap.buffer = shared_ptr<ubyte>(new unsigned char[bitmap.sizeX * bitmap.sizeY * 4]);
+		bitmap.buffer = shared_ptr<ubyte>(new unsigned char[bitmap.sizeX * bitmap.sizeY * 4], [](unsigned char *p) { delete[] p; });
 		bool noMaskFile = MkFilename == "";
 		for (unsigned int i = 0; i < bitmap.sizeX * bitmap.sizeY; i++){
 			//把BGR格式转换为RGB格式
@@ -157,7 +157,7 @@ namespace textures{
 		image = LoadRGBImage(Filename);
 		Texture.sizeX = image.sizeX;
 		Texture.sizeY = image.sizeY;
-		Texture.buffer = shared_ptr<ubyte>(new unsigned char[image.sizeX * image.sizeY * 4]);
+		Texture.buffer = shared_ptr<ubyte>(new unsigned char[image.sizeX * image.sizeY * 4], [](unsigned char *p) { delete[] p; });
 		if (Texture.buffer == nullptr){
 			printf("[console][Warning] Cannot alloc memory when loading %s\n", Filename.c_str());
 			return 0;
@@ -219,9 +219,11 @@ namespace textures{
 		TEXTURE_RGBA image = LoadRGBAImage(Filename, MkFilename);
 		glGenTextures(1, &ret);
 		glBindTexture(GL_TEXTURE_2D, ret);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filter);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filter);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image.sizeX, image.sizeY, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.buffer.get());
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, log(BLOCKTEXTURE_UNITSIZE));
+		gluBuild2DMipmaps(GL_TEXTURE_2D, 4, image.sizeX, image.sizeY, GL_RGBA, GL_UNSIGNED_BYTE, image.buffer.get());
 		return ret;
 	}
 

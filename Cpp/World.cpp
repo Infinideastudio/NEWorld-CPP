@@ -7,7 +7,7 @@ extern bool UseCIArray;
 extern int viewdistance;
 namespace world{
 
-	string worldname = "DefaultWorld";
+	string worldname;
 	brightness skylight = 15;         //Sky light level
 	brightness BRIGHTNESSMAX = 15;    //Maximum brightness
 	brightness BRIGHTNESSMIN = 2;     //Mimimum brightness
@@ -20,17 +20,20 @@ namespace world{
 	chunkIndexArray ciArray;
 	bool ciArrayAval;
 	set<chunkHeightMap> CHMs;
-	sbyte cloud[256][256];
+	bool cloud[128][128];
 	int rebuiltChunks, rebuiltChunksCount;
 	int updatedChunks, updatedChunksCount;
 	int unloadedChunks, unloadedChunksCount;
 	//int chunkRenderList[65536][4]
-	pair<int, chunk*> chunkRenderList[65536];
-	int chunkLoadList[65536][4];
-	int chunkUnloadList[65536][4];
+	//pair<int, chunk*> chunkRenderList[65536];
+	//int chunkLoadList[65536][4];
+	//int chunkUnloadList[65536][4];
+	int chunkBuildRenderList[256][2];
+	int chunkLoadList[256][4];
+	int chunkUnloadList[256][4];
 	//pair<int,chunk*> chunkUnloadList[65536]
-	vector<int> displayListUnloadList;
-	int chunkRenders, chunkLoads, chunkUnloads;
+	vector<uint*> displayListUnloadList;
+	int chunkBuildRenders, chunkLoads, chunkUnloads;
 
 	vector<shared_ptr<Mo>> MOs;
 
@@ -46,10 +49,10 @@ namespace world{
 		rebuiltChunks = 0; rebuiltChunksCount = 0;
 		updatedChunks = 0; updatedChunksCount = 0;
 		unloadedChunks = 0; unloadedChunksCount = 0;
-		memset(chunkRenderList, 0, sizeof(chunkRenderList));
+		memset(chunkBuildRenderList, 0, sizeof(chunkBuildRenderList));
 		memset(chunkLoadList, 0, sizeof(chunkLoadList));
 		memset(chunkUnloadList, 0, sizeof(chunkUnloadList));
-		chunkRenders = 0; chunkLoads = 0; chunkUnloads = 0;
+		chunkBuildRenders = 0; chunkLoads = 0; chunkUnloads = 0;
 		std::stringstream ss;
 		system("mkdir Worlds");
 		ss << "mkdir Worlds\\" << worldname;
@@ -72,7 +75,7 @@ namespace world{
 
 	}
 
-	void AddChunk(int x, int y, int z){
+	chunk* AddChunk(int x, int y, int z){
 
 		int first, last, middle, i;
 		uint64 cid;
@@ -90,6 +93,7 @@ namespace world{
 			if (chunks[middle].id == cid){
 				printf("[Console][Error]");
 				printf("Chunk(%d,%d,%d)has been loaded,when adding chunk.\n", x, y, z);
+				return &chunks[middle];
 			}
 		}
 		ExpandChunkArray(1);
@@ -101,12 +105,12 @@ namespace world{
 			ciCacheID = 0;
 			ciCacheIndex = -2;
 		}
-		ciArray.AddChunk(first);
-
+		//ciArray.AddChunk(first);
+		return &chunks[first];
 	}
 
-	void DeleteChunk(int x, int y, int z){
-		int index = getChunkIndex(x, y, z);
+	void DeleteChunk(int ci){
+		int index = ci;
 		if (index!=-1){
 			int i;
 			for (i = index; i < loadedChunks - 1; i++){
@@ -119,10 +123,6 @@ namespace world{
 				ciCacheIndex = -2;
 			}
 			ciArray.DeleteChunk(index);
-		}
-		else{
-			printf("[console][Warning]");
-			printf("Chunk(%d,%d,%d)is not exist,when deleting chunk.\n", x, y, z);
 		}
 	}
 
@@ -176,7 +176,7 @@ namespace world{
 			ret = ciCacheIndex;
 		}
 		else{
-			if (UseCIArray && world::ciArrayAval && ciArray.chunkIndexExists(x, y, z)){
+			if (UseCIArray && world::ciArrayAval){
 				ret = ciArray.getChunkIndex(x, y, z);
 				ciCacheID = cID;
 				ciCacheIndex = ret;
@@ -259,315 +259,11 @@ namespace world{
 
 	}
 
-	void renderblock(int x, int y, int z,int cx,int cy,int cz) {
-
-		//渲染方块！！！！！
-		int gx = cx * 16 + x, gy = cy * 16 + y, gz = cz * 16 + z;
-		double colors, color1, color2, color3, color4, tcx, tcy, size;
-		block blk[7] = { getblock(gx, gy, gz),
-			getblock(gx, gy, gz + 1, blocks::ROCK),
-			getblock(gx, gy, gz - 1, blocks::ROCK),
-			getblock(gx + 1, gy, gz, blocks::ROCK),
-			getblock(gx - 1, gy, gz, blocks::ROCK),
-			getblock(gx, gy + 1, gz, blocks::ROCK),
-			getblock(gx, gy - 1, gz, blocks::ROCK) };
-		auto b01n1 = getblock(gx, gy + 1, gz - 1);
-		auto b011 = getblock(gx, gy + 1, gz + 1);
-		auto b0n11 = getblock(gx, gy - 1, gz + 1);
-		auto b0n1n1 = getblock(gx, gy - 1, gz - 1);
-		auto b111 = getblock(gx + 1, gy + 1, gz + 1);
-		auto b11n1 = getblock(gx + 1, gy + 1, gz - 1);
-		auto b1n11 = getblock(gx + 1, gy - 1, gz + 1);
-		auto b1n1n1 = getblock(gx + 1, gy - 1, gz - 1);
-		auto bn111 = getblock(gx - 1, gy + 1, gz + 1);
-		auto bn11n1 = getblock(gx - 1, gy + 1, gz - 1);
-		auto bn1n11 = getblock(gx - 1, gy - 1, gz + 1);
-		auto bn1n1n1 = getblock(gx - 1, gy - 1, gz - 1);
-		auto b10n1 = getblock(gx + 1, gy, gz - 1);
-		auto b101 = getblock(gx + 1, gy, gz + 1);
-		auto b110 = getblock(gx + 1, gy + 1, gz);
-		auto b1n10 = getblock(gx + 1, gy - 1, gz);
-		auto bn101 = getblock(gx - 1, gy, gz + 1);
-		auto bn10n1 = getblock(gx - 1, gy, gz - 1);
-		auto bn110 = getblock(gx - 1, gy + 1, gz);
-		auto bn1n10 = getblock(gx - 1, gy - 1, gz);
-		brightness brt[7] = { getbrightness(gx, gy, gz),
-			getbrightness(gx, gy, gz + 1),
-			getbrightness(gx, gy, gz - 1),
-			getbrightness(gx + 1, gy, gz),
-			getbrightness(gx - 1, gy, gz),
-			getbrightness(gx, gy + 1, gz),
-			getbrightness(gx, gy - 1, gz) };
-
-		size = BLOCKTEXTURE_UNITSIZE / (double)BLOCKTEXTURE_SIZE - 0.001;
-
-		if (b0n11 == blocks::GRASS && blk[0] == blocks::GRASS)
-			tcx = textures::getTexcoordX(blk[0], 1) + 0.001;
-		else
-			tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
-
-		if (b0n11 == blocks::GRASS && blk[0] == blocks::GRASS)
-			tcy = textures::getTexcoordY(blk[0], 1) + 0.001;
-		else
-			tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
-
-		// Front Face
-		if (!(BlockInfo(blk[1]).isOpaque() || (blk[1] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
-
-			colors = brt[1] / (double)BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) colors *= 0.5;
-			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
-
-			if (blk[0] != blocks::GLOWSTONE) {
-
-				if (BlockInfo(b0n11).isDark()) { color1 = colors*0.5; color2 = colors*0.5; }
-				if (BlockInfo(b011).isDark()) { color3 = colors*0.5; color4 = colors*0.5; }
-				if (BlockInfo(bn101).isDark()) { color1 = colors*0.5; color4 = colors*0.5; }
-				if (BlockInfo(b101).isDark()) { color2 = colors*0.5; color3 = colors*0.5; }
-
-				if (BlockInfo(bn1n11).isDark()) color1 = colors*0.5;
-				if (BlockInfo(b1n11).isDark()) color2 = colors*0.5;
-				if (BlockInfo(b111).isDark()) color3 = colors*0.5;
-				if (BlockInfo(bn111).isDark()) color4 = colors*0.5;
-
-			}
-			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, 0.5 + z);
-			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, -0.5 + y, 0.5 + z);
-			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*1.0); renderer::Vertex3d(0.5 + x, 0.5 + y, 0.5 + z);
-			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, 0.5 + z);
-
-		}
-
-		if (b0n1n1 == blocks::GRASS && blk[0] == blocks::GRASS)
-			tcx = textures::getTexcoordX(blk[0], 1) + 0.001;
-		else
-			tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
-		if (b0n1n1 == blocks::GRASS && blk[0] == blocks::GRASS)
-			tcy = textures::getTexcoordY(blk[0], 1) + 0.001;
-		else
-			tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
-
-		// Back Face
-		if (!(BlockInfo(blk[2]).isOpaque() || (blk[2] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
-
-			colors = brt[2] / (double)BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) colors *= 0.5;
-			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
-
-			if (blk[0] != blocks::GLOWSTONE) {
-
-				if (BlockInfo(b0n1n1).isDark()) {
-					color1 = colors*0.5; color4 = colors*0.5;
-				}
-				if (BlockInfo(b01n1).isDark()) {
-					color2 = colors*0.5; color3 = colors*0.5;
-				}
-				if (BlockInfo(bn10n1).isDark()) {
-					color1 = colors*0.5; color2 = colors*0.5;
-				}
-				if (BlockInfo(b10n1).isDark()) {
-					color3 = colors*0.5; color4 = colors*0.5;
-				}
-				if (BlockInfo(bn1n1n1).isDark()) color1 = colors*0.5;
-				if (BlockInfo(bn11n1).isDark()) color2 = colors*0.5;
-				if (BlockInfo(b11n1).isDark()) color3 = colors*0.5;
-				if (BlockInfo(b1n1n1).isDark()) color4 = colors*0.5;
-
-			}
-
-			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, -0.5 + z);
-			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, -0.5 + z);
-			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(0.5 + x, 0.5 + y, -0.5 + z);
-			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, -0.5 + y, -0.5 + z);
-
-		}
-
-		if (b1n10 == blocks::GRASS && blk[0] == blocks::GRASS) tcx = textures::getTexcoordX(blk[0], 1) + 0.001; else tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
-		if (b1n10 == blocks::GRASS && blk[0] == blocks::GRASS) tcy = textures::getTexcoordY(blk[0], 1) + 0.001; else tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
-
-		// Right face
-		if (!(BlockInfo(blk[3]).isOpaque() || (blk[3] == blk[0] && !BlockInfo(blk[0]).isOpaque())) || blk[0] == blocks::LEAF) {
-
-			colors = brt[3] / (double)BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) colors *= 0.7;
-			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
-
-			if (blk[0] != blocks::GLOWSTONE) {
-
-				if (BlockInfo(b1n10).isDark()) {
-					color1 = colors*0.5; color4 = colors*0.5;
-				}
-				if (BlockInfo(b110).isDark()) {
-					color2 = colors*0.5; color3 = colors*0.5;
-				}
-				if (BlockInfo(b10n1).isDark()) {
-					color1 = colors*0.5; color2 = colors*0.5;
-				}
-				if (BlockInfo(b101).isDark()) {
-					color3 = colors*0.5; color4 = colors*0.5;
-				}
-
-				if (BlockInfo(b1n1n1).isDark()) color1 = colors*0.5;
-				if (BlockInfo(b11n1).isDark()) color2 = colors*0.5;
-				if (BlockInfo(b111).isDark()) color3 = colors*0.5;
-				if (BlockInfo(getblock(x + 1, y - 1, z + 1)).isDark()) color4 = colors*0.5;
-
-			}
-
-			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, -0.5 + y, -0.5 + z);
-			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*1.0); renderer::Vertex3d(0.5 + x, 0.5 + y, -0.5 + z);
-			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(0.5 + x, 0.5 + y, 0.5 + z);
-			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, -0.5 + y, 0.5 + z);
-
-		}
-
-		if (bn1n10 == blocks::GRASS && blk[0] == blocks::GRASS) tcx = textures::getTexcoordX(blk[0], 1) + 0.001; else tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
-		if (bn1n10 == blocks::GRASS && blk[0] == blocks::GRASS) tcy = textures::getTexcoordY(blk[0], 1) + 0.001; else tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
-
-		// Left Face
-		if (!(BlockInfo(blk[4]).isOpaque() || (blk[4] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
-
-			colors = brt[4] / (double)BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) colors *= 0.7;
-			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
-
-			if (blk[0] != blocks::GLOWSTONE) {
-
-				if (BlockInfo(bn1n10).isDark()) {
-					color1 = colors*0.5; color2 = colors*0.5;
-				}
-				if (BlockInfo(bn110).isDark()) {
-					color3 = colors*0.5; color4 = colors*0.5;
-				}
-				if (BlockInfo(bn10n1).isDark()) {
-					color1 = colors*0.5; color4 = colors*0.5;
-				}
-				if (BlockInfo(bn101).isDark()) {
-					color2 = colors*0.5; color3 = colors*0.5;
-				}
-
-				if (BlockInfo(bn1n1n1).isDark()) color1 = colors*0.5;
-				if (BlockInfo(bn1n11).isDark()) color2 = colors*0.5;
-				if (BlockInfo(bn111).isDark()) color3 = colors*0.5;
-				if (BlockInfo(bn11n1).isDark()) color4 = colors*0.5;
-
-			}
-
-			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, -0.5 + z);
-			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, 0.5 + z);
-			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, 0.5 + z);
-			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, -0.5 + z);
-
-		}
-
-		tcx = textures::getTexcoordX(blk[0], 1);
-		tcy = textures::getTexcoordY(blk[0], 1);
-
-		// Top Face
-		if (!(BlockInfo(blk[5]).isOpaque() || (blk[5] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
-
-			colors = brt[5] / (double)BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) colors *= 1.0;
-			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
-
-			if (blk[0] != blocks::GLOWSTONE) {
-
-				if (BlockInfo(b01n1).isDark()) {
-					color1 = colors*0.5; color4 = colors*0.5;
-				}
-				if (BlockInfo(b011).isDark()) {
-					color2 = colors*0.5; color3 = colors*0.5;
-				}
-				if (BlockInfo(bn110).isDark()) {
-					color1 = colors*0.5; color2 = colors*0.5;
-				}
-				if (BlockInfo(b110).isDark()) {
-					color3 = colors*0.5; color4 = colors*0.5;
-				}
-
-				if (BlockInfo(bn11n1).isDark()) color1 = colors*0.5;
-				if (BlockInfo(bn111).isDark()) color2 = colors*0.5;
-				if (BlockInfo(b111).isDark()) color3 = colors*0.5;
-				if (BlockInfo(b11n1).isDark()) color4 = colors*0.5;
-
-			}
-
-			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, -0.5 + z);
-			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, 0.5 + z);
-			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, 0.5 + y, 0.5 + z);
-			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*1.0); renderer::Vertex3d(0.5 + x, 0.5 + y, -0.5 + z);
-
-		}
-
-		tcx = textures::getTexcoordX(blk[0], 3);
-		tcy = textures::getTexcoordY(blk[0], 3);
-
-		// Bottom Face
-		if (!(BlockInfo(blk[6]).isOpaque() || (blk[6] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
-
-			colors = brt[6] / (double)BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) colors *= 1.0;
-			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
-
-			if (blk[0] != blocks::GLOWSTONE) {
-
-				if (BlockInfo(b0n1n1).isDark()) {
-					color1 = colors*0.5; color2 = colors*0.5;
-				}
-				if (BlockInfo(b0n11).isDark()) {
-					color3 = colors*0.5; color4 = colors*0.5;
-				}
-				if (BlockInfo(bn1n10).isDark()) {
-					color1 = colors*0.5; color4 = colors*0.5;
-				}
-				if (BlockInfo(b1n10).isDark()) {
-					color2 = colors*0.5; color3 = colors*0.5;
-				}
-
-				if (BlockInfo(bn1n1n1).isDark()) color1 = colors*0.5;
-				if (BlockInfo(b1n1n1).isDark()) color2 = colors*0.5;
-				if (BlockInfo(getblock(x + 1, y - 1, z + 1)).isDark()) color3 = colors*0.5;
-				if (BlockInfo(bn1n11).isDark()) color4 = colors*0.5;
-
-			}
-
-			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, -0.5 + z);
-			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(0.5 + x, -0.5 + y, -0.5 + z);
-			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, -0.5 + y, 0.5 + z);
-			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, 0.5 + z);
-
-		}
-	}
-	
 	void renderblock(int x, int y, int z, chunk* chunkptr) {
 
 		//渲染方块v2！！！！！
 
-		double colors, color1, color2, color3, color4, tcx, tcy, size;
+		float colors, color1, color2, color3, color4, tcx, tcy, size, EPS = 0.0f;
 		int cx = chunkptr->cx, cy = chunkptr->cy, cz = chunkptr->cz;
 		int gx = cx * 16 + x, gy = cy * 16 + y, gz = cz * 16 + z;
 		block blk[7] = { chunkptr->getblock(x,y,z) ,
@@ -586,17 +282,17 @@ namespace world{
 			y < 15 ? chunkptr->getbrightness(x,y + 1,z) : getbrightness(gx,gy + 1,gz),
 			y>0 ? chunkptr->getbrightness(x,y - 1,z) : getbrightness(gx,gy - 1,gz) };
 
-		size = BLOCKTEXTURE_UNITSIZE / (double)BLOCKTEXTURE_SIZE - 0.001;
+		size = 1 / 8.0 - EPS;
 
-		if (getblock(gx, gy - 1, gz + 1) == blocks::GRASS && blk[0] == blocks::GRASS)
-			tcx = textures::getTexcoordX(blk[0], 1) + 0.001;
-		else
-			tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
-
-		if (getblock(gx, gy - 1, gz + 1) == blocks::GRASS && blk[0] == blocks::GRASS)
-			tcy = textures::getTexcoordY(blk[0], 1) + 0.001;
-		else
-			tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
+        
+		if (blk[0] == blocks::GRASS && getblock(gx, gy - 1, gz + 1, blocks::ROCK, chunkptr) == blocks::GRASS) {
+			tcx = textures::getTexcoordX(blk[0], 1) + EPS;
+			tcy = textures::getTexcoordY(blk[0], 1) + EPS;
+		}
+		else {
+			tcx = textures::getTexcoordX(blk[0], 2) + EPS;
+			tcy = textures::getTexcoordY(blk[0], 2) + EPS;
+		}
 
 		// Front Face
 		if (!(BlockInfo(blk[1]).isOpaque() || (blk[1] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
@@ -614,33 +310,33 @@ namespace world{
 			}
 
 			color1 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color1 *= 0.5;
 			color2 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color2 *= 0.5;
 			color3 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color3 *= 0.5;
 			color4 /= BRIGHTNESSMAX;
+			if (blk[0] != blocks::GLOWSTONE) color1 *= 0.5;
+			if (blk[0] != blocks::GLOWSTONE) color2 *= 0.5;
+			if (blk[0] != blocks::GLOWSTONE) color3 *= 0.5;
 			if (blk[0] != blocks::GLOWSTONE) color4 *= 0.5;
 
 			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, 0.5 + z);
+			renderer::TexCoord2d(tcx, tcy); renderer::Vertex3d(-0.5 + x, -0.5 + y, 0.5 + z);
 			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, -0.5 + y, 0.5 + z);
+			renderer::TexCoord2d(tcx + size, tcy); renderer::Vertex3d(0.5 + x, -0.5 + y, 0.5 + z);
 			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*1.0); renderer::Vertex3d(0.5 + x, 0.5 + y, 0.5 + z);
+			renderer::TexCoord2d(tcx + size, tcy + size); renderer::Vertex3d(0.5 + x, 0.5 + y, 0.5 + z);
 			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, 0.5 + z);
+			renderer::TexCoord2d(tcx, tcy + size); renderer::Vertex3d(-0.5 + x, 0.5 + y, 0.5 + z);
 
 		}
 
-		if (getblock(gx, gy - 1, gz - 1) == blocks::GRASS && blk[0] == blocks::GRASS)
-			tcx = textures::getTexcoordX(blk[0], 1) + 0.001;
-		else
-			tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
-		if (getblock(gx, gy - 1, gz - 1) == blocks::GRASS && blk[0] == blocks::GRASS)
-			tcy = textures::getTexcoordY(blk[0], 1) + 0.001;
-		else
-			tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
+		if (blk[0] == blocks::GRASS && getblock(gx, gy - 1, gz - 1, blocks::ROCK, chunkptr) == blocks::GRASS) {
+			tcx = textures::getTexcoordX(blk[0], 1) + EPS;
+			tcy = textures::getTexcoordY(blk[0], 1) + EPS;
+		}
+		else {
+			tcx = textures::getTexcoordX(blk[0], 2) + EPS;
+			tcy = textures::getTexcoordY(blk[0], 2) + EPS;
+		}
 
 		// Back Face
 		if (!(BlockInfo(blk[2]).isOpaque() || (blk[2] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
@@ -677,9 +373,14 @@ namespace world{
 
 		}
 
-		if (getblock(gx - 1, gy - 1, gz) == blocks::GRASS && blk[0] == blocks::GRASS) tcx = textures::getTexcoordX(blk[0], 1) + 0.001; else tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
-		if (getblock(gx - 1, gy - 1, gz) == blocks::GRASS && blk[0] == blocks::GRASS) tcy = textures::getTexcoordY(blk[0], 1) + 0.001; else tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
-
+		if (blk[0] == blocks::GRASS && getblock(gx + 1, gy - 1, gz, blocks::ROCK, chunkptr) == blocks::GRASS) {
+			tcx = textures::getTexcoordX(blk[0], 1) + EPS;
+			tcy = textures::getTexcoordY(blk[0], 1) + EPS;
+		}
+		else {
+			tcx = textures::getTexcoordX(blk[0], 2) + EPS;
+			tcy = textures::getTexcoordY(blk[0], 2) + EPS;
+		}
 		// Right face
 		if (!(BlockInfo(blk[3]).isOpaque() || (blk[3] == blk[0] && !BlockInfo(blk[0]).isOpaque())) || blk[0] == blocks::LEAF) {
 
@@ -696,13 +397,13 @@ namespace world{
 			}
 
 			color1 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color1 *= 0.7;
 			color2 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color2 *= 0.7;
 			color3 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color3 *= 0.7;
 			color4 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color4 *= 0.7;
+			if (blk[0] != blocks::GLOWSTONE) color1 *= 0.5;
+			if (blk[0] != blocks::GLOWSTONE) color2 *= 0.5;
+			if (blk[0] != blocks::GLOWSTONE) color3 *= 0.5;
+			if (blk[0] != blocks::GLOWSTONE) color4 *= 0.5;
 
 			renderer::Color3d(color1, color1, color1);
 			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, -0.5 + y, -0.5 + z);
@@ -715,9 +416,14 @@ namespace world{
 
 		}
 
-		if (getblock(gx - 1, gy - 1, gz) == blocks::GRASS && blk[0] == blocks::GRASS) tcx = textures::getTexcoordX(blk[0], 1) + 0.001; else tcx = textures::getTexcoordX(blk[0], 2) + 0.001;
-		if (getblock(gx - 1, gy - 1, gz) == blocks::GRASS && blk[0] == blocks::GRASS) tcy = textures::getTexcoordY(blk[0], 1) + 0.001; else tcy = textures::getTexcoordY(blk[0], 2) + 0.001;
-
+		if (blk[0] == blocks::GRASS && getblock(gx - 1, gy - 1, gz, blocks::ROCK, chunkptr) == blocks::GRASS) {
+			tcx = textures::getTexcoordX(blk[0], 1) + EPS;
+			tcy = textures::getTexcoordY(blk[0], 1) + EPS;
+		}
+		else {
+			tcx = textures::getTexcoordX(blk[0], 2) + EPS;
+			tcy = textures::getTexcoordY(blk[0], 2) + EPS;
+		}
 		// Left Face
 		if (!(BlockInfo(blk[4]).isOpaque() || (blk[4] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
 
@@ -734,13 +440,13 @@ namespace world{
 			}
 
 			color1 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color1 *= 0.7;
 			color2 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color2 *= 0.7;
 			color3 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color3 *= 0.7;
 			color4 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color4 *= 0.7;
+			if (blk[0] != blocks::GLOWSTONE) color1 *= 0.5;
+			if (blk[0] != blocks::GLOWSTONE) color2 *= 0.5;
+			if (blk[0] != blocks::GLOWSTONE) color3 *= 0.5;
+			if (blk[0] != blocks::GLOWSTONE) color4 *= 0.5;
 
 			renderer::Color3d(color1, color1, color1);
 			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, -0.5 + z);
@@ -975,7 +681,7 @@ namespace world{
 		}
 	}
 
-	block getblock(int x, int y, int z, block defaultRet){
+	block getblock(int x, int y, int z, block defaultRet, chunk* defaultchunkptr){
 
 		//获取XYZ的方块
 		block ret = defaultRet;
@@ -988,6 +694,9 @@ namespace world{
 		bx = getblockpos(x);
 		by = getblockpos(y);
 		bz = getblockpos(z);
+
+		if (defaultchunkptr != nullptr&&cx == defaultchunkptr->cx&&cy == defaultchunkptr->cy&&cz == defaultchunkptr->cz)
+			return defaultchunkptr->getblock(bx, by, bz);
 
 		auto chunkptr = getChunkPtr(cx, cy, cz, true);
 		if (chunkptr == nullptr) return ret;
@@ -1112,196 +821,140 @@ namespace world{
 
 	}
 
-	void sortChunkRenderList(int xpos, int ypos, int zpos){
-
-		//根据chunk与一个点的距离对chunk的渲染顺序进行排序，离玩家越近的chunk先渲染
-		int cxp, cyp, czp, p=0, i;
-		int xd, yd, zd;
-
-		cxp = getchunkpos(xpos);
-		cyp = getchunkpos(ypos);
-		czp = getchunkpos(zpos);
-
-		for (i = 0; i != loadedChunks; i++){
-			if (p >= 65536) {
-				printf("[Console][Error]");
-				printf("Chunk render list overflow.\n");
-				return;
-			}
-
-			auto cptr = &world::chunks[i];
-			if (cptr->isEmptyChunk || !cptr->getUpdated()) continue;
-
-			p++;
-
-			xd = cptr->cx * 16 + 7 - xpos;
-			yd = cptr->cy * 16 + 7 - ypos;
-			zd = cptr->cz * 16 + 7 - zpos;
-			chunkRenderList[p].first = xd*xd + yd*yd + zd*zd;
-
-			chunkRenderList[p].second = cptr;
-		}
-
-		qsortListPtr(chunkRenderList, 1, p, false);
-
-		chunkRenders = p;
-
-	}
-
-	void sortChunkLoadList(int xpos, int ypos, int zpos){
-
-		int cxp, cyp, czp, cx, cy, cz, p=0;
+	void sortChunkBuildRenderList(int xpos, int ypos, int zpos) {
+		int cxp, cyp, czp, cx, cy, cz, p = 0, ci;
 		int xd, yd, zd, distsqr;
 
 		cxp = getchunkpos(xpos);
 		cyp = getchunkpos(ypos);
 		czp = getchunkpos(zpos);
 
-		for (cx = cxp - viewdistance - 1; cx <= cxp + viewdistance; cx++){
-			for (cy = cyp - viewdistance - 1; cy <= cyp + viewdistance; cy++){
-				for (cz = czp - viewdistance - 1; cz <= czp + viewdistance; cz++){
-					if (!chunkOutOfBound(cx, cy, cz)){
-						if (!chunkLoaded(cx, cy, cz)){
-							if (p >= 65536){
-								printf("[Console][Error]");
-								printf("Chunk load list overflow.\n");
-								return;
-							}
-							p++;
-							chunkLoadList[p][1] = cx;
-							chunkLoadList[p][2] = cy;
-							chunkLoadList[p][3] = cz;
+		for (int ci = 0; ci != loadedChunks; ci++) {
+			if (!chunks[ci].isEmptyChunk && chunks[ci].getUpdated()) {
+				cx = chunks[ci].cx;
+				cy = chunks[ci].cy;
+				cz = chunks[ci].cz;
+				if (!chunkInRange(cx, cy, cz, cxp, cyp, czp, viewdistance)) continue;
+				xd = cx * 16 + 7 - xpos;
+				yd = cy * 16 + 7 - ypos;
+				zd = cz * 16 + 7 - zpos;
+				distsqr = xd *xd + yd *yd + zd *zd;
+				for (int i = 0; i != 4; i++) {
+					if (distsqr < chunkBuildRenderList[i][0] || p <= i) {
+						for (int j = 3; j >= i + 1; j--) {
+							chunkBuildRenderList[j][0] = chunkBuildRenderList[j - 1][0];
+							chunkBuildRenderList[j][1] = chunkBuildRenderList[j - 1][1];
+						}
+						chunkBuildRenderList[i][0] = distsqr;
+						chunkBuildRenderList[i][1] = ci;
+						break;
+					}
+				}
+				if (p < 4) p++;
+			}
+		}
+		chunkBuildRenders = p;
+	}
+
+	void sortChunkLoadUnloadList(int xpos, int ypos, int zpos) {
+
+		int cxp, cyp, czp, cx, cy, cz, ci, pl = 0, pu = 0, i, j, cxt, cyt, czt;
+		int xd, yd, zd, distsqr, first, middle, last;
+		int lcasize = (viewdistance + 1) * 2;
+		int lcadelta = viewdistance + 1;
+		static shared_ptr<bool> loadedChunkArray = shared_ptr<bool>(new bool[lcasize*lcasize*lcasize], [](bool *p) { delete[] p; });
+		memset(loadedChunkArray.get(), 0, lcasize*lcasize*lcasize*sizeof(bool));
+
+		cxp = getchunkpos(xpos);
+		cyp = getchunkpos(ypos);
+		czp = getchunkpos(zpos);
+
+		for (int ci = 0; ci != loadedChunks; ci++) {
+			cx = chunks[ci].cx;
+			cy = chunks[ci].cy;
+			cz = chunks[ci].cz;
+			if (!chunkInRange(cx, cy, cz, cxp, cyp, czp, viewdistance + 1)) {
+				xd = cx * 16 + 7 - xpos;
+				yd = cy * 16 + 7 - ypos;
+				zd = cz * 16 + 7 - zpos;
+				distsqr = xd *xd + yd *yd + zd *zd;
+
+				first = 0; last = pl - 1;
+				while (first <= last) {
+					middle = (first + last) / 2;
+					if (distsqr > chunkUnloadList[middle][0])
+						last = middle - 1;
+					else
+						first = middle + 1;
+				}
+				if (first > pl || first >= 4) continue;
+				i = first;
+
+				for (int j = 3; j >= i + 1; j--) {
+					chunkUnloadList[j][0] = chunkUnloadList[j - 1][0];
+					chunkUnloadList[j][1] = chunkUnloadList[j - 1][1];
+					chunkUnloadList[j][2] = chunkUnloadList[j - 1][2];
+					chunkUnloadList[j][3] = chunkUnloadList[j - 1][3];
+				}
+				chunkUnloadList[i][0] = distsqr;
+				chunkUnloadList[i][1] = cx;
+				chunkUnloadList[i][2] = cy;
+				chunkUnloadList[i][3] = cz;
+
+				if (pl < 4) pl++;
+			}
+			else {
+				cxt = cx - cxp + lcadelta;
+				cyt = cy - cyp + lcadelta;
+				czt = cz - czp + lcadelta;
+				loadedChunkArray.get()[cxt*lcasize*lcasize + cyt*lcasize + czt] = true;
+			}
+		}
+		chunkUnloads = pl;
+
+		for (cx = cxp - viewdistance - 1; cx <= cxp + viewdistance; cx++) {
+			for (cy = cyp - viewdistance - 1; cy <= cyp + viewdistance; cy++) {
+				for (cz = czp - viewdistance - 1; cz <= czp + viewdistance; cz++) {
+					cxt = cx - cxp + lcadelta;
+					cyt = cy - cyp + lcadelta;
+					czt = cz - czp + lcadelta;
+					if (!chunkOutOfBound(cx, cy, cz)) {
+						if (!loadedChunkArray.get()[cxt*lcasize*lcasize + cyt*lcasize + czt]) {
 							xd = cx * 16 + 7 - xpos;
 							yd = cy * 16 + 7 - ypos;
 							zd = cz * 16 + 7 - zpos;
-							distsqr = xd*xd + yd*yd + zd*zd;
-							chunkLoadList[p][0] = distsqr;
+							distsqr = xd *xd + yd *yd + zd *zd;
+
+							first = 0; last = pu - 1;
+							while (first <= last) {
+								middle = (first + last) / 2;
+								if (distsqr < chunkLoadList[middle][0])
+									last = middle - 1;
+								else
+									first = middle + 1;
+							}
+							if (first > pu || first >= 4)  continue;
+							i = first;
+
+							for (int j = 3; j >= i + 1; j--) {
+								chunkUnloadList[j][0] = chunkUnloadList[j - 1][0];
+								chunkUnloadList[j][1] = chunkUnloadList[j - 1][1];
+								chunkUnloadList[j][2] = chunkUnloadList[j - 1][2];
+								chunkUnloadList[j][3] = chunkUnloadList[j - 1][3];
+							}
+							chunkUnloadList[i][0] = distsqr;
+							chunkUnloadList[i][1] = cx;
+							chunkUnloadList[i][2] = cy;
+							chunkUnloadList[i][3] = cz;
+							if (pu < 4) pu++;
 						}
 					}
 				}
 			}
 		}
-		qsortList(chunkLoadList, 1, p, false);
-		chunkLoads = p;
-
-	}
-
-	void sortChunkUnloadList(int xpos, int ypos, int zpos){
-
-		int cxp, cyp, czp, ci, cx, cy, cz, p = 0;
-		int xd, yd, zd, distsqr;
-
-		cxp = getchunkpos(xpos);
-		cyp = getchunkpos(ypos);
-		czp = getchunkpos(zpos);
-
-		for (ci = 0; ci < loadedChunks; ci++){
-			cx = chunks[ci].cx;
-			cy = chunks[ci].cy;
-			cz = chunks[ci].cz;
-			if (!chunkInRange(cx, cy, cz, cxp, cyp, czp, viewdistance + 1)){
-				if (p >= 65536){
-					printf("[Console][Error]");
-					printf("Chunk unload list overflow.\n");
-					return;
-				}
-				p++;
-				
-				chunkUnloadList[p][1] = cx;
-				chunkUnloadList[p][2] = cy;
-				chunkUnloadList[p][3] = cz;
-				xd = cx * 16 + 7 - xpos;
-				yd = cy * 16 + 7 - ypos;
-				zd = cz * 16 + 7 - zpos;
-				distsqr = xd*xd + yd*yd + zd*zd;
-				chunkUnloadList[p][0] = distsqr;
-			}
-		}
-		qsortList(chunkUnloadList, 1, p, true);
-
-		chunkUnloads = p;
-
+		chunkLoads = pu;
 	}
 	
-	void qsortListPtr(pair<int, chunk*> List[], int first, int last, bool unloadsort) {
-		if (first >= last) return;
-		int key = List[first].first;
-		auto k1 = List[first].second;
-		int i = first, j = last;
-		while (i != j) {
-			if (unloadsort) {
-				while (i < j && List[j].first <= key) {
-					j -= 1;
-				}
-			}
-			else {
-				while (i < j && List[j].first >= key) {
-					j -= 1;
-				}
-			}
-			List[i].first = List[j].first;
-			List[i].second = List[j].second;
-			if (unloadsort) {
-				while (i < j && List[j].first >= key) {
-					i += 1;
-				}
-			}
-			else {
-				while (i < j && List[i].first <= key) {
-					i += 1;
-				}
-			}
-			List[j].first = List[i].first;
-			List[j].second = List[i].second;
-		}
-		List[i].first = key;
-		List[i].second = k1;
-		qsortListPtr(List, first, i - 1, unloadsort);
-		qsortListPtr(List, i + 1, last, unloadsort);
-	}
-	
-	void qsortList(int List[][4], int first, int last, bool unloadsort){
-		if (first >= last) return;
-		int key = List[first][0], k1 = List[first][1], k2 = List[first][2], k3 = List[first][3];
-		int i = first, j = last;
-		while (i != j){
-			if (unloadsort){
-				while (i < j && List[j][0] <= key){
-					j -= 1;
-				}
-			}
-			else{
-				while (i < j && List[j][0] >= key){
-					j -= 1;
-				}
-			}
-			List[i][0] = List[j][0];
-			List[i][1] = List[j][1];
-			List[i][2] = List[j][2];
-			List[i][3] = List[j][3];
-			if (unloadsort){
-				while (i < j && List[j][0] >= key){
-					i += 1;
-				}
-			}
-			else{
-				while (i < j && List[i][0] <= key){
-					i += 1;
-				}
-			}
-			List[j][0] = List[i][0];
-			List[j][1] = List[i][1];
-			List[j][2] = List[i][2];
-			List[j][3] = List[i][3];
-		}
-		List[i][0] = key;
-		List[i][1] = k1;
-		List[i][2] = k2;
-		List[i][3] = k3;
-		qsortList(List, first, i - 1, unloadsort);
-		qsortList(List, i + 1, last, unloadsort);
-	}
-
 	void saveAllChunks(){
 
 #ifndef DEBUG_NO_FILEIO
@@ -1355,6 +1008,5 @@ namespace world{
 		setblock(x, y + th, z, blocks::LEAF);
 
 	}
-
 
 }

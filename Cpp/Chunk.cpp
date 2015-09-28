@@ -11,7 +11,6 @@ namespace world{
 		cy = cyi;
 		cz = czi;
 		id = idi;
-		list = 0;
 		Modified = false;
 		memset(pblocks, 0, sizeof(pblocks));
 		memset(pbrightness, 0, sizeof(pbrightness));
@@ -72,36 +71,43 @@ namespace world{
 		bool EmptyChunk = true;
 		for (x = 0; x != 16; x++){
 			for (z = 0; z != 16; z++){
-				h = iter->terrain[x][z];
-				sh = iter->sandTerrain[x][z];
+				if (cy <= 4 && cy >= 0) {
+					h = iter->terrain[x][z];
+					sh = WorldGen::WaterLevel + 2;
+				}
 				for (y = 0; y != 16; y++){
-					height = cy * 16 + y;
-					pbrightness[x][y][z] = 0;
-					if (height == 0)
-						pblocks[x][y][z] = blocks::BEDROCK;
-					else if (height == h && height > sh && height > WorldGen::WaterLevel + 1)
-						pblocks[x][y][z] = blocks::GRASS;
-					else if (height<h && height>sh && height > WorldGen::WaterLevel + 1)
-						pblocks[x][y][z] = blocks::DIRT;
-					else if ((height >= sh - 5 || height >= h - 5) && height <= h && (height <= sh || height <= WorldGen::WaterLevel + 1))
-						pblocks[x][y][z] = blocks::SAND;
-					else if ((height < sh - 5 && height < h - 5) && height >= 1 && height <= h)
-						pblocks[x][y][z] = blocks::ROCK;
-					else{
-						if (height <= WorldGen::WaterLevel){
-							pblocks[x][y][z] = blocks::WATER;
-							if (skylight - (WorldGen::WaterLevel - height) * 2 < BRIGHTNESSMIN)
-								pbrightness[x][y][z] = BRIGHTNESSMIN;
+					if (cy > 4) {
+						pblocks[x][y][z]= blocks::AIR;
+						pbrightness[x][y][z] = skylight;
+					}
+					else {
+						height = cy * 16 + y;
+						pbrightness[x][y][z] = 0;
+						if (height == 0)
+							pblocks[x][y][z] = blocks::BEDROCK;
+						else if (height == h && height > sh && height > WorldGen::WaterLevel + 1)
+							pblocks[x][y][z] = blocks::GRASS;
+						else if (height<h && height>sh && height > WorldGen::WaterLevel + 1)
+							pblocks[x][y][z] = blocks::DIRT;
+						else if ((height >= sh - 5 || height >= h - 5) && height <= h && (height <= sh || height <= WorldGen::WaterLevel + 1))
+							pblocks[x][y][z] = blocks::SAND;
+						else if ((height < sh - 5 && height < h - 5) && height >= 1 && height <= h)
+							pblocks[x][y][z] = blocks::ROCK;
+						else {
+							if (height <= WorldGen::WaterLevel) {
+								pblocks[x][y][z] = blocks::WATER;
+								if (skylight - (WorldGen::WaterLevel - height) * 2 < BRIGHTNESSMIN)
+									pbrightness[x][y][z] = BRIGHTNESSMIN;
+								else
+									pbrightness[x][y][z] = skylight - (brightness)((WorldGen::WaterLevel - height) * 2);
+							}
 							else
-								pbrightness[x][y][z] = skylight - (brightness)((WorldGen::WaterLevel - height) * 2);
-						}
-						else
-						{
-							pblocks[x][y][z] = blocks::AIR;
-							pbrightness[x][y][z] = skylight;
+							{
+								pblocks[x][y][z] = blocks::AIR;
+								pbrightness[x][y][z] = skylight;
+							}
 						}
 					}
-
 					if (pblocks[x][y][z] != blocks::AIR) EmptyChunk = false;
 				}
 
@@ -121,12 +127,12 @@ namespace world{
 		build();
 #endif
 		updated = true;
-		if (cy < worldheight - 1) setChunkUpdated(cx, cy + 1, cz, true);
-		if (cy > -worldheight) setChunkUpdated(cx, cy - 1, cz, true);
-		if (cx < worldsize - 1) setChunkUpdated(cx + 1, cy, cz, true);
-		if (cx > -worldsize) setChunkUpdated(cx - 1, cy, cz, true);
-		if (cz < worldsize - 1) setChunkUpdated(cx, cy, cz + 1, true);
-		if (cz > -worldsize) setChunkUpdated(cx, cy, cz - 1, true);
+		//if (cy < worldheight - 1) setChunkUpdated(cx, cy + 1, cz, true);
+		//if (cy > -worldheight) setChunkUpdated(cx, cy - 1, cz, true);
+		//if (cx < worldsize - 1) setChunkUpdated(cx + 1, cy, cz, true);
+		//if (cx > -worldsize) setChunkUpdated(cx - 1, cy, cz, true);
+		//if (cz < worldsize - 1) setChunkUpdated(cx, cy, cz + 1, true);
+		//if (cz > -worldsize) setChunkUpdated(cx, cy, cz - 1, true);
 	}
 
 	void chunk::Unload(){
@@ -174,69 +180,69 @@ namespace world{
 		if (isEmptyChunk) return;
 		//建立chunk显示列表
 		int x, y, z;
-		if (rebuiltChunks >= 2) return;
+		for (x = -1; x != 2; x++) {
+			for (y = -1; y != 2; y++) {
+				for (z = -1; z != 2; z++) {
+					if (x == 0 && y == 0 && z == 0) continue;
+					if (chunkOutOfBound(cx + x, cy + y, cz + z))  continue;
+					if (!chunkLoaded(cx + x, cy + y, cz + z)) return;
+				}
+			}
+		}
+                
 		rebuiltChunks++;
 		updatedChunks++;
+		isBuilt = true;
+		loadAnim = cy * 16 + 16;
+		glGenBuffersARB(3, vbuffer);
 
-		if (list == 0){
-			list = glGenLists(3);
-			loadAnim = 100.0;
+		renderer::Init();
+		glBindTexture(GL_TEXTURE_2D, BlockTextures);
+		for (x = 0; x != 16; x++) {
+			for (y = 0; y != 16; y++) {
+				for (z = 0; z != 16; z++) {
+					if (pblocks[x][y][z] == blocks::AIR) continue;
+					if (!BlockInfo(pblocks[x][y][z]).isTranslucent())
+						renderblock(x, y, z, this);
+
+				}
+			}
 		}
+		renderer::Flush(vbuffer[0], vertexes[0]);
 		
 		renderer::Init();
 		glBindTexture(GL_TEXTURE_2D, BlockTextures);
 		for (x = 0; x != 16; x++){
 			for (y = 0; y != 16; y++){
 				for (z = 0; z != 16; z++){
-					if (BlockInfo(pblocks[x][y][z]).isOpaque())
+					if (pblocks[x][y][z] == blocks::AIR) continue;
+					if (BlockInfo(pblocks[x][y][z]).isTranslucent() && BlockInfo(pblocks[x][y][z]).isSolid())
 						renderblock(x, y, z, this);
 				}
 			}
 		}
-		glNewList(list, GL_COMPILE);
-		renderer::Flush();
-		glEndList();
-
-		
-		renderer::Init();
-		glBindTexture(GL_TEXTURE_2D, BlockTextures);
-		for (x = 0; x != 16; x++){
-			for (y = 0; y != 16; y++){
-				for (z = 0; z != 16; z++){
-					if (!BlockInfo(pblocks[x][y][z]).isOpaque() && BlockInfo(pblocks[x][y][z]).isSolid())
-						renderblock(x, y, z, this);
-				}
-			}
-		}
-		glNewList(list + 1, GL_COMPILE);
-		renderer::Flush();
-		glEndList();
+		renderer::Flush(vbuffer[1], vertexes[1]);
 
 		renderer::Init();
 		glBindTexture(GL_TEXTURE_2D, BlockTextures);
 		for (x = 0; x != 16; x++){
 			for (y = 0; y != 16; y++){
 				for (z = 0; z != 16; z++){
-					if (!BlockInfo(pblocks[x][y][z]).isSolid() && pblocks[x][y][z] != 0)
+					if (pblocks[x][y][z] == blocks::AIR) continue;
+					if (!BlockInfo(pblocks[x][y][z]).isSolid())
 						renderblock(x, y, z, this);
 				}
 			}
 		}
-		glNewList(list + 2, GL_COMPILE);
-		renderer::Flush();
-		glEndList();
+		renderer::Flush(vbuffer[2], vertexes[2]);
 		updated = false;
 
 	}
 
 	void chunk::destroylists(){
 
-		if (list != 0){
-
-			world::displayListUnloadList.push_back(list);
-			list = 0;
-
-		}
+		if(!isBuilt) return;
+		world::displayListUnloadList.push_back(vbuffer);
 
 	}
 
@@ -299,10 +305,6 @@ namespace world{
 
 	void chunk::setUpdated(bool value){
 		updated = value;
-	}
-
-	void chunk::callList(int l){
-		if (list > 0 && glIsList(list + l)) glCallList(list + l);
 	}
 
 	void chunk::hiddenChunkTest(){

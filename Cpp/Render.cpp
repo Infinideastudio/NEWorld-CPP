@@ -6,6 +6,7 @@
 #include "Textures.h"
 #include "GUI.h"
 #include "Particles.h"
+#include "Renderer.h"
 
 int renderedChunk = 0;
 
@@ -31,8 +32,6 @@ bool bagOpened;
 
 bool shouldGetScreenshot, shouldGetThumbnail;
 
-TextureID splTex;
-TextureID BlockTexture[20];
 TextureID BlockTextures;
 TextureID guiImage[6];
 TextureID DestroyImage[11];
@@ -122,16 +121,25 @@ void drawMain() {
 	if (world::CHMs.size() > 1000) world::CHMs.clear();
 
 	//更新区块显示列表
-	world::sortChunkRenderList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
-	for (int i = 1; i <= world::chunkRenders; i++) {
-		auto cptr = world::chunkRenderList[i].second;
-		cptr->buildlists();
+	//world::sortChunkRenderList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
+	//for (int i = 1; i <= world::chunkRenders; i++) {
+	//	auto cptr = world::chunkRenderList[i].second;
+	//	cptr->buildlists();
+	//}
+	static bool FirstFrameThisUpdate;
+	if (FirstFrameThisUpdate) {
+		world::sortChunkBuildRenderList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
+		FirstFrameThisUpdate = false;
 	}
-
+	int brl = world::chunkBuildRenders > 4 ? 3 : world::chunkBuildRenders - 1;
+	for (int i = 0; i <= brl; i++) {
+		int ci = world::chunkBuildRenderList[i][1];
+		world::chunks[ci].buildlists();
+	}
 	//删除已卸载区块的显示列表
-	for (int i = 0; i != 3; i++) {
+	for (int i = 0; i != 5; i++) {
 		if (world::displayListUnloadList.size() <= 0) break;
-		glDeleteLists(world::displayListUnloadList[world::displayListUnloadList.size() - 1], 3);
+		glDeleteBuffersARB(3, world::displayListUnloadList[0]);
 		world::displayListUnloadList.pop_back();
 	}
 	//if ((timer() - uctime) >= 1.0) {
@@ -139,6 +147,22 @@ void drawMain() {
 	//	ups = upsc
 	//	upsc = 0
 	//}
+	struct RenderChunk
+	{
+	public:
+		RenderChunk(world::chunk* c) {
+			cx = c->cx;
+			cy = c->cy;
+			cz = c->cz;
+			vbuffers = c->vbuffer;
+			vtxs = c->vertexes;
+			loadAnim = c->loadAnim;
+		}
+		int cx, cy, cz;
+		uint* vbuffers = nullptr;
+		float loadAnim = 0;
+		int* vtxs = nullptr;
+	};
 	double plookupdown = player::lookupdown;
 	double pheading = player::heading;
 	glLoadIdentity();
@@ -147,28 +171,38 @@ void drawMain() {
 	Frustum::calc();
 	vector<RenderChunk> displayChunks;
 	for (int i = 0; i != world::loadedChunks; i++) {
-		if (world::chunks[i].list > 0 && world::chunkInRange(world::chunks[i].cx, world::chunks[i].cy, world::chunks[i].cz, player::cxt, player::cyt, player::czt, viewdistance)) {
-			if (Frustum::aabbInFrustum(world::chunks[i].getRelativeAABB(xpos, ypos, zpos))) displayChunks.push_back(&world::chunks[i]);
+		if (world::chunks[i].isEmptyChunk) continue;
+		if (world::chunks[i].isBuilt && world::chunkInRange(world::chunks[i].cx, world::chunks[i].cy, world::chunks[i].cz, player::cxt, player::cyt, player::czt, viewdistance)) {
+			if (Frustum::AABBInFrustum(world::chunks[i].getRelativeAABB(xpos, ypos, zpos))) {
+				displayChunks.push_back(&world::chunks[i]);
+			}
 		}
 	}
 	MutexUnlock();
 	renderedChunk = displayChunks.size();
 	glBindTexture(GL_TEXTURE_2D, BlockTextures);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
 	for (int i = 0; i != renderedChunk; i++) {
 		auto cr = displayChunks[i];
+		if (cr.vtxs[0] == 0) continue;
+		glPushMatrix();
 		glTranslated(cr.cx * 16 - xpos, cr.cy * 16 - cr.loadAnim - ypos, cr.cz * 16 - zpos);
-		glCallList(cr.list);
-		glTranslated(-cr.cx * 16 + xpos, -cr.cy * 16 + cr.loadAnim + ypos, -cr.cz * 16 + zpos);
+		renderer::renderbuffer(cr.vbuffers[0], cr.vtxs[0], true, true);
+		glPopMatrix();
 	}
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 	if (seldes > 0.0) {
 		glTranslated(selx - xpos, sely - ypos, selz - zpos);
 		renderDestroy(seldes, 0, 0, 0);
 		glTranslated(-selx + xpos, -sely + ypos, -selz + zpos);
 	}
-	MutexLock();
 	glBindTexture(GL_TEXTURE_2D, BlockTextures);
 	particles::renderall();
-	MutexUnlock();
 	glDisable(GL_TEXTURE_2D);
 	glTranslated(selx - xpos, sely - ypos, selz - zpos);
 	if (GUIrenderswitch) drawborder(0, 0, 0);
@@ -181,23 +215,33 @@ void drawMain() {
 	glLoadIdentity();
 	glRotated(plookupdown, 1, 0, 0);
 	glRotated(360.0 - pheading, 0, 1, 0);
-	glBindTexture(GL_TEXTURE_2D, BlockTextures);
+	//glBindTexture(GL_TEXTURE_2D, BlockTextures);
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_CULL_FACE);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_VERTEX_ARRAY);
 	for (int i = 0; i != renderedChunk; i++) {
 		auto cr = displayChunks[i];
+		if (cr.vtxs[1] == 0) continue;
+		glPushMatrix();
 		glTranslated(cr.cx * 16 - xpos, cr.cy * 16 - cr.loadAnim - ypos, cr.cz * 16 - zpos);
-		glCallList(cr.list + 1);
-		glTranslated(-cr.cx * 16 + xpos, -cr.cy * 16 + cr.loadAnim + ypos, -cr.cz * 16 + zpos);
+		renderer::renderbuffer(cr.vbuffers[1], cr.vtxs[1], true, true);
+		glPopMatrix();
 	}
 	glDisable(GL_CULL_FACE);
 	for (int i = 0; i != renderedChunk; i++) {
 		auto cr = displayChunks[i];
+		if (cr.vtxs[2] == 0) continue;
+		glPushMatrix();
 		glTranslated(cr.cx * 16 - xpos, cr.cy * 16 - cr.loadAnim - ypos, cr.cz * 16 - zpos);
-		glCallList(cr.list + 2);
-		glTranslated(-cr.cx * 16 + xpos, -cr.cy * 16 + cr.loadAnim + ypos, -cr.cz * 16 + zpos);
+		renderer::renderbuffer(cr.vbuffers[2], cr.vtxs[2], true, true);
+		glPopMatrix();
 	}
-
+	glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+	glDisableClientState(GL_COLOR_ARRAY);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_VERTEX_ARRAY);
 	glLoadIdentity();
 	glRotated(player::lookupdown, 1, 0, 0);
 	glRotated(360.0 - player::heading, 0, 1, 0);
@@ -222,14 +266,15 @@ void drawMain() {
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 	}
-	if (world::getblock((int)player::xpos, int(player::ypos + player::height + player::heightExt), (int)player::zpos) == blocks::WATER) {
+	if (world::getblock(int(player::xpos + 0.5), int(player::ypos + player::height + player::heightExt + 0.5), int(player::zpos + 0.5)) == blocks::WATER) {
 		glColor4f(1.0, 1.0, 1.0, 1.0);
-		glBindTexture(GL_TEXTURE_2D, BlockTexture[textures::getTextureIndex(blocks::WATER, 1)]);
+		double tcX = textures::getTexcoordX(blocks::WATER, 1);
+		double tcY = textures::getTexcoordY(blocks::WATER, 1);
 		glBegin(GL_QUADS);
-		glTexCoord2f(0.0, 1.0); glVertex2i(0, 0);
-		glTexCoord2f(0.0, 0.0); glVertex2i(0, windowheight);
-		glTexCoord2f(1.0, 0.0); glVertex2i(windowwidth, windowheight);
-		glTexCoord2f(1.0, 1.0); glVertex2i(windowwidth, 0);
+		glTexCoord2f(tcX, tcY + 1 / 8.0); glVertex2i(0, 0);
+		glTexCoord2f(tcX, tcY); glVertex2i(0, windowheight);
+		glTexCoord2f(tcX + 1 / 8.0, tcY); glVertex2i(windowwidth, windowheight);
+		glTexCoord2f(tcX + 1 / 8.0, tcY + 1 / 8.0); glVertex2i(windowwidth, 0);
 		glEnd();
 	}
 
@@ -347,7 +392,7 @@ void splashscreen() {
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	splTex = textures::LoadRGBATexture("textures\\gui\\SplashScreen.bmp", "");
+	TextureID splTex = textures::LoadRGBATexture("textures\\gui\\SplashScreen.bmp", "");
 
 	int i;
 	glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -370,8 +415,6 @@ void splashscreen() {
 		glEnd();
 		setFontColor(0.0, 0.0, 0.0, 1.0);
 		glprint(400, 200, MAJOR_VERSION + MINOR_VERSION);
-		//glfwSleep(0.001)
-		Sleep(1);
 	}
 	glprint(10, 10, "Loading Textures...");
 	glprint(10, 26, "Please Wait...");
@@ -494,25 +537,27 @@ void drawGUI() {
 		glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
 		glBegin(GL_QUADS);
 		glTexCoord2f(0.0, 1.0);
-		glVertex2d((i)*(32), windowheight - 32);
+		glVertex2d(i*32, windowheight - 32);
 		glTexCoord2f(0.0, 0.0);
-		glVertex2d((i)*(32) + 32, windowheight - 32);
+		glVertex2d(i*32 + 32, windowheight - 32);
 		glTexCoord2f(1.0, 0.0);
-		glVertex2d((i)*(32) + 32, windowheight);
+		glVertex2d(i*32 + 32, windowheight);
 		glTexCoord2f(1.0, 1.0);
-		glVertex2d((i)*(32), windowheight);
+		glVertex2d(i*32, windowheight);
 		glEnd();
 		if (player::inventorybox[3][i] != blocks::AIR) {
 			glColor4f(1.0, 1.0, 1.0, 1.0);
-			glBindTexture(GL_TEXTURE_2D, BlockTexture[textures::getTextureIndex(player::inventorybox[3][i], 1)]);
+			glBindTexture(GL_TEXTURE_2D, BlockTextures);
+			double tcX = textures::getTexcoordX(player::inventorybox[4][i], 1);
+			double tcY = textures::getTexcoordY(player::inventorybox[4][i], 1);
 			glBegin(GL_QUADS);
-			glTexCoord2f(0.0, 1.0);
+			glTexCoord2f(tcX, tcY + 1 / 8.0);
 			glVertex2d(i * 32 + 2, windowheight - 32 + 2);
-			glTexCoord2f(0.0, 0.0);
+			glTexCoord2f(tcX, tcY);
 			glVertex2d(i * 32 + 30, windowheight - 32 + 2);
-			glTexCoord2f(1.0, 0.0);
+			glTexCoord2f(tcX + 1 / 8.0, tcY);
 			glVertex2d(i * 32 + 30, windowheight - 32 + 30);
-			glTexCoord2f(1.0, 1.0);
+			glTexCoord2f(tcX + 1 / 8.0, tcY + 1 / 8);
 			glVertex2d(i * 32 + 2, windowheight - 32 + 30);
 			glEnd();
 			std::stringstream ss;
@@ -520,27 +565,6 @@ void drawGUI() {
 			glprint(i * 32, windowheight - 32, ss.str());
 		}
 	}
-
-	//glDisable(GL_TEXTURE_2D)
-	//glColor4f(1.0 - player::lives / (double)player::livesoverall, player::lives / (double)player::livesoverall, 0.0, 0.5)
-
-	//glBegin(GL_QUADS)
-	//glVertex2d(windowwidth - 256, windowheight)
-	//glVertex2d(windowwidth - 256, windowheight - 20)
-	//glVertex2d(windowwidth - 256 + (player::lives / (double)player::livesoverall * 256), windowheight - 20)
-	//glVertex2d(windowwidth - 256 + (player::lives / (double)player::livesoverall * 256), windowheight)
-	//glEnd()
-
-	//glDisable(GL_TEXTURE_2D)
-	//glColor4f(0.0, 0.0, 0.0, 0.9)
-	//glLineWidth(2)
-
-	//glBegin(GL_LINES)
-	//glVertex2d(windowwidth - 256 + (player::livestarget / (double)player::livesoverall * 256), windowheight - 20)
-	//glVertex2d(windowwidth - 256 + (player::livestarget / (double)player::livesoverall * 256), windowheight)
-	//glEnd()
-
-	//glEnable(GL_TEXTURE_2D)
 
 	if (DEBUGMODE) {
 		setFontColor(1.0f, 1.0f, 1.0f, 0.9f);
@@ -593,84 +617,7 @@ void drawGUI() {
 		ss << "ChunkHeightMap Size = " << world::CHMs.size();
 		debugText(ss.str()); ss.str("");
 
-		//ss << "MO count: " << world::MOs.size()
-		//debugText(ss.str()) ss.str("")
-
-		//ss << "Particle count: " & particles::ptcsrendered & "/" & particles::ptcs.size()
-		//debugText(ss.str())
-
 		debugText("", true);
-		//setFontColor(gui::FgR, gui::FgG, gui::FgB, 0.9)
-		//
-		//glprint(windowwidth - 300, 16 * 0, ("Block infomation"))
-		//
-		//glprint(windowwidth - 300, 16 * 1, ("bx" << str(selbx) << " by" << str(selby) << " bz" << str(selbz)))
-		//
-		//glprint(windowwidth - 300, 16 * 2, ("cx" << str(selcx) << " cy" << str(selcy) << " cz" << str(selcz)))
-		//
-		//glprint(windowwidth - 300, 16 * 3, ("Selected block" << blocks::IDstr(selb) << " (ID" << selb << ")"))
-		//
-		//glprint(windowwidth - 300, 16 * 4, ("Selected face brightness" << selbr))
-
-
-		//setFontColor(1.0f, 1.0f, 1.0f, 1.0f);
-		//glDisable(GL_TEXTURE_2D);
-		//glBegin(GL_QUADS);
-		//glColor4f(gui::FgR, gui::FgG, gui::FgB, 0.7f);
-
-		//glVertex2d(windowwidth - 300, 16 * 9 - 1);
-		//glVertex2d(windowwidth - 300, 16 * 10 - 1);
-		//glVertex2d(windowwidth - 300 + Time_renderscene / (double)Time_overall * 300, 16 * 10 - 1);
-		//glVertex2d(windowwidth - 300 + Time_renderscene / (double)Time_overall * 300, 16 * 9 - 1);
-
-		//glVertex2d(windowwidth - 300, 16 * 10 - 1);
-		//glVertex2d(windowwidth - 300, 16 * 11 - 1);
-		//glVertex2d(windowwidth - 300 + Time_renderGUI / (double)Time_overall * 300, 16 * 11 - 1);
-		//glVertex2d(windowwidth - 300 + Time_renderGUI / (double)Time_overall * 300, 16 * 10 - 1);
-
-		//glVertex2d(windowwidth - 300, 16 * 11 - 1);
-		//glVertex2d(windowwidth - 300, 16 * 12 - 1);
-		//glVertex2d(windowwidth - 300 + Time_updategame / (double)Time_overall * 300, 16 * 12 - 1);
-		//glVertex2d(windowwidth - 300 + Time_updategame / (double)Time_overall * 300, 16 * 11 - 1);
-
-		//glVertex2d(windowwidth - 300, 16 * 12 - 1);
-		//glVertex2d(windowwidth - 300, 16 * 13 - 1);
-		//glVertex2d(windowwidth - 300 + Time_screensync / (double)Time_overall * 300, 16 * 13 - 1);
-		//glVertex2d(windowwidth - 300 + Time_screensync / (double)Time_overall * 300, 16 * 12 - 1);
-		//glEnd();
-		//glBegin(GL_LINE_LOOP);
-		//glColor4f(0.0f, 0.0f, 0.0f, 0.6f);
-		//glVertex2d(windowwidth, 16 * 9 - 1);
-		//glVertex2d(windowwidth, 16 * 10 - 1);
-		//glVertex2d(windowwidth - 300, 16 * 10 - 1);
-		//glVertex2d(windowwidth - 300, 16 * 9 - 1);
-		//glEnd();
-		//glBegin(GL_LINE_LOOP);
-		//glVertex2d(windowwidth, 16 * 10 - 1);
-		//glVertex2d(windowwidth, 16 * 11 - 1);
-		//glVertex2d(windowwidth - 300, 16 * 11 - 1);
-		//glVertex2d(windowwidth - 300, 16 * 10 - 1);
-		//glEnd();
-		//glBegin(GL_LINE_LOOP);
-		//glVertex2d(windowwidth, 16 * 11 - 1);
-		//glVertex2d(windowwidth, 16 * 12 - 1);
-		//glVertex2d(windowwidth - 300, 16 * 12 - 1);
-		//glVertex2d(windowwidth - 300, 16 * 11 - 1);
-		//glEnd();
-		//glBegin(GL_LINE_LOOP);
-		//glVertex2d(windowwidth, 16 * 12 - 1);
-		//glVertex2d(windowwidth, 16 * 13 - 1);
-		//glVertex2d(windowwidth - 300, 16 * 13 - 1);
-		//glVertex2d(windowwidth - 300, 16 * 12 - 1);
-		//glEnd();
-
-		//glEnable(GL_TEXTURE_2D);
-		//setFontColor(0.0f, 0.0f, 0.0f, 0.3f);
-		//glprint(windowwidth - 300, 16 * 9, "Render scene");
-		//glprint(windowwidth - 300, 16 * 10, "Render GUI");
-		//glprint(windowwidth - 300, 16 * 11, "Update game");
-		//glprint(windowwidth - 300, 16 * 12, "Others");
-		//setFontColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	else {
 
@@ -678,6 +625,10 @@ void drawGUI() {
 		std::stringstream ss;
 		ss << "v" << VERSION;
 		glprint(0, 0, ss.str());
+		ss.clear();
+		ss.str("");
+		ss << "fps " << fps;
+		glprint(0,16, ss.str());
 
 	}
 
@@ -688,17 +639,16 @@ void drawGUI() {
 		fctime = timer();
 	}
 	fpsc++;
-	//Time_renderGUI = timer() - Time_renderGUI;
-	//Time_screensync_ = timer();
 }
 
 void drawLoading() {
 	MutexLock();
 	int loadedChunks = world::loadedChunks;
-	world::sortChunkRenderList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
-	for (int i = 1; i <= world::chunkRenders; i++) {
-		auto cptr = world::chunkRenderList[i].second;
-		cptr->buildlists();
+	world::sortChunkBuildRenderList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
+	int brl = world::chunkBuildRenders > 4 ? 3 : world::chunkBuildRenders - 1;
+	for (int i = 0; i <= brl; i++) {
+		int ci = world::chunkBuildRenderList[i][1];
+		world::chunks[ci].buildlists();
 	}
 	MutexUnlock();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -729,75 +679,57 @@ void drawLoading() {
 	glfwPollEvents();
 }
 void drawcloud(double px, double pz) {
-
-	//画云
-	//Powered by bobby825(SuperSodaSea)
-	static bool generated = false;
-	static int d = 0;
-	static float f = 0;
-	int e;
-	f += 0.125;
-	e = int(f / cloudwidth);
-	f -= e * cloudwidth;
-	d += e;
-
-	int cx, cz;
-	px -= 32 * cloudwidth;
-	pz -= 32 * cloudwidth;
-
-	cx = int(px / cloudwidth);
-
-	cz = int(pz / cloudwidth);
-
-	int i, j;
+	glFogf(GL_FOG_START, 100.0);
+	glFogf(GL_FOG_END, 300.0);
+	static double ltimer;
+	static bool generated;
+	static uint cloudvb[128];
+	static int vtxs[128];
+	static float f;
+	static int l;
+	if (ltimer == 0.0) ltimer = timer();
+	f += (timer() - ltimer)*0.25;
+	ltimer = timer();
+	if (f >= 1.0) {
+		l += f;
+		f -= int(f);
+		l %= 128;
+	}
 
 	if (!generated) {
-
-		for (i = 0; i != 128; i++) {
-			for (j = 0; j != 128; j++) {
-				world::cloud[i][j] = sbyte(rnd() * 2);
+		generated = true;
+		for (int i = 0; i != 128; i++) {
+			for (int j = 0; j != 128; j++) {
+				world::cloud[i][j] = int(rnd() * 2);
 			}
 		}
-
-		generated = true;
+		glGenBuffersARB(128, &cloudvb[0]);
+		for (int i = 0; i != 128; i++) {
+			renderer::Init();
+			for (int j = 0; j != 128; j++) {
+				if (world::cloud[i][j]) {
+					renderer::Vertex3d(j*cloudwidth, 128.0, 0.0);
+					renderer::Vertex3d(j*cloudwidth, 128.0, cloudwidth);
+					renderer::Vertex3d((j + 1)*cloudwidth, 128.0, cloudwidth);
+					renderer::Vertex3d((j + 1)*cloudwidth, 128.0, 0.0);
+				}
+			}
+			renderer::Flush(cloudvb[i], vtxs[i]);
+		}
 	}
 
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_CULL_FACE);
-
-	glBegin(GL_QUADS);
-
-	for (i = 0; i != 128; i++) {
-		for (j = 0; j != 128; j++) {
-			int x, z;
-			int cloudx, cloudz;
-			x = cx + i;
-			z = cz + j;
-			if (x < 0)
-				cloudx = 127 + (x % 128);
-			else
-				cloudx = x % 128;
-
-			if (z - d < 0)
-				cloudz = 127 + ((z - d) % 128);
-			else
-				cloudz = (z - d) % 128;
-
-			if (world::cloud[cloudx][cloudz]) {
-				float c = (128 - abs(i - 64) - abs(j - 64)) / 127.0f * 0.5f + 0.25f;
-
-				glColor4f(1.0f, 1.0f, 1.0f, c);
-
-				glVertex3f(x * (float)cloudwidth, 128.0f, z * (float)cloudwidth + f);
-				glVertex3f(x * (float)cloudwidth, 128.0f, (z + 1) * (float)cloudwidth + f);
-				glVertex3f((x + 1) * (float)cloudwidth, 128.0f, (z + 1) * (float)cloudwidth + f);
-				glVertex3f((x + 1) * (float)cloudwidth, 128.0f, z * (float)cloudwidth + f);
-			}
-		}
+	glColor4f(1.0, 1.0, 1.0, 0.5);
+	for (int i = 0; i != 128; i++) {
+		glPushMatrix();
+		glTranslatef(-64 * cloudwidth, 0, cloudwidth*((l + i) % 128 + f) - 64 * cloudwidth);
+		renderer::renderbuffer(cloudvb[i], vtxs[i], false, false);
+		glPopMatrix();
 	}
-	glEnd();
-	glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	setupNormalFog();
 }
+
 void renderDestroy(float level, int x, int y, int z) {
 
 	//float colors
@@ -939,15 +871,17 @@ void drawBag() {
 			glVertex2d(j*(32 + 8) + leftp, i*(32 + 8) + 32 + upp);
 			glEnd();
 			if (player::inventorybox[i][j] != blocks::AIR) {
-				glBindTexture(GL_TEXTURE_2D, BlockTexture[textures::getTextureIndex((player::inventorybox[i][j]), 1)]);
+				glBindTexture(GL_TEXTURE_2D, BlockTextures);
+				double tcX = textures::getTexcoordX(player::inventorybox[i][j], 1);
+				double tcY = textures::getTexcoordY(player::inventorybox[i][j], 1);
 				glBegin(GL_QUADS);
-				glTexCoord2f(0.0, 0.0);
+				glTexCoord2f(tcX, tcY + 1 / 8.0);
 				glVertex2d(j*(32 + 8) + 2 + leftp, i*(32 + 8) + 2 + upp);
-				glTexCoord2f(1.0, 0.0);
+				glTexCoord2f(tcX, tcY);
 				glVertex2d(j*(32 + 8) + 30 + leftp, i*(32 + 8) + 2 + upp);
-				glTexCoord2f(1.0, 1.0);
+				glTexCoord2f(tcX + 1 / 8.0, tcY);
 				glVertex2d(j*(32 + 8) + 30 + leftp, i*(32 + 8) + 30 + upp);
-				glTexCoord2f(0.0, 1.0);
+				glTexCoord2f(tcX + 1 / 8.0, tcY + 1 / 8.0);
 				glVertex2d(j*(32 + 8) + 2 + leftp, i*(32 + 8) + 30 + upp);
 				glEnd();
 				std::stringstream ss;
@@ -957,18 +891,22 @@ void drawBag() {
 		}
 	}
 	if (itemselected != blocks::AIR) {
-		glBindTexture(GL_TEXTURE_2D, BlockTexture[textures::getTextureIndex((itemselected), 1)]);
+		glBindTexture(GL_TEXTURE_2D, BlockTextures);
+		double tcX = textures::getTexcoordX(itemselected, 1);
+		double tcY = textures::getTexcoordY(itemselected, 1);
 		glBegin(GL_QUADS);
-		glTexCoord2f(0.0, 0.0);
+		glTexCoord2f(tcX, tcY + 1 / 8.0);
 		glVertex2d(mx - 16, my - 16);
-		glTexCoord2f(1.0, 0.0);
+		glTexCoord2f(tcX, tcY);
 		glVertex2d(mx + 16, my - 16);
-		glTexCoord2f(1.0, 1.0);
+		glTexCoord2f(tcX + 1 / 8.0, tcY);
 		glVertex2d(mx + 16, my + 16);
-		glTexCoord2f(0.0, 1.0);
+		glTexCoord2f(tcX + 1 / 8.0, tcY + 1 / 8.0);
 		glVertex2d(mx - 16, my + 16);
 		glEnd();
-		glprint((int)mx + 4, (int)my + 16, BlockInfo(pcsselected).getBlockName());
+		std::stringstream ss;
+		ss << pcsselected;
+		glprint((int)mx + 4, (int)my + 16, ss.str());
 	}
 	if (player::inventorybox[si][sj] != 0 && sf == 1) {
 		glColor4f(1.0, 1.0, 0.0, 1.0);

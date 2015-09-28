@@ -1,23 +1,20 @@
 #include "frustum.h"
 
-namespace Frustum{
-	double m_Frustum[24];
+namespace Frustum {
+	double frus[24];
 	double proj[16], modl[16];
 	double clip[16];
 
-	void normalize(int side){
-		double f0 = m_Frustum[side + 0];
-		double f1 = m_Frustum[side + 1];
-		double f2 = m_Frustum[side + 2];
-		double magnitude = sqrt(f0 * f0 + f1 * f1 + f2 * f2);
+	void normalize(int side) {
+		double magnitude = sqrt(frus[side + 0] * frus[side + 0] + frus[side + 1] * frus[side + 1] + frus[side + 2] * frus[side + 2]);
 
-		m_Frustum[side + 0] /= magnitude;
-		m_Frustum[side + 1] /= magnitude;
-		m_Frustum[side + 2] /= magnitude;
-		m_Frustum[side + 3] /= magnitude;
+		frus[side + 0] /= magnitude;
+		frus[side + 1] /= magnitude;
+		frus[side + 2] /= magnitude;
+		frus[side + 3] /= magnitude;
 	}
 
-	void calc(){
+	void calc() {
 		glGetDoublev(GL_PROJECTION_MATRIX, proj);
 		glGetDoublev(GL_MODELVIEW_MATRIX, modl);
 
@@ -41,74 +38,61 @@ namespace Frustum{
 		clip[14] = modl[12] * proj[2] + modl[13] * proj[6] + modl[14] * proj[10] + modl[15] * proj[14];
 		clip[15] = modl[12] * proj[3] + modl[13] * proj[7] + modl[14] * proj[11] + modl[15] * proj[15];
 
-		m_Frustum[0] = clip[3] - clip[0];
-		m_Frustum[1] = clip[7] - clip[4];
-		m_Frustum[2] = clip[11] - clip[8];
-		m_Frustum[3] = clip[15] - clip[12];
+		frus[0] = clip[3] - clip[0];
+		frus[1] = clip[7] - clip[4];
+		frus[2] = clip[11] - clip[8];
+		frus[3] = clip[15] - clip[12];
 
 		normalize(0);
 
-		m_Frustum[4] = clip[3] + clip[0];
-		m_Frustum[5] = clip[7] + clip[4];
-		m_Frustum[6] = clip[11] + clip[8];
-		m_Frustum[7] = clip[15] + clip[12];
+		frus[4] = clip[3] + clip[0];
+		frus[5] = clip[7] + clip[4];
+		frus[6] = clip[11] + clip[8];
+		frus[7] = clip[15] + clip[12];
 
 		normalize(4);
 
-		m_Frustum[8] = clip[3] + clip[1];
-		m_Frustum[9] = clip[7] + clip[5];
-		m_Frustum[10] = clip[11] + clip[9];
-		m_Frustum[11] = clip[15] + clip[13];
+		frus[8] = clip[3] + clip[1];
+		frus[9] = clip[7] + clip[5];
+		frus[10] = clip[11] + clip[9];
+		frus[11] = clip[15] + clip[13];
 
 		normalize(8);
 
-		m_Frustum[12] = clip[3] - clip[1];
-		m_Frustum[13] = clip[7] - clip[5];
-		m_Frustum[14] = clip[11] - clip[9];
-		m_Frustum[15] = clip[15] - clip[13];
+		frus[12] = clip[3] - clip[1];
+		frus[13] = clip[7] - clip[5];
+		frus[14] = clip[11] - clip[9];
+		frus[15] = clip[15] - clip[13];
 
 		normalize(12);
 
-		m_Frustum[16] = clip[3] - clip[2];
-		m_Frustum[17] = clip[7] - clip[6];
-		m_Frustum[18] = clip[11] - clip[10];
-		m_Frustum[19] = clip[15] - clip[14];
+		frus[16] = clip[3] - clip[2];
+		frus[17] = clip[7] - clip[6];
+		frus[18] = clip[11] - clip[10];
+		frus[19] = clip[15] - clip[14];
 
 		normalize(16);
 
-		m_Frustum[20] = clip[3] + clip[2];
-		m_Frustum[21] = clip[7] + clip[6];
-		m_Frustum[22] = clip[11] + clip[10];
-		m_Frustum[23] = clip[15] + clip[14];
+		frus[20] = clip[3] + clip[2];
+		frus[21] = clip[7] + clip[6];
+		frus[22] = clip[11] + clip[10];
+		frus[23] = clip[15] + clip[14];
 
 		normalize(20);
 
 	}
 
-	bool cubeInFrustum(double x1, double y1, double z1, double x2, double y2, double z2){
-		int i = 0;
-		while (i < 24){
-			double f0 = m_Frustum[i + 0];
-			double f1 = m_Frustum[i + 1];
-			double f2 = m_Frustum[i + 2];
-			double f3 = m_Frustum[i + 3];
-			if ((f0 * x1 + f1 * y1 + f2 * z1 + f3 <= 0.0) &&
-				(f0 * x2 + f1 * y1 + f2 * z1 + f3 <= 0.0) &&
-				(f0 * x1 + f1 * y2 + f2 * z1 + f3 <= 0.0) &&
-				(f0 * x2 + f1 * y2 + f2 * z1 + f3 <= 0.0) &&
-				(f0 * x1 + f1 * y1 + f2 * z2 + f3 <= 0.0) &&
-				(f0 * x2 + f1 * y1 + f2 * z2 + f3 <= 0.0) &&
-				(f0 * x1 + f1 * y2 + f2 * z2 + f3 <= 0.0) &&
-				(f0 * x2 + f1 * y2 + f2 * z2 + f3 <= 0.0))
-				return false;
-			i += 4;
+	bool AABBInFrustum(const Hitbox::AABB& aabb) {
+		for (int i = 0; i <= 24; i += 4) {
+			return !(frus[i + 0] * aabb.xmin + frus[i + 1] * aabb.ymin + frus[i + 2] * aabb.zmin + frus[i + 3] <= 0.0 &&
+				frus[i + 0] * aabb.xmax + frus[i + 1] * aabb.ymin + frus[i + 2] * aabb.zmin + frus[i + 3] <= 0.0&&
+				frus[i + 0] * aabb.xmin + frus[i + 1] * aabb.ymax + frus[i + 2] * aabb.zmin + frus[i + 3] <= 0.0 &&
+				frus[i + 0] * aabb.xmax + frus[i + 1] * aabb.ymax + frus[i + 2] * aabb.zmin + frus[i + 3] <= 0.0 &&
+				frus[i + 0] * aabb.xmin + frus[i + 1] * aabb.ymin + frus[i + 2] * aabb.zmax + frus[i + 3] <= 0.0 &&
+				frus[i + 0] * aabb.xmax + frus[i + 1] * aabb.ymin + frus[i + 2] * aabb.zmax + frus[i + 3] <= 0.0 &&
+				frus[i + 0] * aabb.xmin + frus[i + 1] * aabb.ymax + frus[i + 2] * aabb.zmax + frus[i + 3] <= 0.0 &&
+				frus[i + 0] * aabb.xmax + frus[i + 1] * aabb.ymax + frus[i + 2] * aabb.zmax + frus[i + 3] <= 0.0);
 		}
-
 		return true;
 	}
-
-	bool aabbInFrustum(Hitbox::AABB aabb){
-		return cubeInFrustum(aabb.xmin, aabb.ymin, aabb.zmin, aabb.xmax, aabb.ymax, aabb.zmax);
-	}
-
 }

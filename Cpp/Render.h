@@ -34,20 +34,7 @@ extern TextureID BlockTextures;
 extern TextureID guiImage[6];
 extern TextureID DestroyImage[11];
 extern TextureID Skins[2];
-struct RenderChunk
-{
-public:
-	RenderChunk(world::chunk* c) {
-		cx = c->cx;
-		cy = c->cy;
-		cz = c->cz;
-		list = c->list;
-		loadAnim = c->loadAnim;
-	}
-	int cx, cy, cz;
-	uint list = 0;
-	float loadAnim = 0;
-};
+
 
 void splashscreen();
 void drawcloud(double px, double pz);

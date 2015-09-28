@@ -13,7 +13,9 @@ namespace world{
 	public:
 		int cx, cy, cz;
 		uint64 id;
-		uint list = 0;
+		uint vbuffer[3];
+		int vertexes[3];
+		bool isBuilt = false;
 		float loadAnim = 0;
 		bool isEmptyChunk = false;
 		bool isHiddenChunk = false;

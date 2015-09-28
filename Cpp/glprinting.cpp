@@ -143,8 +143,8 @@ void renderChar(int x, int y, string glstring){
 		}
 		else{
 			if (!glprt::unicodeTexAval[uc / 256]) {
-				/*color 15:*/printf("[Console][Event]");
-				/*color 7 :*/printf("Loading unicode font texture #%d\n", uc / 256);
+				//printf("[Console][Event]");
+				//printf("Loading unicode font texture #%d\n", uc / 256);
 				std::stringstream ss;
 				ss << "Textures\\Fonts\\unicode\\unicode_glyph_" << uc / 256 << ".bmp";
 				ftex = textures::LoadFontTexture(ss.str());
@@ -157,7 +157,6 @@ void renderChar(int x, int y, string glstring){
 
 			tx = ((uc % 256) % 16) / 16.0;
 			ty = 1 - ((uc % 256) / 16) / 16.0;
-			//glScaled(2, 2, 2)
 			glBindTexture(GL_TEXTURE_2D, ftex);
 			glBegin(GL_QUADS);
 			glColor4f(0.5, 0.5, 0.5, glprt::a);
@@ -181,13 +180,12 @@ void renderChar(int x, int y, string glstring){
 			glEnd();
 		}
 		if (glstring[i] >= 0 && glstring[i] <= 127){
-			//k += 1
 			i += 1;
-			span += 10;//*2
+			span += 10;
 		}
 		else{
 			i += 2;
-			span += 16;//*2 //10
+			span += 16;
 		}
 	}
 

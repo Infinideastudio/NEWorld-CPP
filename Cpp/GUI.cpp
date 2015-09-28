@@ -629,6 +629,24 @@ namespace gui{
 	}
 
 	void Form::render(){
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0.0, windowwidth, windowheight, 0.0, -1.0, 1.0);
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glDepthFunc(GL_ALWAYS);
+		glDisable(GL_CULL_FACE);
+		glEnable(GL_TEXTURE_2D);
+		glColor4f(1.0, 1.0, 1.0, 1.0);
+		glBindTexture(GL_TEXTURE_2D, guiImage[1]);
+		glBegin(GL_QUADS);
+		glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i(windowwidth, 0);
+		glTexCoord2f(1.0f, 0.45f); glVertex2i(windowwidth, windowheight);
+		glTexCoord2f(0.0f, 0.45f); glVertex2i(0, windowheight);
+		glEnd();
+		glDisable(GL_TEXTURE_2D);
 		glDisable(GL_LINE_SMOOTH);
 		for (int i = 0; i != childrenCount; i++){
 			children[i]->render();

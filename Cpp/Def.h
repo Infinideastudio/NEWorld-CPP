@@ -42,7 +42,7 @@ typedef unsigned char uint8;
 typedef unsigned short uint16;
 typedef unsigned long uint32;
 typedef unsigned long long uint64;
-typedef unsigned char blockinfo;
+typedef unsigned char blockprop;
 typedef unsigned char brightness;
 typedef GLuint TextureID;
 //const double PI = 3.1415926535898
@@ -62,10 +62,10 @@ extern thread updateThread;
 
 #ifndef _DEF_FUNC_VAR_
 #define _DEF_FUNC_VAR_
-const uint32 VERSION = 35;
+const uint32 VERSION = 36;
 const string MAJOR_VERSION = "Alpha_0.";
 const string MINOR_VERSION = "4.9 ";
-const string EXT_VERSION = " [Preview Not Release(C++ Edition)] v5";
+const string EXT_VERSION = "";
 
 inline string boolstr(bool b){
 	return b ? "True" : "False";
