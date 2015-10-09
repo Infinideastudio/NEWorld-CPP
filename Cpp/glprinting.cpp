@@ -143,8 +143,6 @@ void renderChar(int x, int y, string glstring){
 		}
 		else{
 			if (!glprt::unicodeTexAval[uc / 256]) {
-				//printf("[Console][Event]");
-				//printf("Loading unicode font texture #%d\n", uc / 256);
 				std::stringstream ss;
 				ss << "Textures\\Fonts\\unicode\\unicode_glyph_" << uc / 256 << ".bmp";
 				ftex = textures::LoadFontTexture(ss.str());

@@ -19,7 +19,7 @@ namespace WorldGen{
 	}
 
 	inline double Noise(int x, int y){
-		return perm[abs(x * 437 + y) && 0xff];
+		return perm[abs(x * 437 + y) & 0xff];
 	}
 
 	double SmoothedNoise(double x, double y){

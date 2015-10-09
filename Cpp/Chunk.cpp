@@ -11,11 +11,8 @@ namespace world{
 		cy = cyi;
 		cz = czi;
 		id = idi;
-		Modified = false;
 		memset(pblocks, 0, sizeof(pblocks));
 		memset(pbrightness, 0, sizeof(pbrightness));
-		isEmptyChunk = false;
-		isHiddenChunk = false;
 
 	}
 
@@ -192,9 +189,11 @@ namespace world{
                 
 		rebuiltChunks++;
 		updatedChunks++;
-		isBuilt = true;
-		loadAnim = cy * 16 + 16;
-		glGenBuffersARB(3, vbuffer);
+		if (!isBuilt) {
+			isBuilt = true;
+			loadAnim = cy * 16 + 16;
+			glGenBuffersARB(3, vbuffer);
+		}
 
 		renderer::Init();
 		glBindTexture(GL_TEXTURE_2D, BlockTextures);
@@ -204,7 +203,6 @@ namespace world{
 					if (pblocks[x][y][z] == blocks::AIR) continue;
 					if (!BlockInfo(pblocks[x][y][z]).isTranslucent())
 						renderblock(x, y, z, this);
-
 				}
 			}
 		}

@@ -235,6 +235,11 @@ main_menu:
 			updateThreadRun = false;
 			saveGame();
 			world::destroyAllChunks();
+			//TODO
+			//for (int i = 0; i != world::displayListUnloadList.size(); i++) {
+			//	glDeleteBuffersARB(3, world::displayListUnloadList[i]);
+			//}
+			//world::displayListUnloadList.clear();
 			MutexUnlock();
 			updateThread.join();
 			printf("[Console][Game]");

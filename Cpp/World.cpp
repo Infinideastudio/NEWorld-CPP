@@ -54,11 +54,11 @@ namespace world{
 		memset(chunkUnloadList, 0, sizeof(chunkUnloadList));
 		chunkBuildRenders = 0; chunkLoads = 0; chunkUnloads = 0;
 		std::stringstream ss;
-		system("mkdir Worlds");
-		ss << "mkdir Worlds\\" << worldname;
+		system("@mkdir Worlds");
+		ss << "@mkdir Worlds\\" << worldname;
 		system(ss.str().c_str());
 		ss.clear(); ss.str("");
-		ss << "mkdir Worlds\\" << worldname << "\\chunks";
+		ss << "@mkdir Worlds\\" << worldname << "\\chunks";
 		system(ss.str().c_str());
 		WorldGen::perlinNoiseInit(12221222);
 		ciCacheIndex = -2;
@@ -100,6 +100,8 @@ namespace world{
 		for (i = loadedChunks - 1; i >= first + 1; i--){
 			chunks[i] = chunks[i - 1];
 		}
+		//chunks[first].Init(x, y, z, cid);
+		chunks[first] = world::chunk();
 		chunks[first].Init(x, y, z, cid);
 		if (ciCacheID >= cid){
 			ciCacheID = 0;
@@ -259,6 +261,40 @@ namespace world{
 
 	}
 
+	//NEWorld中参数最多的一个函数！
+	void renderface(int x, int y, int z, int gx, int gy, int gz, int size, float tcx, float tcy, block orblk, block blk, brightness brt, std::function<void(float, int, int, int, float&, float&, float&, float&)> SmoothLightingFunc) {
+		if (!(BlockInfo(blk).isOpaque() || (blk == orblk && BlockInfo(orblk).isOpaque() == false)) || orblk == blocks::LEAF) {
+			float colors, color1, color2, color3, color4;
+			colors = brt;
+			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
+
+			if (orblk != blocks::GLOWSTONE && SmoothLighting) {
+				SmoothLightingFunc(colors, gx, gy, gz, color1, color2, color3, color4);
+			}
+
+			color1 /= BRIGHTNESSMAX;
+			color2 /= BRIGHTNESSMAX;
+			color3 /= BRIGHTNESSMAX;
+			color4 /= BRIGHTNESSMAX;
+			if (orblk != blocks::GLOWSTONE) {
+				color1 *= 0.5;
+				color2 *= 0.5;
+				color3 *= 0.5;
+				color4 *= 0.5;
+			}
+
+			renderer::Color3d(color1, color1, color1);
+			renderer::TexCoord2d(tcx, tcy); renderer::Vertex3d(-0.5 + x, -0.5 + y, 0.5 + z);
+			renderer::Color3d(color2, color2, color2);
+			renderer::TexCoord2d(tcx + size, tcy); renderer::Vertex3d(0.5 + x, -0.5 + y, 0.5 + z);
+			renderer::Color3d(color3, color3, color3);
+			renderer::TexCoord2d(tcx + size, tcy + size); renderer::Vertex3d(0.5 + x, 0.5 + y, 0.5 + z);
+			renderer::Color3d(color4, color4, color4);
+			renderer::TexCoord2d(tcx, tcy + size); renderer::Vertex3d(-0.5 + x, 0.5 + y, 0.5 + z);
+
+		}
+	}
+
 	void renderblock(int x, int y, int z, chunk* chunkptr) {
 
 		//渲染方块v2！！！！！
@@ -284,7 +320,7 @@ namespace world{
 
 		size = 1 / 8.0 - EPS;
 
-        
+		// Front Face
 		if (blk[0] == blocks::GRASS && getblock(gx, gy - 1, gz + 1, blocks::ROCK, chunkptr) == blocks::GRASS) {
 			tcx = textures::getTexcoordX(blk[0], 1) + EPS;
 			tcy = textures::getTexcoordY(blk[0], 1) + EPS;
@@ -294,41 +330,14 @@ namespace world{
 			tcy = textures::getTexcoordY(blk[0], 2) + EPS;
 		}
 
-		// Front Face
-		if (!(BlockInfo(blk[1]).isOpaque() || (blk[1] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
+		renderface(x, y, z, gx, gy, gz, size, tcx, tcy, blk[0], blk[1], brt[1], [](float colors, int gx, int gy, int gz, float& color1, float& color2, float&color3, float&color4) {
+			color1 = (colors + getbrightness(gx, gy - 1, gz + 1) + getbrightness(gx - 1, gy, gz + 1) + getbrightness(gx - 1, gy - 1, gz + 1)) / 4.0;
+			color2 = (colors + getbrightness(gx, gy - 1, gz + 1) + getbrightness(gx + 1, gy, gz + 1) + getbrightness(gx + 1, gy - 1, gz + 1)) / 4.0;
+			color3 = (colors + getbrightness(gx, gy + 1, gz + 1) + getbrightness(gx + 1, gy, gz + 1) + getbrightness(gx + 1, gy + 1, gz + 1)) / 4.0;
+			color4 = (colors + getbrightness(gx, gy + 1, gz + 1) + getbrightness(gx - 1, gy, gz + 1) + getbrightness(gx - 1, gy + 1, gz + 1)) / 4.0;
+		});
 
-			colors = brt[1];
-			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
-
-			if (blk[0] != blocks::GLOWSTONE && SmoothLighting) {
-
-				color1 = (colors + getbrightness(gx, gy - 1, gz + 1) + getbrightness(gx - 1, gy, gz + 1) + getbrightness(gx - 1, gy - 1, gz + 1)) / 4.0;
-				color2 = (colors + getbrightness(gx, gy - 1, gz + 1) + getbrightness(gx + 1, gy, gz + 1) + getbrightness(gx + 1, gy - 1, gz + 1)) / 4.0;
-				color3 = (colors + getbrightness(gx, gy + 1, gz + 1) + getbrightness(gx + 1, gy, gz + 1) + getbrightness(gx + 1, gy + 1, gz + 1)) / 4.0;
-				color4 = (colors + getbrightness(gx, gy + 1, gz + 1) + getbrightness(gx - 1, gy, gz + 1) + getbrightness(gx - 1, gy + 1, gz + 1)) / 4.0;
-
-			}
-
-			color1 /= BRIGHTNESSMAX;
-			color2 /= BRIGHTNESSMAX;
-			color3 /= BRIGHTNESSMAX;
-			color4 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color1 *= 0.5;
-			if (blk[0] != blocks::GLOWSTONE) color2 *= 0.5;
-			if (blk[0] != blocks::GLOWSTONE) color3 *= 0.5;
-			if (blk[0] != blocks::GLOWSTONE) color4 *= 0.5;
-
-			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx, tcy); renderer::Vertex3d(-0.5 + x, -0.5 + y, 0.5 + z);
-			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size, tcy); renderer::Vertex3d(0.5 + x, -0.5 + y, 0.5 + z);
-			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size, tcy + size); renderer::Vertex3d(0.5 + x, 0.5 + y, 0.5 + z);
-			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx, tcy + size); renderer::Vertex3d(-0.5 + x, 0.5 + y, 0.5 + z);
-
-		}
-
+		// Back Face
 		if (blk[0] == blocks::GRASS && getblock(gx, gy - 1, gz - 1, blocks::ROCK, chunkptr) == blocks::GRASS) {
 			tcx = textures::getTexcoordX(blk[0], 1) + EPS;
 			tcy = textures::getTexcoordY(blk[0], 1) + EPS;
@@ -338,41 +347,14 @@ namespace world{
 			tcy = textures::getTexcoordY(blk[0], 2) + EPS;
 		}
 
-		// Back Face
-		if (!(BlockInfo(blk[2]).isOpaque() || (blk[2] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
+		renderface(x, y, z, gx, gy, gz, size, tcx, tcy, blk[0], blk[2], brt[2], [](float colors, int gx, int gy, int gz, float& color1, float& color2, float&color3, float&color4) {
+			color1 = (colors + getbrightness(gx, gy - 1, gz - 1) + getbrightness(gx - 1, gy, gz - 1) + getbrightness(gx - 1, gy - 1, gz - 1)) / 4.0;
+			color2 = (colors + getbrightness(gx, gy + 1, gz - 1) + getbrightness(gx - 1, gy, gz - 1) + getbrightness(gx - 1, gy + 1, gz - 1)) / 4.0;
+			color3 = (colors + getbrightness(gx, gy + 1, gz - 1) + getbrightness(gx + 1, gy, gz - 1) + getbrightness(gx + 1, gy + 1, gz - 1)) / 4.0;
+			color4 = (colors + getbrightness(gx, gy - 1, gz - 1) + getbrightness(gx + 1, gy, gz - 1) + getbrightness(gx + 1, gy - 1, gz - 1)) / 4.0;
+		});
 
-			colors = brt[2];
-			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
-
-			if (blk[0] != blocks::GLOWSTONE && SmoothLighting) {
-
-				color1 = (colors + getbrightness(gx, gy - 1, gz - 1) + getbrightness(gx - 1, gy, gz - 1) + getbrightness(gx - 1, gy - 1, gz - 1)) / 4.0;
-				color2 = (colors + getbrightness(gx, gy + 1, gz - 1) + getbrightness(gx - 1, gy, gz - 1) + getbrightness(gx - 1, gy + 1, gz - 1)) / 4.0;
-				color3 = (colors + getbrightness(gx, gy + 1, gz - 1) + getbrightness(gx + 1, gy, gz - 1) + getbrightness(gx + 1, gy + 1, gz - 1)) / 4.0;
-				color4 = (colors + getbrightness(gx, gy - 1, gz - 1) + getbrightness(gx + 1, gy, gz - 1) + getbrightness(gx + 1, gy - 1, gz - 1)) / 4.0;
-
-			}
-
-			color1 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color1 *= 0.5;
-			color2 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color2 *= 0.5;
-			color3 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color3 *= 0.5;
-			color4 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color4 *= 0.5;
-
-			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, -0.5 + z);
-			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, -0.5 + z);
-			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(0.5 + x, 0.5 + y, -0.5 + z);
-			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, -0.5 + y, -0.5 + z);
-
-		}
-
+		// Right face
 		if (blk[0] == blocks::GRASS && getblock(gx + 1, gy - 1, gz, blocks::ROCK, chunkptr) == blocks::GRASS) {
 			tcx = textures::getTexcoordX(blk[0], 1) + EPS;
 			tcy = textures::getTexcoordY(blk[0], 1) + EPS;
@@ -381,41 +363,15 @@ namespace world{
 			tcx = textures::getTexcoordX(blk[0], 2) + EPS;
 			tcy = textures::getTexcoordY(blk[0], 2) + EPS;
 		}
-		// Right face
-		if (!(BlockInfo(blk[3]).isOpaque() || (blk[3] == blk[0] && !BlockInfo(blk[0]).isOpaque())) || blk[0] == blocks::LEAF) {
+		
+		renderface(x, y, z, gx, gy, gz, size, tcx, tcy, blk[0], blk[3], brt[3], [](float colors, int gx, int gy, int gz, float& color1, float& color2, float&color3, float&color4) {
+			color1 = (colors + getbrightness(gx + 1, gy - 1, gz) + getbrightness(gx + 1, gy, gz - 1) + getbrightness(gx + 1, gy - 1, gz - 1)) / 4.0;
+			color2 = (colors + getbrightness(gx + 1, gy + 1, gz) + getbrightness(gx + 1, gy, gz - 1) + getbrightness(gx + 1, gy + 1, gz - 1)) / 4.0;
+			color3 = (colors + getbrightness(gx + 1, gy + 1, gz) + getbrightness(gx + 1, gy, gz + 1) + getbrightness(gx + 1, gy + 1, gz + 1)) / 4.0;
+			color4 = (colors + getbrightness(gx + 1, gy - 1, gz) + getbrightness(gx + 1, gy, gz + 1) + getbrightness(gx + 1, gy - 1, gz + 1)) / 4.0;
+		});
 
-			colors = brt[3];
-			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
-
-			if (blk[0] != blocks::GLOWSTONE && SmoothLighting) {
-
-				color1 = (colors + getbrightness(gx + 1, gy - 1, gz) + getbrightness(gx + 1, gy, gz - 1) + getbrightness(gx + 1, gy - 1, gz - 1)) / 4.0;
-				color2 = (colors + getbrightness(gx + 1, gy + 1, gz) + getbrightness(gx + 1, gy, gz - 1) + getbrightness(gx + 1, gy + 1, gz - 1)) / 4.0;
-				color3 = (colors + getbrightness(gx + 1, gy + 1, gz) + getbrightness(gx + 1, gy, gz + 1) + getbrightness(gx + 1, gy + 1, gz + 1)) / 4.0;
-				color4 = (colors + getbrightness(gx + 1, gy - 1, gz) + getbrightness(gx + 1, gy, gz + 1) + getbrightness(gx + 1, gy - 1, gz + 1)) / 4.0;
-
-			}
-
-			color1 /= BRIGHTNESSMAX;
-			color2 /= BRIGHTNESSMAX;
-			color3 /= BRIGHTNESSMAX;
-			color4 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color1 *= 0.5;
-			if (blk[0] != blocks::GLOWSTONE) color2 *= 0.5;
-			if (blk[0] != blocks::GLOWSTONE) color3 *= 0.5;
-			if (blk[0] != blocks::GLOWSTONE) color4 *= 0.5;
-
-			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, -0.5 + y, -0.5 + z);
-			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*1.0); renderer::Vertex3d(0.5 + x, 0.5 + y, -0.5 + z);
-			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(0.5 + x, 0.5 + y, 0.5 + z);
-			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, -0.5 + y, 0.5 + z);
-
-		}
-
+		// Left Face
 		if (blk[0] == blocks::GRASS && getblock(gx - 1, gy - 1, gz, blocks::ROCK, chunkptr) == blocks::GRASS) {
 			tcx = textures::getTexcoordX(blk[0], 1) + EPS;
 			tcy = textures::getTexcoordY(blk[0], 1) + EPS;
@@ -424,110 +380,36 @@ namespace world{
 			tcx = textures::getTexcoordX(blk[0], 2) + EPS;
 			tcy = textures::getTexcoordY(blk[0], 2) + EPS;
 		}
-		// Left Face
-		if (!(BlockInfo(blk[4]).isOpaque() || (blk[4] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
-
-			colors = brt[4];
-			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
-
-			if (blk[0] != blocks::GLOWSTONE && SmoothLighting) {
-
-				color1 = (colors + getbrightness(gx - 1, gy - 1, gz) + getbrightness(gx - 1, gy, gz - 1) + getbrightness(gx - 1, gy - 1, gz - 1)) / 4.0;
-				color2 = (colors + getbrightness(gx - 1, gy - 1, gz) + getbrightness(gx - 1, gy, gz + 1) + getbrightness(gx - 1, gy - 1, gz + 1)) / 4.0;
-				color3 = (colors + getbrightness(gx - 1, gy + 1, gz) + getbrightness(gx - 1, gy, gz + 1) + getbrightness(gx - 1, gy + 1, gz + 1)) / 4.0;
-				color4 = (colors + getbrightness(gx - 1, gy + 1, gz) + getbrightness(gx - 1, gy, gz - 1) + getbrightness(gx - 1, gy + 1, gz - 1)) / 4.0;
-
-			}
-
-			color1 /= BRIGHTNESSMAX;
-			color2 /= BRIGHTNESSMAX;
-			color3 /= BRIGHTNESSMAX;
-			color4 /= BRIGHTNESSMAX;
-			if (blk[0] != blocks::GLOWSTONE) color1 *= 0.5;
-			if (blk[0] != blocks::GLOWSTONE) color2 *= 0.5;
-			if (blk[0] != blocks::GLOWSTONE) color3 *= 0.5;
-			if (blk[0] != blocks::GLOWSTONE) color4 *= 0.5;
-
-			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, -0.5 + z);
-			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, 0.5 + z);
-			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, 0.5 + z);
-			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, -0.5 + z);
-
-		}
-
-		tcx = textures::getTexcoordX(blk[0], 1);
-		tcy = textures::getTexcoordY(blk[0], 1);
+		renderface(x, y, z, gx, gy, gz, size, tcx, tcy, blk[0], blk[4], brt[4], [](float colors, int gx, int gy, int gz, float& color1, float& color2, float&color3, float&color4) {
+			color1 = (colors + getbrightness(gx - 1, gy - 1, gz) + getbrightness(gx - 1, gy, gz - 1) + getbrightness(gx - 1, gy - 1, gz - 1)) / 4.0;
+			color2 = (colors + getbrightness(gx - 1, gy - 1, gz) + getbrightness(gx - 1, gy, gz + 1) + getbrightness(gx - 1, gy - 1, gz + 1)) / 4.0;
+			color3 = (colors + getbrightness(gx - 1, gy + 1, gz) + getbrightness(gx - 1, gy, gz + 1) + getbrightness(gx - 1, gy + 1, gz + 1)) / 4.0;
+			color4 = (colors + getbrightness(gx - 1, gy + 1, gz) + getbrightness(gx - 1, gy, gz - 1) + getbrightness(gx - 1, gy + 1, gz - 1)) / 4.0;
+		});
 
 		// Top Face
-		if (!(BlockInfo(blk[5]).isOpaque() || (blk[5] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
+		tcx = textures::getTexcoordX(blk[0], 1);
+		tcy = textures::getTexcoordY(blk[0], 1);
+		renderface(x, y, z, gx, gy, gz, size, tcx, tcy, blk[0], blk[5], brt[5], [](float colors, int gx, int gy, int gz, float& color1, float& color2, float&color3, float&color4) {
+			color1 = (color1 + getbrightness(gx, gy + 1, gz - 1) + getbrightness(gx - 1, gy + 1, gz) + getbrightness(gx - 1, gy + 1, gz - 1)) / 4.0;
+			color2 = (color2 + getbrightness(gx, gy + 1, gz + 1) + getbrightness(gx - 1, gy + 1, gz) + getbrightness(gx - 1, gy + 1, gz + 1)) / 4.0;
+			color3 = (color3 + getbrightness(gx, gy + 1, gz + 1) + getbrightness(gx + 1, gy + 1, gz) + getbrightness(gx + 1, gy + 1, gz + 1)) / 4.0;
+			color4 = (color4 + getbrightness(gx, gy + 1, gz - 1) + getbrightness(gx + 1, gy + 1, gz) + getbrightness(gx + 1, gy + 1, gz - 1)) / 4.0;
 
-			colors = brt[5];
-			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
-
-			if (blk[0] != blocks::GLOWSTONE && SmoothLighting) {
-
-				color1 = (color1 + getbrightness(gx, gy + 1, gz - 1) + getbrightness(gx - 1, gy + 1, gz) + getbrightness(gx - 1, gy + 1, gz - 1)) / 4.0;
-				color2 = (color2 + getbrightness(gx, gy + 1, gz + 1) + getbrightness(gx - 1, gy + 1, gz) + getbrightness(gx - 1, gy + 1, gz + 1)) / 4.0;
-				color3 = (color3 + getbrightness(gx, gy + 1, gz + 1) + getbrightness(gx + 1, gy + 1, gz) + getbrightness(gx + 1, gy + 1, gz + 1)) / 4.0;
-				color4 = (color4 + getbrightness(gx, gy + 1, gz - 1) + getbrightness(gx + 1, gy + 1, gz) + getbrightness(gx + 1, gy + 1, gz - 1)) / 4.0;
-
-			}
-
-			color1 /= BRIGHTNESSMAX;
-			color2 /= BRIGHTNESSMAX;
-			color3 /= BRIGHTNESSMAX;
-			color4 /= BRIGHTNESSMAX;
-
-			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, -0.5 + z);
-			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, 0.5 + y, 0.5 + z);
-			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, 0.5 + y, 0.5 + z);
-			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*1.0); renderer::Vertex3d(0.5 + x, 0.5 + y, -0.5 + z);
-
-		}
-
+		});
+		
+		// Bottom Face
 		tcx = textures::getTexcoordX(blk[0], 3);
 		tcy = textures::getTexcoordY(blk[0], 3);
 
-		// Bottom Face
-		if (!(BlockInfo(blk[6]).isOpaque() || (blk[6] == blk[0] && BlockInfo(blk[0]).isOpaque() == false)) || blk[0] == blocks::LEAF) {
+		renderface(x, y, z, gx, gy, gz, size, tcx, tcy, blk[0], blk[6], brt[6], [](float colors, int gx, int gy, int gz, float& color1, float& color2, float&color3, float&color4) {
+			color1 = (colors + getbrightness(gx, gy - 1, gz - 1) + getbrightness(gx - 1, gy - 1, gz) + getbrightness(gx - 1, gy - 1, gz - 1)) / 4.0;
+			color2 = (colors + getbrightness(gx, gy - 1, gz - 1) + getbrightness(gx + 1, gy - 1, gz) + getbrightness(gx + 1, gy - 1, gz - 1)) / 4.0;
+			color3 = (colors + getbrightness(gx, gy - 1, gz + 1) + getbrightness(gx + 1, gy - 1, gz) + getbrightness(gx + 1, gy - 1, gz + 1)) / 4.0;
+			color4 = (colors + getbrightness(gx, gy - 1, gz + 1) + getbrightness(gx - 1, gy - 1, gz) + getbrightness(gx - 1, gy - 1, gz + 1)) / 4.0;
 
-			colors = brt[6];
-			color1 = colors; color2 = colors; color3 = colors; color4 = colors;
-
-			if (blk[0] != blocks::GLOWSTONE && SmoothLighting) {
-
-				color1 = (colors + getbrightness(gx, gy - 1, gz - 1) + getbrightness(gx - 1, gy - 1, gz) + getbrightness(gx - 1, gy - 1, gz - 1)) / 4.0;
-				color2 = (colors + getbrightness(gx, gy - 1, gz - 1) + getbrightness(gx + 1, gy - 1, gz) + getbrightness(gx + 1, gy - 1, gz - 1)) / 4.0;
-				color3 = (colors + getbrightness(gx, gy - 1, gz + 1) + getbrightness(gx + 1, gy - 1, gz) + getbrightness(gx + 1, gy - 1, gz + 1)) / 4.0;
-				color4 = (colors + getbrightness(gx, gy - 1, gz + 1) + getbrightness(gx - 1, gy - 1, gz) + getbrightness(gx - 1, gy - 1, gz + 1)) / 4.0;
-
-			}
-
-			color1 /= BRIGHTNESSMAX;
-			color2 /= BRIGHTNESSMAX;
-			color3 /= BRIGHTNESSMAX;
-			color4 /= BRIGHTNESSMAX;
-
-			renderer::Color3d(color1, color1, color1);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*1.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, -0.5 + z);
-			renderer::Color3d(color2, color2, color2);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*1.0); renderer::Vertex3d(0.5 + x, -0.5 + y, -0.5 + z);
-			renderer::Color3d(color3, color3, color3);
-			renderer::TexCoord2d(tcx + size*0.0, tcy + size*0.0); renderer::Vertex3d(0.5 + x, -0.5 + y, 0.5 + z);
-			renderer::Color3d(color4, color4, color4);
-			renderer::TexCoord2d(tcx + size*1.0, tcy + size*0.0); renderer::Vertex3d(-0.5 + x, -0.5 + y, 0.5 + z);
-
-		}
+		});
 	}
-
 
 	vector<Hitbox::AABB> getHitboxes(Hitbox::AABB box){
 		//返回与box相交的所有方块AABB
@@ -937,15 +819,15 @@ namespace world{
 							i = first;
 
 							for (int j = 3; j >= i + 1; j--) {
-								chunkUnloadList[j][0] = chunkUnloadList[j - 1][0];
-								chunkUnloadList[j][1] = chunkUnloadList[j - 1][1];
-								chunkUnloadList[j][2] = chunkUnloadList[j - 1][2];
-								chunkUnloadList[j][3] = chunkUnloadList[j - 1][3];
+								chunkLoadList[j][0] = chunkLoadList[j - 1][0];
+								chunkLoadList[j][1] = chunkLoadList[j - 1][1];
+								chunkLoadList[j][2] = chunkLoadList[j - 1][2];
+								chunkLoadList[j][3] = chunkLoadList[j - 1][3];
 							}
-							chunkUnloadList[i][0] = distsqr;
-							chunkUnloadList[i][1] = cx;
-							chunkUnloadList[i][2] = cy;
-							chunkUnloadList[i][3] = cz;
+							chunkLoadList[i][0] = distsqr;
+							chunkLoadList[i][1] = cx;
+							chunkLoadList[i][2] = cy;
+							chunkLoadList[i][3] = cz;
 							if (pu < 4) pu++;
 						}
 					}

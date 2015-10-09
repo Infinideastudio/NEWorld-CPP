@@ -28,7 +28,6 @@ extern bool bagOpened;
 
 extern bool shouldGetScreenshot, shouldGetThumbnail;
 
-extern TextureID splTex;
 extern TextureID BlockTexture[20];
 extern TextureID BlockTextures;
 extern TextureID guiImage[6];
@@ -37,7 +36,7 @@ extern TextureID Skins[2];
 
 
 void splashscreen();
-void drawcloud(double px, double pz);
+void drawcloud();
 void drawLoading();
 void drawMain();
 void drawBag();

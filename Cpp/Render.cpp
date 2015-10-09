@@ -126,22 +126,21 @@ void drawMain() {
 	//	auto cptr = world::chunkRenderList[i].second;
 	//	cptr->buildlists();
 	//}
-	static bool FirstFrameThisUpdate;
-	if (FirstFrameThisUpdate) {
-		world::sortChunkBuildRenderList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
-		FirstFrameThisUpdate = false;
-	}
+	//static bool FirstFrameThisUpdate;
+	//if (FirstFrameThisUpdate) {
+	world::sortChunkBuildRenderList(RoundInt(player::xpos), RoundInt(player::ypos), RoundInt(player::zpos));
+	//	FirstFrameThisUpdate = false;
+	//}
 	int brl = world::chunkBuildRenders > 4 ? 3 : world::chunkBuildRenders - 1;
 	for (int i = 0; i <= brl; i++) {
 		int ci = world::chunkBuildRenderList[i][1];
 		world::chunks[ci].buildlists();
 	}
 	//删除已卸载区块的显示列表
-	for (int i = 0; i != 5; i++) {
-		if (world::displayListUnloadList.size() <= 0) break;
-		glDeleteBuffersARB(3, world::displayListUnloadList[0]);
-		world::displayListUnloadList.pop_back();
+	for (unsigned int i = 0; i != world::displayListUnloadList.size(); i++) {
+		glDeleteBuffersARB(3, world::displayListUnloadList[i]);
 	}
+	world::displayListUnloadList.clear();
 	//if ((timer() - uctime) >= 1.0) {
 	//	uctime = timer()
 	//	ups = upsc
@@ -171,7 +170,7 @@ void drawMain() {
 	Frustum::calc();
 	vector<RenderChunk> displayChunks;
 	for (int i = 0; i != world::loadedChunks; i++) {
-		if (world::chunks[i].isEmptyChunk) continue;
+		if (world::chunks[i].isEmptyChunk) continue; 
 		if (world::chunks[i].isBuilt && world::chunkInRange(world::chunks[i].cx, world::chunks[i].cy, world::chunks[i].cz, player::cxt, player::cyt, player::czt, viewdistance)) {
 			if (Frustum::AABBInFrustum(world::chunks[i].getRelativeAABB(xpos, ypos, zpos))) {
 				displayChunks.push_back(&world::chunks[i]);
@@ -248,7 +247,7 @@ void drawMain() {
 	glTranslated(-xpos, -ypos, -zpos);
 	MutexLock();
 	glDisable(GL_TEXTURE_2D);
-	drawcloud(player::xpos, player::zpos);
+	drawcloud();
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_CULL_FACE);
 	//MutexLock()
@@ -271,10 +270,10 @@ void drawMain() {
 		double tcX = textures::getTexcoordX(blocks::WATER, 1);
 		double tcY = textures::getTexcoordY(blocks::WATER, 1);
 		glBegin(GL_QUADS);
-		glTexCoord2f(tcX, tcY + 1 / 8.0); glVertex2i(0, 0);
-		glTexCoord2f(tcX, tcY); glVertex2i(0, windowheight);
-		glTexCoord2f(tcX + 1 / 8.0, tcY); glVertex2i(windowwidth, windowheight);
-		glTexCoord2f(tcX + 1 / 8.0, tcY + 1 / 8.0); glVertex2i(windowwidth, 0);
+		glTexCoord2d(tcX, tcY + 1 / 8.0); glVertex2i(0, 0);
+		glTexCoord2d(tcX, tcY); glVertex2i(0, windowheight);
+		glTexCoord2d(tcX + 1 / 8.0, tcY); glVertex2i(windowwidth, windowheight);
+		glTexCoord2d(tcX + 1 / 8.0, tcY + 1 / 8.0); glVertex2i(windowwidth, 0);
 		glEnd();
 	}
 
@@ -551,13 +550,13 @@ void drawGUI() {
 			double tcX = textures::getTexcoordX(player::inventorybox[4][i], 1);
 			double tcY = textures::getTexcoordY(player::inventorybox[4][i], 1);
 			glBegin(GL_QUADS);
-			glTexCoord2f(tcX, tcY + 1 / 8.0);
+			glTexCoord2d(tcX, tcY + 1 / 8.0);
 			glVertex2d(i * 32 + 2, windowheight - 32 + 2);
-			glTexCoord2f(tcX, tcY);
+			glTexCoord2d(tcX, tcY);
 			glVertex2d(i * 32 + 30, windowheight - 32 + 2);
-			glTexCoord2f(tcX + 1 / 8.0, tcY);
+			glTexCoord2d(tcX + 1 / 8.0, tcY);
 			glVertex2d(i * 32 + 30, windowheight - 32 + 30);
-			glTexCoord2f(tcX + 1 / 8.0, tcY + 1 / 8);
+			glTexCoord2d(tcX + 1 / 8.0, tcY + 1 / 8);
 			glVertex2d(i * 32 + 2, windowheight - 32 + 30);
 			glEnd();
 			std::stringstream ss;
@@ -678,20 +677,20 @@ void drawLoading() {
 	glfwSwapBuffers(win);
 	glfwPollEvents();
 }
-void drawcloud(double px, double pz) {
+void drawcloud() {
 	glFogf(GL_FOG_START, 100.0);
 	glFogf(GL_FOG_END, 300.0);
 	static double ltimer;
 	static bool generated;
 	static uint cloudvb[128];
 	static int vtxs[128];
-	static float f;
+	static double f;
 	static int l;
 	if (ltimer == 0.0) ltimer = timer();
 	f += (timer() - ltimer)*0.25;
 	ltimer = timer();
 	if (f >= 1.0) {
-		l += f;
+		l += int(f);
 		f -= int(f);
 		l %= 128;
 	}
@@ -700,7 +699,7 @@ void drawcloud(double px, double pz) {
 		generated = true;
 		for (int i = 0; i != 128; i++) {
 			for (int j = 0; j != 128; j++) {
-				world::cloud[i][j] = int(rnd() * 2);
+				world::cloud[i][j] = int(rnd() * 2) != 0;
 			}
 		}
 		glGenBuffersARB(128, &cloudvb[0]);
@@ -723,7 +722,7 @@ void drawcloud(double px, double pz) {
 	glColor4f(1.0, 1.0, 1.0, 0.5);
 	for (int i = 0; i != 128; i++) {
 		glPushMatrix();
-		glTranslatef(-64 * cloudwidth, 0, cloudwidth*((l + i) % 128 + f) - 64 * cloudwidth);
+		glTranslated(-64 * cloudwidth, 0, cloudwidth*((l + i) % 128 + f) - 64 * cloudwidth);
 		renderer::renderbuffer(cloudvb[i], vtxs[i], false, false);
 		glPopMatrix();
 	}
@@ -875,13 +874,13 @@ void drawBag() {
 				double tcX = textures::getTexcoordX(player::inventorybox[i][j], 1);
 				double tcY = textures::getTexcoordY(player::inventorybox[i][j], 1);
 				glBegin(GL_QUADS);
-				glTexCoord2f(tcX, tcY + 1 / 8.0);
+				glTexCoord2d(tcX, tcY + 1 / 8.0);
 				glVertex2d(j*(32 + 8) + 2 + leftp, i*(32 + 8) + 2 + upp);
-				glTexCoord2f(tcX, tcY);
+				glTexCoord2d(tcX, tcY);
 				glVertex2d(j*(32 + 8) + 30 + leftp, i*(32 + 8) + 2 + upp);
-				glTexCoord2f(tcX + 1 / 8.0, tcY);
+				glTexCoord2d(tcX + 1 / 8.0, tcY);
 				glVertex2d(j*(32 + 8) + 30 + leftp, i*(32 + 8) + 30 + upp);
-				glTexCoord2f(tcX + 1 / 8.0, tcY + 1 / 8.0);
+				glTexCoord2d(tcX + 1 / 8.0, tcY + 1 / 8.0);
 				glVertex2d(j*(32 + 8) + 2 + leftp, i*(32 + 8) + 30 + upp);
 				glEnd();
 				std::stringstream ss;
@@ -895,13 +894,13 @@ void drawBag() {
 		double tcX = textures::getTexcoordX(itemselected, 1);
 		double tcY = textures::getTexcoordY(itemselected, 1);
 		glBegin(GL_QUADS);
-		glTexCoord2f(tcX, tcY + 1 / 8.0);
+		glTexCoord2d(tcX, tcY + 1 / 8.0);
 		glVertex2d(mx - 16, my - 16);
-		glTexCoord2f(tcX, tcY);
+		glTexCoord2d(tcX, tcY);
 		glVertex2d(mx + 16, my - 16);
-		glTexCoord2f(tcX + 1 / 8.0, tcY);
+		glTexCoord2d(tcX + 1 / 8.0, tcY);
 		glVertex2d(mx + 16, my + 16);
-		glTexCoord2f(tcX + 1 / 8.0, tcY + 1 / 8.0);
+		glTexCoord2d(tcX + 1 / 8.0, tcY + 1 / 8.0);
 		glVertex2d(mx - 16, my + 16);
 		glEnd();
 		std::stringstream ss;
