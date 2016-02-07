@@ -1,3 +1,6 @@
+# Notice
+Since the owner of this branch has been kicked from ths studio, the Linux version is deprecated.
+
 # NEWorld-CPP
 At linux braunh  
 
